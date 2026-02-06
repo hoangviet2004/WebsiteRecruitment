@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+
+<html class="light" lang="vi">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>RecruitVN - Tìm kiếm việc làm hàng đầu</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&amp;display=swap"
+        rel="stylesheet" />
+    <!-- Material Symbols -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <!-- Theme Config -->
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#137fec",
+                        "primary-dark": "#0b5cb5",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101922",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+    <style>
+        /* Custom scrollbar for horizontal scrolling sections if needed */
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+
+<body class="bg-background-light dark:bg-background-dark text-slate-900 font-display min-h-screen flex flex-col">
+    <!-- Header -->
+    <header class="sticky top-0 z-50 w-full border-b border-[#e7edf3] bg-white/90 backdrop-blur-md px-4 sm:px-10 py-3">
+        <div class="layout-container mx-auto flex h-full max-w-[1280px] items-center justify-between">
+            <div class="flex items-center gap-4 text-[#0d141b]">
+                <div class="flex items-center gap-2">
+                    <div class="text-primary size-8 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-3xl">hexagon</span>
+                    </div>
+                    <h2 class="text-[#0d141b] text-xl font-bold leading-tight tracking-[-0.015em]">RecruitVN</h2>
+                </div>
+                <!-- Desktop Nav -->
+                <nav class="hidden md:flex ml-8 gap-6">
+                    <a class="text-slate-600 hover:text-primary text-sm font-medium leading-normal transition-colors"
+                        href="#">Tìm việc</a>
+                    <a class="text-slate-600 hover:text-primary text-sm font-medium leading-normal transition-colors"
+                        href="#">Công ty</a>
+                    <a class="text-slate-600 hover:text-primary text-sm font-medium leading-normal transition-colors"
+                        href="#">Blog</a>
+                </nav>
+            </div>
+            <div class="flex flex-1 justify-end gap-3">
+                <button
+                    class="hidden sm:flex h-10 items-center justify-center rounded-lg px-4 text-slate-600 hover:bg-slate-100 text-sm font-bold transition-colors">
+                    <span class="truncate">Đăng nhập</span>
+                </button>
+                <button
+                    class="flex h-10 items-center justify-center rounded-lg bg-[#0d141b] px-4 text-white hover:bg-slate-800 text-sm font-bold shadow-sm transition-colors">
+                    <span class="truncate">Nhà tuyển dụng</span>
+                </button>
+            </div>
+        </div>
+    </header>
+    <main class="flex-1">
+        <!-- Hero Section -->
+        <section class="w-full bg-white px-4 py-12 md:py-20 lg:py-24 border-b border-slate-100">
+            <div class="mx-auto max-w-[1280px]">
+                <div class="grid gap-12 lg:grid-cols-2 items-center">
+                    <!-- Text Content -->
+                    <div class="flex flex-col gap-6 text-center lg:text-left">
+                        <div class="space-y-4">
+                            <span
+                                class="inline-flex items-center rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-primary ring-1 ring-inset ring-blue-700/10">
+                                Nền tảng tuyển dụng #1 Việt Nam
+                            </span>
+                            <h1
+                                class="text-4xl font-black leading-tight tracking-[-0.033em] text-[#0d141b] sm:text-5xl lg:text-6xl">
+                                Tìm kiếm công việc <span class="text-primary">mơ ước</span> của bạn
+                            </h1>
+                            <p class="text-lg text-slate-600 max-w-xl mx-auto lg:mx-0">
+                                Kết nối với hàng ngàn doanh nghiệp hàng đầu. Cơ hội phát triển sự nghiệp chỉ cách bạn
+                                một lần tìm kiếm.
+                            </p>
+                        </div>
+                        <!-- Advanced Search Bar -->
+                        <div
+                            class="mt-4 w-full rounded-xl bg-white shadow-[0_8px_30px_rgb(0,0,0,0.08)] border border-slate-100 p-2">
+                            <form class="flex flex-col gap-2 md:flex-row md:items-center">
+                                <!-- Keyword Input -->
+                                <div class="relative flex-1 group">
+                                    <div
+                                        class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400 group-focus-within:text-primary transition-colors">
+                                        <span class="material-symbols-outlined">search</span>
+                                    </div>
+                                    <input
+                                        class="block w-full rounded-lg border-0 bg-transparent py-3 pl-10 text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-inset focus:ring-primary sm:text-sm sm:leading-6"
+                                        placeholder="Vị trí, kỹ năng, công ty..." type="text" />
+                                </div>
+                                <div class="hidden md:block h-8 w-px bg-slate-200"></div>
+                                <!-- Location Input -->
+                                <div class="relative flex-1 group">
+                                    <div
+                                        class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400 group-focus-within:text-primary transition-colors">
+                                        <span class="material-symbols-outlined">location_on</span>
+                                    </div>
+                                    <select
+                                        class="block w-full appearance-none rounded-lg border-0 bg-transparent py-3 pl-10 text-slate-900 focus:ring-2 focus:ring-inset focus:ring-primary sm:text-sm sm:leading-6 cursor-pointer">
+                                        <option>Tất cả địa điểm</option>
+                                        <option>Hà Nội</option>
+                                        <option>Hồ Chí Minh</option>
+                                        <option>Đà Nẵng</option>
+                                        <option>Remote</option>
+                                    </select>
+                                    <div
+                                        class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400">
+                                        <span class="material-symbols-outlined text-sm">expand_more</span>
+                                    </div>
+                                </div>
+                                <div class="hidden md:block h-8 w-px bg-slate-200"></div>
+                                <!-- Search Button -->
+                                <button
+                                    class="flex items-center justify-center rounded-lg bg-primary px-8 py-3 text-sm font-bold text-white shadow-sm hover:bg-primary-dark focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary transition-all"
+                                    type="submit">
+                                    Tìm kiếm
+                                </button>
+                            </form>
+                        </div>
+                        <div
+                            class="flex flex-wrap items-center justify-center lg:justify-start gap-x-4 gap-y-2 text-sm text-slate-500">
+                            <span>Phổ biến:</span>
+                            <a class="hover:text-primary underline decoration-slate-300 underline-offset-4 hover:decoration-primary transition-all"
+                                href="#">Designer</a>
+                            <a class="hover:text-primary underline decoration-slate-300 underline-offset-4 hover:decoration-primary transition-all"
+                                href="#">Developer</a>
+                            <a class="hover:text-primary underline decoration-slate-300 underline-offset-4 hover:decoration-primary transition-all"
+                                href="#">Marketing</a>
+                            <a class="hover:text-primary underline decoration-slate-300 underline-offset-4 hover:decoration-primary transition-all"
+                                href="#">Sales</a>
+                        </div>
+                    </div>
+                    <!-- Hero Image -->
+                    <div class="relative hidden lg:block h-full min-h-[500px] w-full">
+                        <div
+                            class="absolute inset-0 rounded-2xl bg-gradient-to-tr from-blue-100 to-white overflow-hidden">
+                            <!-- Background pattern abstract decoration -->
+                            <div
+                                class="absolute -right-20 -top-20 h-[300px] w-[300px] rounded-full bg-blue-200/50 blur-3xl">
+                            </div>
+                            <div
+                                class="absolute bottom-0 left-0 h-[300px] w-[300px] rounded-full bg-indigo-100/50 blur-3xl">
+                            </div>
+                            <div class="absolute inset-4 rounded-xl overflow-hidden shadow-2xl bg-white"
+                                data-alt="Modern professional working on laptop in a bright office environment">
+                                <img alt="Professional woman working in office" class="h-full w-full object-cover"
+                                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuBG5_bWFe_nvILYKJDa-mpjbPtbHCYFZIachZa3SlL2XncpyNPlUgYy2Bf6EYvlANkvnAcBz12RJGZ5nsDBD7LxhASg7_f8Nz8fKc97qmAUiz1LH9ZjgQPkiLLUmtl_GNaePAw2zj9sGP_gdOS1VTOspwuPmwrs3hmTCJmj-8l57JsP8bi5eVM2rWmVf07CQHuPAxLU2_wK7B02SybqJLnn-PpmyAFzUPPY92r593XsxoCtq90lV1xAcPtyVRWl-RlO2he17amCAbw" />
+                            </div>
+                            <!-- Floating Card -->
+                            <div
+                                class="absolute bottom-10 -left-6 rounded-lg bg-white p-4 shadow-xl border border-slate-100 max-w-[240px] animate-bounce duration-[3000ms]">
+                                <div class="flex items-center gap-3 mb-2">
+                                    <div
+                                        class="h-10 w-10 rounded-full bg-green-100 flex items-center justify-center text-green-600">
+                                        <span class="material-symbols-outlined">check_circle</span>
+                                    </div>
+                                    <div>
+                                        <p class="text-xs text-slate-500">Trạng thái</p>
+                                        <p class="text-sm font-bold text-slate-900">Đã ứng tuyển</p>
+                                    </div>
+                                </div>
+                                <div class="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
+                                    <div class="h-full w-3/4 bg-green-500 rounded-full"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- Categories Section -->
+        <section class="py-16 bg-background-light dark:bg-slate-900">
+            <div class="layout-container mx-auto max-w-[1280px] px-4 sm:px-10">
+                <div class="flex items-end justify-between mb-8">
+                    <div>
+                        <h2 class="text-[#0d141b] text-2xl md:text-3xl font-bold leading-tight tracking-[-0.015em]">Khám
+                            phá theo danh mục</h2>
+                        <p class="text-slate-500 mt-2">Các ngành nghề đang có nhu cầu tuyển dụng cao nhất</p>
+                    </div>
+                    <a class="hidden sm:flex items-center text-primary font-semibold hover:gap-2 transition-all gap-1"
+                        href="#">
+                        Xem tất cả <span class="material-symbols-outlined text-sm">arrow_forward</span>
+                    </a>
+                </div>
+                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+                    <!-- Item 1 -->
+                    <a class="group flex flex-col items-center justify-center gap-4 rounded-xl border border-slate-200 bg-white p-6 hover:border-primary hover:shadow-md hover:-translate-y-1 transition-all duration-300"
+                        href="#">
+                        <div
+                            class="h-12 w-12 rounded-lg bg-blue-50 text-primary flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-colors">
+                            <span class="material-symbols-outlined text-2xl">computer</span>
+                        </div>
+                        <h3 class="text-[#0d141b] text-center text-sm font-bold leading-tight">Công nghệ thông tin</h3>
+                    </a>
+                    <!-- Item 2 -->
+                    <a class="group flex flex-col items-center justify-center gap-4 rounded-xl border border-slate-200 bg-white p-6 hover:border-primary hover:shadow-md hover:-translate-y-1 transition-all duration-300"
+                        href="#">
+                        <div
+                            class="h-12 w-12 rounded-lg bg-red-50 text-red-500 flex items-center justify-center group-hover:bg-red-500 group-hover:text-white transition-colors">
+                            <span class="material-symbols-outlined text-2xl">campaign</span>
+                        </div>
+                        <h3 class="text-[#0d141b] text-center text-sm font-bold leading-tight">Marketing</h3>
+                    </a>
+                    <!-- Item 3 -->
+                    <a class="group flex flex-col items-center justify-center gap-4 rounded-xl border border-slate-200 bg-white p-6 hover:border-primary hover:shadow-md hover:-translate-y-1 transition-all duration-300"
+                        href="#">
+                        <div
+                            class="h-12 w-12 rounded-lg bg-emerald-50 text-emerald-500 flex items-center justify-center group-hover:bg-emerald-500 group-hover:text-white transition-colors">
+                            <span class="material-symbols-outlined text-2xl">business_center</span>
+                        </div>
+                        <h3 class="text-[#0d141b] text-center text-sm font-bold leading-tight">Kinh doanh</h3>
+                    </a>
+                    <!-- Item 4 -->
+                    <a class="group flex flex-col items-center justify-center gap-4 rounded-xl border border-slate-200 bg-white p-6 hover:border-primary hover:shadow-md hover:-translate-y-1 transition-all duration-300"
+                        href="#">
+                        <div
+                            class="h-12 w-12 rounded-lg bg-purple-50 text-purple-500 flex items-center justify-center group-hover:bg-purple-500 group-hover:text-white transition-colors">
+                            <span class="material-symbols-outlined text-2xl">account_balance</span>
+                        </div>
+                        <h3 class="text-[#0d141b] text-center text-sm font-bold leading-tight">Tài chính</h3>
+                    </a>
+                    <!-- Item 5 -->
+                    <a class="group flex flex-col items-center justify-center gap-4 rounded-xl border border-slate-200 bg-white p-6 hover:border-primary hover:shadow-md hover:-translate-y-1 transition-all duration-300"
+                        href="#">
+                        <div
+                            class="h-12 w-12 rounded-lg bg-orange-50 text-orange-500 flex items-center justify-center group-hover:bg-orange-500 group-hover:text-white transition-colors">
+                            <span class="material-symbols-outlined text-2xl">groups</span>
+                        </div>
+                        <h3 class="text-[#0d141b] text-center text-sm font-bold leading-tight">Nhân sự</h3>
+                    </a>
+                    <!-- Item 6 -->
+                    <a class="group flex flex-col items-center justify-center gap-4 rounded-xl border border-slate-200 bg-white p-6 hover:border-primary hover:shadow-md hover:-translate-y-1 transition-all duration-300"
+                        href="#">
+                        <div
+                            class="h-12 w-12 rounded-lg bg-pink-50 text-pink-500 flex items-center justify-center group-hover:bg-pink-500 group-hover:text-white transition-colors">
+                            <span class="material-symbols-outlined text-2xl">support_agent</span>
+                        </div>
+                        <h3 class="text-[#0d141b] text-center text-sm font-bold leading-tight">Dịch vụ</h3>
+                    </a>
+                </div>
+            </div>
+        </section>
+        <!-- Featured Jobs Section -->
+        <section class="py-16 bg-white dark:bg-slate-950">
+            <div class="layout-container mx-auto max-w-[1280px] px-4 sm:px-10">
+                <div class="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
+                    <div>
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="flex h-2 w-2 rounded-full bg-red-500 animate-pulse"></span>
+                            <span class="text-xs font-bold uppercase tracking-wider text-red-500">Đang tuyển gấp</span>
+                        </div>
+                        <h2 class="text-[#0d141b] text-2xl md:text-3xl font-bold leading-tight tracking-[-0.015em]">Việc
+                            làm nổi bật</h2>
+                    </div>
+                    <!-- Filter Tabs -->
+                    <div class="flex p-1 bg-slate-100 rounded-lg self-start">
+                        <button
+                            class="px-4 py-1.5 rounded-md bg-white text-sm font-semibold shadow-sm text-slate-900">Mới
+                            nhất</button>
+                        <button
+                            class="px-4 py-1.5 rounded-md text-sm font-medium text-slate-500 hover:text-slate-900">Lương
+                            cao</button>
+                        <button
+                            class="px-4 py-1.5 rounded-md text-sm font-medium text-slate-500 hover:text-slate-900">Remote</button>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Job Card 1 -->
+                    <div
+                        class="group relative flex flex-col rounded-xl border border-slate-200 bg-white p-5 hover:border-primary hover:shadow-lg transition-all duration-200">
+                        <div class="flex items-start justify-between mb-4">
+                            <div class="flex items-center gap-3">
+                                <div class="h-12 w-12 rounded-lg bg-gray-900 text-white flex items-center justify-center font-bold text-xl overflow-hidden"
+                                    data-alt="Company Logo TechFlow">
+                                    TF
+                                </div>
+                                <div>
+                                    <h3
+                                        class="font-bold text-slate-900 group-hover:text-primary transition-colors line-clamp-1">
+                                        Senior UI/UX Designer</h3>
+                                    <p class="text-sm text-slate-500">TechFlow Inc.</p>
+                                </div>
+                            </div>
+                            <button class="text-slate-400 hover:text-red-500 transition-colors">
+                                <span class="material-symbols-outlined">favorite</span>
+                            </button>
+                        </div>
+                        <div class="flex flex-wrap gap-2 mb-4">
+                            <span
+                                class="inline-flex items-center gap-1 rounded-md bg-slate-50 px-2 py-1 text-xs font-medium text-slate-600 ring-1 ring-inset ring-slate-500/10">
+                                <span class="material-symbols-outlined text-[14px]">payments</span> $1500 - $2500
+                            </span>
+                            <span
+                                class="inline-flex items-center gap-1 rounded-md bg-slate-50 px-2 py-1 text-xs font-medium text-slate-600 ring-1 ring-inset ring-slate-500/10">
+                                <span class="material-symbols-outlined text-[14px]">location_on</span> Hà Nội
+                            </span>
+                            <span
+                                class="inline-flex items-center gap-1 rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10">
+                                Full-time
+                            </span>
+                        </div>
+                        <div class="mt-auto pt-4 border-t border-slate-100 flex items-center justify-between">
+                            <span class="text-xs text-slate-400">Đăng 2 giờ trước</span>
+                            <button class="text-sm font-semibold text-primary hover:underline">Ứng tuyển ngay</button>
+                        </div>
+                    </div>
+                    <!-- Job Card 2 -->
+                    <div
+                        class="group relative flex flex-col rounded-xl border border-slate-200 bg-white p-5 hover:border-primary hover:shadow-lg transition-all duration-200">
+                        <div class="flex items-start justify-between mb-4">
+                            <div class="flex items-center gap-3">
+                                <div class="h-12 w-12 rounded-lg bg-orange-500 text-white flex items-center justify-center font-bold text-xl overflow-hidden"
+                                    data-alt="Company Logo F8">
+                                    F8
+                                </div>
+                                <div>
+                                    <h3
+                                        class="font-bold text-slate-900 group-hover:text-primary transition-colors line-clamp-1">
+                                        Frontend Developer (ReactJS)</h3>
+                                    <p class="text-sm text-slate-500">F8 Education</p>
+                                </div>
+                            </div>
+                            <button class="text-slate-400 hover:text-red-500 transition-colors">
+                                <span class="material-symbols-outlined">favorite</span>
+                            </button>
+                        </div>
+                        <div class="flex flex-wrap gap-2 mb-4">
+                            <span
+                                class="inline-flex items-center gap-1 rounded-md bg-slate-50 px-2 py-1 text-xs font-medium text-slate-600 ring-1 ring-inset ring-slate-500/10">
+                                <span class="material-symbols-outlined text-[14px]">payments</span> Thỏa thuận
+                            </span>
+                            <span
+                                class="inline-flex items-center gap-1 rounded-md bg-slate-50 px-2 py-1 text-xs font-medium text-slate-600 ring-1 ring-inset ring-slate-500/10">
+                                <span class="material-symbols-outlined text-[14px]">location_on</span> HCM
+                            </span>
+                            <span
+                                class="inline-flex items-center gap-1 rounded-md bg-green-50 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-inset ring-green-600/20">
+                                Remote
+                            </span>
+                        </div>
+                        <div class="mt-auto pt-4 border-t border-slate-100 flex items-center justify-between">
+                            <span class="text-xs text-slate-400">Đăng 5 giờ trước</span>
+                            <button class="text-sm font-semibold text-primary hover:underline">Ứng tuyển ngay</button>
+                        </div>
+                    </div>
+                    <!-- Job Card 3 -->
+                    <div
+                        class="group relative flex flex-col rounded-xl border border-slate-200 bg-white p-5 hover:border-primary hover:shadow-lg transition-all duration-200">
+                        <div class="flex items-start justify-between mb-4">
+                            <div class="flex items-center gap-3">
+                                <div class="h-12 w-12 rounded-lg bg-blue-600 text-white flex items-center justify-center font-bold text-xl overflow-hidden"
+                                    data-alt="Company Logo VNP">
+                                    VN
+                                </div>
+                                <div>
+                                    <h3
+                                        class="font-bold text-slate-900 group-hover:text-primary transition-colors line-clamp-1">
+                                        Trưởng phòng Kinh Doanh</h3>
+                                    <p class="text-sm text-slate-500">VN Pay</p>
+                                </div>
+                            </div>
+                            <button class="text-slate-400 hover:text-red-500 transition-colors">
+                                <span class="material-symbols-outlined">favorite</span>
+                            </button>
+                        </div>
+                        <div class="flex flex-wrap gap-2 mb-4">
+                            <span
+                                class="inline-flex items-center gap-1 rounded-md bg-slate-50 px-2 py-1 text-xs font-medium text-slate-600 ring-1 ring-inset ring-slate-500/10">
+                                <span class="material-symbols-outlined text-[14px]">payments</span> $2000 - $4000
+                            </span>
+                            <span
+                                class="inline-flex items-center gap-1 rounded-md bg-slate-50 px-2 py-1 text-xs font-medium text-slate-600 ring-1 ring-inset ring-slate-500/10">
+                                <span class="material-symbols-outlined text-[14px]">location_on</span> Hà Nội
+                            </span>
+                            <span
+                                class="inline-flex items-center gap-1 rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10">
+                                Full-time
+                            </span>
+                        </div>
+                        <div class="mt-auto pt-4 border-t border-slate-100 flex items-center justify-between">
+                            <span class="text-xs text-slate-400">Đăng 1 ngày trước</span>
+                            <button class="text-sm font-semibold text-primary hover:underline">Ứng tuyển ngay</button>
+                        </div>
+                    </div>
+                    <!-- Job Card 4 -->
+                    <div
+                        class="group relative flex flex-col rounded-xl border border-slate-200 bg-white p-5 hover:border-primary hover:shadow-lg transition-all duration-200">
+                        <div class="flex items-start justify-between mb-4">
+                            <div class="flex items-center gap-3">
+                                <div class="h-12 w-12 rounded-lg bg-emerald-600 text-white flex items-center justify-center font-bold text-xl overflow-hidden"
+                                    data-alt="Company Logo Grab">
+                                    G
+                                </div>
+                                <div>
+                                    <h3
+                                        class="font-bold text-slate-900 group-hover:text-primary transition-colors line-clamp-1">
+                                        Marketing Executive</h3>
+                                    <p class="text-sm text-slate-500">Grab Vietnam</p>
+                                </div>
+                            </div>
+                            <button class="text-slate-400 hover:text-red-500 transition-colors">
+                                <span class="material-symbols-outlined">favorite</span>
+                            </button>
+                        </div>
+                        <div class="flex flex-wrap gap-2 mb-4">
+                            <span
+                                class="inline-flex items-center gap-1 rounded-md bg-slate-50 px-2 py-1 text-xs font-medium text-slate-600 ring-1 ring-inset ring-slate-500/10">
+                                <span class="material-symbols-outlined text-[14px]">payments</span> 15tr - 20tr
+                            </span>
+                            <span
+                                class="inline-flex items-center gap-1 rounded-md bg-slate-50 px-2 py-1 text-xs font-medium text-slate-600 ring-1 ring-inset ring-slate-500/10">
+                                <span class="material-symbols-outlined text-[14px]">location_on</span> HCM
+                            </span>
+                            <span
+                                class="inline-flex items-center gap-1 rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10">
+                                Full-time
+                            </span>
+                        </div>
+                        <div class="mt-auto pt-4 border-t border-slate-100 flex items-center justify-between">
+                            <span class="text-xs text-slate-400">Đăng 1 ngày trước</span>
+                            <button class="text-sm font-semibold text-primary hover:underline">Ứng tuyển ngay</button>
+                        </div>
+                    </div>
+                    <!-- Job Card 5 -->
+                    <div
+                        class="group relative flex flex-col rounded-xl border border-slate-200 bg-white p-5 hover:border-primary hover:shadow-lg transition-all duration-200">
+                        <div class="flex items-start justify-between mb-4">
+                            <div class="flex items-center gap-3">
+                                <div class="h-12 w-12 rounded-lg bg-indigo-600 text-white flex items-center justify-center font-bold text-xl overflow-hidden"
+                                    data-alt="Company Logo Momo">
+                                    M
+                                </div>
+                                <div>
+                                    <h3
+                                        class="font-bold text-slate-900 group-hover:text-primary transition-colors line-clamp-1">
+                                        Java Backend Engineer</h3>
+                                    <p class="text-sm text-slate-500">Momo</p>
+                                </div>
+                            </div>
+                            <button class="text-slate-400 hover:text-red-500 transition-colors">
+                                <span class="material-symbols-outlined">favorite</span>
+                            </button>
+                        </div>
+                        <div class="flex flex-wrap gap-2 mb-4">
+                            <span
+                                class="inline-flex items-center gap-1 rounded-md bg-slate-50 px-2 py-1 text-xs font-medium text-slate-600 ring-1 ring-inset ring-slate-500/10">
+                                <span class="material-symbols-outlined text-[14px]">payments</span> Up to $3000
+                            </span>
+                            <span
+                                class="inline-flex items-center gap-1 rounded-md bg-slate-50 px-2 py-1 text-xs font-medium text-slate-600 ring-1 ring-inset ring-slate-500/10">
+                                <span class="material-symbols-outlined text-[14px]">location_on</span> HCM
+                            </span>
+                            <span
+                                class="inline-flex items-center gap-1 rounded-md bg-purple-50 px-2 py-1 text-xs font-medium text-purple-700 ring-1 ring-inset ring-purple-700/10">
+                                Hybrid
+                            </span>
+                        </div>
+                        <div class="mt-auto pt-4 border-t border-slate-100 flex items-center justify-between">
+                            <span class="text-xs text-slate-400">Đăng 2 ngày trước</span>
+                            <button class="text-sm font-semibold text-primary hover:underline">Ứng tuyển ngay</button>
+                        </div>
+                    </div>
+                    <!-- Job Card 6 -->
+                    <div
+                        class="group relative flex flex-col rounded-xl border border-slate-200 bg-white p-5 hover:border-primary hover:shadow-lg transition-all duration-200">
+                        <div class="flex items-start justify-between mb-4">
+                            <div class="flex items-center gap-3">
+                                <div class="h-12 w-12 rounded-lg bg-red-600 text-white flex items-center justify-center font-bold text-xl overflow-hidden"
+                                    data-alt="Company Logo Shopee">
+                                    S
+                                </div>
+                                <div>
+                                    <h3
+                                        class="font-bold text-slate-900 group-hover:text-primary transition-colors line-clamp-1">
+                                        Data Analyst</h3>
+                                    <p class="text-sm text-slate-500">Shopee</p>
+                                </div>
+                            </div>
+                            <button class="text-slate-400 hover:text-red-500 transition-colors">
+                                <span class="material-symbols-outlined">favorite</span>
+                            </button>
+                        </div>
+                        <div class="flex flex-wrap gap-2 mb-4">
+                            <span
+                                class="inline-flex items-center gap-1 rounded-md bg-slate-50 px-2 py-1 text-xs font-medium text-slate-600 ring-1 ring-inset ring-slate-500/10">
+                                <span class="material-symbols-outlined text-[14px]">payments</span> 20tr - 35tr
+                            </span>
+                            <span
+                                class="inline-flex items-center gap-1 rounded-md bg-slate-50 px-2 py-1 text-xs font-medium text-slate-600 ring-1 ring-inset ring-slate-500/10">
+                                <span class="material-symbols-outlined text-[14px]">location_on</span> Hà Nội
+                            </span>
+                            <span
+                                class="inline-flex items-center gap-1 rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10">
+                                Full-time
+                            </span>
+                        </div>
+                        <div class="mt-auto pt-4 border-t border-slate-100 flex items-center justify-between">
+                            <span class="text-xs text-slate-400">Đăng 3 ngày trước</span>
+                            <button class="text-sm font-semibold text-primary hover:underline">Ứng tuyển ngay</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-10 flex justify-center">
+                    <button
+                        class="flex items-center justify-center rounded-lg border border-slate-300 bg-white px-6 py-3 text-sm font-bold text-slate-700 hover:bg-slate-50 transition-colors">
+                        Xem tất cả 2,345 việc làm
+                    </button>
+                </div>
+            </div>
+        </section>
+        <!-- Top Companies -->
+        <section class="py-16 bg-slate-50 border-t border-slate-200">
+            <div class="layout-container mx-auto max-w-[1280px] px-4 sm:px-10 text-center">
+                <h2 class="text-[#0d141b] text-xl font-bold leading-tight mb-8 opacity-60 uppercase tracking-wide">Được
+                    tin tưởng bởi các doanh nghiệp hàng đầu</h2>
+                <div
+                    class="flex flex-wrap justify-center items-center gap-8 md:gap-16 opacity-50 grayscale hover:grayscale-0 transition-all duration-500">
+                    <!-- Placeholder Logos -->
+                    <div class="flex items-center gap-2 font-black text-2xl text-slate-800">
+                        <span class="material-symbols-outlined text-3xl">token</span> TECHCORP
+                    </div>
+                    <div class="flex items-center gap-2 font-bold text-2xl text-slate-800">
+                        <span class="material-symbols-outlined text-3xl">all_inclusive</span> INFINITY
+                    </div>
+                    <div class="flex items-center gap-2 font-bold text-2xl text-slate-800">
+                        <span class="material-symbols-outlined text-3xl">deployed_code</span> CODEBOX
+                    </div>
+                    <div class="flex items-center gap-2 font-bold text-2xl text-slate-800">
+                        <span class="material-symbols-outlined text-3xl">hub</span> NEXUS
+                    </div>
+                    <div class="flex items-center gap-2 font-bold text-2xl text-slate-800">
+                        <span class="material-symbols-outlined text-3xl">rocket_launch</span> ROCKET
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- Call to Action -->
+        <section class="relative overflow-hidden bg-primary py-16 sm:py-24">
+            <div class="absolute inset-0 bg-blue-600">
+                <svg aria-hidden="true"
+                    class="absolute left-1/2 top-1/2 -z-10 h-[64rem] w-[64rem] -translate-x-1/2 -translate-y-1/2 [mask-image:radial-gradient(closest-side,white,transparent)]">
+                    <circle cx="512" cy="512" fill="url(#gradient-1)" fill-opacity="0.35" r="512"></circle>
+                    <defs>
+                        <radialgradient id="gradient-1">
+                            <stop stop-color="#ffffff"></stop>
+                            <stop offset="1" stop-color="#137fec"></stop>
+                        </radialgradient>
+                    </defs>
+                </svg>
+            </div>
+            <div class="layout-container mx-auto max-w-[1280px] px-4 sm:px-10 text-center relative z-10">
+                <h2 class="text-3xl font-bold tracking-tight text-white sm:text-4xl">Bạn là nhà tuyển dụng?</h2>
+                <p class="mx-auto mt-6 max-w-xl text-lg leading-8 text-blue-100">Đăng tin tuyển dụng ngay hôm nay để
+                    tiếp cận hàng triệu ứng viên tiềm năng và xây dựng đội ngũ trong mơ của bạn.</p>
+                <div class="mt-10 flex items-center justify-center gap-x-6">
+                    <button
+                        class="rounded-lg bg-white px-5 py-3 text-sm font-bold text-primary shadow-sm hover:bg-blue-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white transition-all">
+                        Đăng tin miễn phí
+                    </button>
+                    <a class="text-sm font-semibold leading-6 text-white hover:underline" href="#">Liên hệ tư vấn <span
+                            aria-hidden="true">→</span></a>
+                </div>
+            </div>
+        </section>
+    </main>
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-200 pt-16 pb-8">
+        <div class="layout-container mx-auto max-w-[1280px] px-4 sm:px-10">
+            <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8 mb-12">
+                <div class="col-span-2 lg:col-span-2">
+                    <div class="flex items-center gap-2 mb-4">
+                        <div class="text-primary size-6 flex items-center justify-center">
+                            <span class="material-symbols-outlined text-2xl">hexagon</span>
+                        </div>
+                        <h2 class="text-[#0d141b] text-lg font-bold">RecruitVN</h2>
+                    </div>
+                    <p class="text-sm text-slate-500 mb-6 max-w-xs">
+                        Nền tảng công nghệ tuyển dụng hàng đầu Việt Nam. Kết nối đúng người, đúng việc, nâng tầm sự
+                        nghiệp.
+                    </p>
+                    <div class="flex gap-4">
+                        <a class="text-slate-400 hover:text-primary transition-colors" href="#">
+                            <svg aria-hidden="true" class="h-5 w-5" fill="currentColor" viewbox="0 0 24 24">
+                                <path clip-rule="evenodd"
+                                    d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z"
+                                    fill-rule="evenodd"></path>
+                            </svg>
+                        </a>
+                        <a class="text-slate-400 hover:text-primary transition-colors" href="#">
+                            <svg aria-hidden="true" class="h-5 w-5" fill="currentColor" viewbox="0 0 24 24">
+                                <path
+                                    d="M8.29 20.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0022 5.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.072 4.072 0 012.8 9.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 012 18.407a11.616 11.616 0 006.29 1.84">
+                                </path>
+                            </svg>
+                        </a>
+                        <a class="text-slate-400 hover:text-primary transition-colors" href="#">
+                            <svg aria-hidden="true" class="h-5 w-5" fill="currentColor" viewbox="0 0 24 24">
+                                <path clip-rule="evenodd"
+                                    d="M12.315 2c2.43 0 2.784.013 3.808.06 1.064.049 1.791.218 2.427.465a4.902 4.902 0 011.772 1.153 4.902 4.902 0 011.153 1.772c.247.636.416 1.363.465 2.427.048 1.067.06 1.407.06 4.123v.08c0 2.643-.012 2.987-.06 4.043-.049 1.064-.218 1.791-.465 2.427a4.902 4.902 0 01-1.153 1.772 4.902 4.902 0 01-1.772 1.153c-.636.247-1.363.416-2.427.465-1.067.048-1.407.06-4.123.06h-.08c-2.643 0-2.987-.012-4.043-.06-1.064-.049-1.791-.218-2.427-.465a4.902 4.902 0 01-1.772-1.153 4.902 4.902 0 01-1.153-1.772c-.247-.636-.416-1.363-.465-2.427-.047-1.024-.06-1.379-.06-3.808v-.63c0-2.43.013-2.784.06-3.808.049-1.064.218-1.791.465-2.427a4.902 4.902 0 011.153-1.772 4.902 4.902 0 011.772-1.153c.636-.247 1.363-.416 2.427-.465 1.067-.047 1.407-.06 3.808-.06zm0 1.838c-2.386 0-2.665.009-3.577.051-.913.041-1.405.191-1.739.32a2.91 2.91 0 00-1.065.693 2.91 2.91 0 00-.693 1.065c-.129.334-.279.826-.32 1.739-.042.912-.051 1.191-.051 3.577v.468c0 2.386.009 2.665.051 3.577.041.913.191 1.405.32 1.739.23.585.54 1.006 1.065 1.53.524.524.945.835 1.53 1.065.334.129.826.279 1.739.32.912.042 1.191.051 3.577.051.468 0 .81-.002 1.139-.007 2.274-.035 2.573-.047 3.424-.086.913-.041 1.405-.191 1.739-.32a2.91 2.91 0 001.065-.693 2.91 2.91 0 00.693-1.065c.129-.334.279-.826.32-1.739.042-.912.051-1.191.051-3.577 0-.468-.002-.81-.007-1.139-.035-2.274-.047-2.573-.086-3.424-.041-.913-.191-1.405-.32-1.739a2.91 2.91 0 00-.693-1.065 2.91 2.91 0 00-1.065-.693c-.334-.129-.826-.279-1.739-.32-.851-.039-1.15-.051-3.424-.086-.329-.005-.671-.007-1.139-.007zm-2.06 6.162a4.122 4.122 0 118.244 0 4.122 4.122 0 01-8.245 0zm1.838 0a2.284 2.284 0 104.568 0 2.284 2.284 0 00-4.568 0zm6.953-5.327a1.378 1.378 0 11-2.756 0 1.378 1.378 0 012.756 0z"
+                                    fill-rule="evenodd"></path>
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="font-bold text-[#0d141b] mb-4">Dành cho ứng viên</h3>
+                    <ul class="flex flex-col gap-2">
+                        <li><a class="text-sm text-slate-500 hover:text-primary" href="#">Việc làm mới nhất</a></li>
+                        <li><a class="text-sm text-slate-500 hover:text-primary" href="#">Việc làm IT</a></li>
+                        <li><a class="text-sm text-slate-500 hover:text-primary" href="#">Cẩm nang nghề nghiệp</a></li>
+                        <li><a class="text-sm text-slate-500 hover:text-primary" href="#">Tạo CV</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="font-bold text-[#0d141b] mb-4">Nhà tuyển dụng</h3>
+                    <ul class="flex flex-col gap-2">
+                        <li><a class="text-sm text-slate-500 hover:text-primary" href="#">Đăng tin tuyển dụng</a></li>
+                        <li><a class="text-sm text-slate-500 hover:text-primary" href="#">Tìm kiếm hồ sơ</a></li>
+                        <li><a class="text-sm text-slate-500 hover:text-primary" href="#">Sản phẩm dịch vụ</a></li>
+                        <li><a class="text-sm text-slate-500 hover:text-primary" href="#">Liên hệ</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="font-bold text-[#0d141b] mb-4">Hỗ trợ</h3>
+                    <ul class="flex flex-col gap-2">
+                        <li><a class="text-sm text-slate-500 hover:text-primary" href="#">Điều khoản dịch vụ</a></li>
+                        <li><a class="text-sm text-slate-500 hover:text-primary" href="#">Chính sách bảo mật</a></li>
+                        <li><a class="text-sm text-slate-500 hover:text-primary" href="#">Quy định đăng tin</a></li>
+                        <li><a class="text-sm text-slate-500 hover:text-primary" href="#">Câu hỏi thường gặp</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-slate-100 pt-8 text-center">
+                <p class="text-xs text-slate-400">© 2024 RecruitVN. All rights reserved. Designed for excellence.</p>
+            </div>
+        </div>
+    </footer>
+</body>
+
+</html>
