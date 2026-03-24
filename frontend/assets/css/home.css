@@ -68,7 +68,6 @@ body {
   font-size: 14px;
   font-weight: bold;
   border-radius: 5px;
-  cursor: pointer;
   transition: all 0.3s;
   text-decoration: none;
 }
