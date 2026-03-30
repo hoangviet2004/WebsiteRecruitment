@@ -62,40 +62,51 @@ body {
   gap: 15px;
 }
 
-.homebar .right button {
+.homebar .right a {
+  display: inline-block;
   padding: 10px 20px;
   font-size: 14px;
   font-weight: bold;
   border-radius: 5px;
-  cursor: pointer;
   transition: all 0.3s;
+  text-decoration: none;
 }
 
 .btn-login {
   background-color: transparent;
-  
   border: 1px solid #137FEC;
+  color: #475569;
 }
 
 .btn-login:hover {
   background-color: #137FEC;
+  color: white;
 }
-.btn-login a {
-    color: #475569;
-    text-decoration: none; 
-}
+
 .btn-register {
   background-color: #0D141B;
   border: 1px solid #137FEC;
+  color: white;
 }
 
 .btn-register:hover {
   background-color: #137FEC;
 }
-.btn-register a {
-  color: #ffffff; 
-  text-decoration: none; 
-}
 .content {
   padding: 40px;
+}
+
+.logo-svg {
+  display: flex;
+  align-items: center; /* căn giữa theo chiều dọc */
+  gap: 8px; /* khoảng cách giữa logo và chữ */
+  text-decoration: none;
+  color: #007bff;
+  font-size: 20px;
+  font-weight: bold;
+}
+.logo-svg img {
+  height: 40px;
+  width: auto;
+  display: block;
 }
