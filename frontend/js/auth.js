@@ -20,11 +20,14 @@ function togglePassword(id) {
     input.type = input.type === "password" ? "text" : "password";
 }
 
-// Validate đăng ký
-document.getElementById("registerForm").addEventListener("submit", function(e) {
+// Đăng ký
+document.getElementById("registerForm").addEventListener("submit", async function(e) {
     e.preventDefault();
-    var pass    = document.getElementById("reg-password").value;
-    var confirm = document.getElementById("reg-confirm").value;
+    var fullName = document.getElementById("reg-fullname").value.trim();
+    var email    = document.getElementById("reg-email").value.trim().toLowerCase();
+    var role     = document.getElementById("reg-role").value;
+    var pass     = document.getElementById("reg-password").value;
+    var confirm  = document.getElementById("reg-confirm").value;
 
     if (pass.length < 8) {
         alert("Mật khẩu phải có ít nhất 8 ký tự!");
@@ -34,13 +37,74 @@ document.getElementById("registerForm").addEventListener("submit", function(e) {
         alert("Mật khẩu không khớp!");
         return;
     }
-    alert("Đăng ký thành công!");
+
+    try {
+        var response = await apiFetch("/api/Auth/register", {
+            method: "POST",
+            body: JSON.stringify({
+                FullName: fullName,
+                Email: email,
+                Password: pass,
+                Role: role
+            })
+        });
+
+        var data = null;
+        try { data = await response.json(); } catch (_) {}
+
+        if (response.ok) {
+            alert(data?.message || "Đăng ký thành công!");
+            document.getElementById("login-email").value = email;
+            showPanel("login");
+            return;
+        }
+
+        var msg =
+            data?.message ||
+            (Array.isArray(data?.errors) ? data.errors.join(", ") : null) ||
+            `Đăng ký thất bại (HTTP ${response.status})`;
+        alert(msg);
+    } catch (err) {
+        console.error("Đăng ký lỗi:", err);
+        alert("Không thể kết nối server để đăng ký!");
+    }
 });
 
-// Validate đăng nhập
-document.getElementById("loginForm").addEventListener("submit", function(e) {
+// Đăng nhập
+document.getElementById("loginForm").addEventListener("submit", async function(e) {
     e.preventDefault();
-    alert("Đăng nhập thành công!");
+
+    var email    = document.getElementById("login-email").value.trim().toLowerCase();
+    var password = document.getElementById("login-password").value;
+
+    try {
+        var response = await apiFetch("/api/Auth/login", {
+            method: "POST",
+            body: JSON.stringify({
+                Email: email,
+                Password: password
+            })
+        });
+
+        var data = null;
+        try { data = await response.json(); } catch (_) {}
+
+        if (response.ok) {
+            localStorage.setItem("token", data.token);
+            localStorage.setItem("fullName", data.fullName || "");
+            localStorage.setItem("email", data.email || "");
+            localStorage.setItem("role", data.role || "");
+
+            window.location.href = "../pages/home.html";
+            return;
+        }
+
+        var msg = data?.message || `Đăng nhập thất bại (HTTP ${response.status})`;
+        alert(msg);
+    } catch (err) {
+        console.error("Đăng nhập lỗi:", err);
+        alert("Không thể kết nối server để đăng nhập!");
+    }
 });
 
 // Quên mật khẩu
@@ -51,6 +115,6 @@ document.getElementById("forgotForm").addEventListener("submit", function(e) {
 
 // Đọc hash từ URL (khi từ trang home chuyển sang)
 var hash = window.location.hash.replace("#", "");
-if (hash === "login" || hash === "forgot") {
+if (hash === "login" || hash === "register" || hash === "forgot") {
     showPanel(hash);
 }

@@ -1,10 +1,9 @@
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Identity;         
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore; 
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using TechList.Infrastructure.Identity; 
+using TechList.Infrastructure.Identity;
 using TechList.Infrastructure.Persistence;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -12,14 +11,33 @@ var builder = WebApplication.CreateBuilder(args);
 // 1. Controllers & Swagger
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.SwaggerDoc("v1", new() { Title = "TechList API", Version = "v1" });
+    options.AddSecurityDefinition("Bearer", new()
+    {
+        Name         = "Authorization",
+        Type         = Microsoft.OpenApi.Models.SecuritySchemeType.Http,
+        Scheme       = "Bearer",
+        BearerFormat = "JWT",
+        In           = Microsoft.OpenApi.Models.ParameterLocation.Header,
+        Description  = "Nhập token theo dạng: Bearer {token}"
+    });
+    options.AddSecurityRequirement(new()
+    {
+        {
+            new() { Reference = new() { Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme, Id = "Bearer" } },
+            Array.Empty<string>()
+        }
+    });
+});
 
 // 2. SQL Server
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// 3. Identity
-builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
+// 3. Identity (dùng AddIdentityCore để không xung đột JWT)
+builder.Services.AddIdentityCore<ApplicationUser>(options =>
 {
     options.Password.RequireDigit           = true;
     options.Password.RequiredLength         = 8;
@@ -28,26 +46,16 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
     options.User.RequireUniqueEmail         = true;
     options.SignIn.RequireConfirmedEmail     = false;
 })
+.AddRoles<IdentityRole>()
 .AddEntityFrameworkStores<AppDbContext>()
 .AddDefaultTokenProviders();
 
-// 4. JWT
+// 4. JWT + Google + GitHub
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");
-
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
     options.DefaultChallengeScheme    = JwtBearerDefaults.AuthenticationScheme;
-})
-.AddGoogle(options =>
-{
-    options.ClientId     = builder.Configuration["OAuth:Google:ClientId"]!;
-    options.ClientSecret = builder.Configuration["OAuth:Google:ClientSecret"]!;
-})
-.AddGitHub(options =>
-{
-    options.ClientId     = builder.Configuration["OAuth:GitHub:ClientId"]!;
-    options.ClientSecret = builder.Configuration["OAuth:GitHub:ClientSecret"]!;
 })
 .AddJwtBearer(options =>
 {
@@ -62,7 +70,35 @@ builder.Services.AddAuthentication(options =>
         IssuerSigningKey         = new SymmetricSecurityKey(
             Encoding.UTF8.GetBytes(jwtSettings["SecretKey"]!))
     };
-}); // ✅ Đóng ngoặc AddJwtBearer
+})
+.AddGoogle(options =>
+{
+    options.ClientId     = builder.Configuration["OAuth:Google:ClientId"]!;
+    options.ClientSecret = builder.Configuration["OAuth:Google:ClientSecret"]!;
+})
+.AddGitHub(options =>
+{
+    options.ClientId     = builder.Configuration["OAuth:GitHub:ClientId"]!;
+    options.ClientSecret = builder.Configuration["OAuth:GitHub:ClientSecret"]!;
+});
+
+// 5. CORS
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend", policy =>
+    {
+        // Dev: cho phép mọi origin gọi API (frontend auth dùng Authorization header, không cần cookie).
+        policy.SetIsOriginAllowed(_ => true)
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
+
+// TODO: Thêm sau khi tạo file
+// builder.Services.AddAutoMapper(...)
+// builder.Services.AddMediatR(...)
+// builder.Services.AddFluentValidation(...)
+// builder.Services.AddSingleton(new Cloudinary(...))
 
 // ──── BUILD APP ────
 var app = builder.Build();
@@ -74,6 +110,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseCors("AllowFrontend");
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();

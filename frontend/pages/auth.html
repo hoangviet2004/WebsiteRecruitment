@@ -21,10 +21,16 @@
         <div id="panel-register">
             <form id="registerForm">
                 <label>Họ và tên</label>
-                <input type="text" required>
+                <input type="text" id="reg-fullname" required>
 
                 <label>Email</label>
-                <input type="email" required>
+                <input type="email" id="reg-email" required>
+
+                <label>Bạn là</label>
+                <select id="reg-role">
+                    <option value="Student">Sinh viên</option>
+                    <option value="Company">Công ty</option>
+                </select>
 
                 <label>Mật khẩu</label>
                 <div class="password-wrapper">
@@ -38,7 +44,7 @@
                     <span onclick="togglePassword('reg-confirm')">👁</span>
                 </div>
 
-                <button type="submit">Đăng ký</button>
+                <button type="submit" id="btn-register">Đăng ký</button>
             </form>
 
             <div class="divider">Tiếp tục với</div>
@@ -57,11 +63,11 @@
         <div id="panel-login" style="display: none;">
             <form id="loginForm">
                 <label>Email</label>
-                <input type="email" required>
+                <input type="email" id="login-email" placeholder="example@email.com" required>
 
                 <label>Mật khẩu</label>
                 <div class="password-wrapper">
-                    <input type="password" id="login-password" required>
+                    <input type="password"  id="login-password" required>
                     <span onclick="togglePassword('login-password')">👁</span>
                 </div>
 
@@ -101,6 +107,7 @@
     </div>
 </div>
 
+<script src="../js/api.js"></script>
 <script src="../js/auth.js"></script>
 </body>
 </html>

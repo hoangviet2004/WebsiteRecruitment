@@ -26,7 +26,12 @@ bld/
 # .NET Core
 project.lock.json
 project.fragment.lock.json
+
+**/appsettings.json
+**/appsettings.*.json
+!**/appsettings.example.json
 appsettings.Development.json
+
 artifacts/
 
 # ASP.NET Scaffolding
