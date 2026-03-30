@@ -195,3 +195,12 @@ button[type="submit"]:hover {
     width: 48px;
     height: 48px;
 }
+
+input[type="password"]::-ms-reveal,
+input[type="password"]::-ms-clear {
+    display: none;
+}
+
+input::-webkit-credentials-auto-fill-button {
+    display: none;
+}
