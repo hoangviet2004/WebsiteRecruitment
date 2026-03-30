@@ -1,0 +1,112 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Inter', sans-serif;
+}
+
+body {
+  padding-top: 70px;
+  background-color: #f4f4f9;
+}
+
+.homebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  height: 70px;
+  padding: 0 40px;
+  background-color: #ffffff;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+}
+
+.homebar .left {
+  display: flex;
+  align-items: center;
+  gap: 40px;
+}
+
+.homebar .logo-svg {
+  font-size: 24px;
+  font-weight: bold;
+  color: #007bff;
+  text-decoration: none;
+}
+
+.homebar .left ul {
+  display: flex;
+  list-style: none;
+  gap: 25px;
+}
+
+.homebar .left ul li a {
+  text-decoration: none;
+  color: #333;
+  font-weight: 500;
+  transition: color 0.3s;
+}
+
+.homebar .left ul li a:hover {
+  color: #007bff;
+}
+
+.homebar .right {
+  display: flex;
+  gap: 15px;
+}
+
+.homebar .right a {
+  display: inline-block;
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: bold;
+  border-radius: 5px;
+  transition: all 0.3s;
+  text-decoration: none;
+}
+
+.btn-login {
+  background-color: transparent;
+  border: 1px solid #137FEC;
+  color: #475569;
+}
+
+.btn-login:hover {
+  background-color: #137FEC;
+  color: white;
+}
+
+.btn-register {
+  background-color: #0D141B;
+  border: 1px solid #137FEC;
+  color: white;
+}
+
+.btn-register:hover {
+  background-color: #137FEC;
+}
+.content {
+  padding: 40px;
+}
+
+.logo-svg {
+  display: flex;
+  align-items: center; /* căn giữa theo chiều dọc */
+  gap: 8px; /* khoảng cách giữa logo và chữ */
+  text-decoration: none;
+  color: #007bff;
+  font-size: 20px;
+  font-weight: bold;
+}
+.logo-svg img {
+  height: 40px;
+  width: auto;
+  display: block;
+}

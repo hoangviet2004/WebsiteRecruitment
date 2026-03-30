@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>TechList - Xác thực</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="../assets/css/auth.css">
+</head>
+<body>
+
+<div class="container">
+    <div class="card">
+
+        <a href="../pages/home.html" class="logo-svg">
+            <img src="../assets/logo.svg" alt="Logo">
+            TechList
+        </a>
+        <p class="subtitle" id="subtitle">Tìm kiếm công việc mơ ước của bạn</p>
+
+        <!-- ĐĂNG KÝ -->
+        <div id="panel-register">
+            <form id="registerForm">
+                <label>Họ và tên</label>
+                <input type="text" id="reg-fullname" required>
+
+                <label>Email</label>
+                <input type="email" id="reg-email" required>
+
+                <label>Bạn là</label>
+                <select id="reg-role">
+                    <option value="Student">Sinh viên</option>
+                    <option value="Company">Công ty</option>
+                </select>
+
+                <label>Mật khẩu</label>
+                <div class="password-wrapper">
+                    <input type="password" id="reg-password" required>
+                    <span onclick="togglePassword('reg-password')">👁</span>
+                </div>
+
+                <label>Xác nhận mật khẩu</label>
+                <div class="password-wrapper">
+                    <input type="password" id="reg-confirm" required>
+                    <span onclick="togglePassword('reg-confirm')">👁</span>
+                </div>
+
+                <button type="submit" id="btn-register">Đăng ký</button>
+            </form>
+
+            <div class="divider">Tiếp tục với</div>
+            <div class="social">
+                <button class="google"><i class="fa-brands fa-google"></i> Google</button>
+                <button class="github"><i class="fa-brands fa-github"></i> GitHub</button>
+            </div>
+
+            <p class="switch-text">
+                Bạn đã có tài khoản?
+                <a href="#" onclick="showPanel('login')">Đăng nhập</a>
+            </p>
+        </div>
+
+        <!-- ĐĂNG NHẬP -->
+        <div id="panel-login" style="display: none;">
+            <form id="loginForm">
+                <label>Email</label>
+                <input type="email" id="login-email" placeholder="example@email.com" required>
+
+                <label>Mật khẩu</label>
+                <div class="password-wrapper">
+                    <input type="password"  id="login-password" required>
+                    <span onclick="togglePassword('login-password')">👁</span>
+                </div>
+
+                <div class="forgot-row">
+                    <a href="#" onclick="showPanel('forgot')">Quên mật khẩu?</a>
+                </div>
+
+                <button type="submit">Đăng nhập</button>
+            </form>
+
+            <div class="divider">Tiếp tục với</div>
+            <div class="social">
+                <button class="google"><i class="fa-brands fa-google"></i> Google</button>
+                <button class="github"><i class="fa-brands fa-github"></i> GitHub</button>
+            </div>
+
+            <p class="switch-text">
+                Chưa có tài khoản?
+                <a href="#" onclick="showPanel('register')">Đăng ký ngay</a>
+            </p>
+        </div>
+
+        <!-- QUÊN MẬT KHẨU -->
+        <div id="panel-forgot" style="display: none;">
+            <p class="forgot-desc">Nhập email để nhận liên kết đặt lại mật khẩu.</p>
+            <form id="forgotForm">
+                <label>Email</label>
+                <input type="email" required>
+                <button type="submit">Gửi liên kết</button>
+            </form>
+
+            <p class="switch-text">
+                <a href="#" onclick="showPanel('login')">← Quay lại đăng nhập</a>
+            </p>
+        </div>
+
+    </div>
+</div>
+
+<script src="../js/api.js"></script>
+<script src="../js/auth.js"></script>
+</body>
+</html>
