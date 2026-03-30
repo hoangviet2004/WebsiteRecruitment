@@ -95,3 +95,18 @@ body {
 .content {
   padding: 40px;
 }
+
+.logo-svg {
+  display: flex;
+  align-items: center; /* căn giữa theo chiều dọc */
+  gap: 8px; /* khoảng cách giữa logo và chữ */
+  text-decoration: none;
+  color: #007bff;
+  font-size: 20px;
+  font-weight: bold;
+}
+.logo-svg img {
+  height: 40px;
+  width: auto;
+  display: block;
+}
