@@ -1,10 +1,14 @@
 using System.Text;
+using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
+using TechList.API.Common;
+using TechList.API.Middleware;
+using TechList.Application;
+using TechList.Infrastructure;
 using TechList.Infrastructure.Identity;
-using TechList.Infrastructure.Persistence;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -32,23 +36,26 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
-// 2. SQL Server
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.AddApplication();
+builder.Services.AddInfrastructure(builder.Configuration);
 
-// 3. Identity (dùng AddIdentityCore để không xung đột JWT)
-builder.Services.AddIdentityCore<ApplicationUser>(options =>
+builder.Services.AddTransient<ExceptionHandlingMiddleware>();
+builder.Services.AddHttpClient();
+
+builder.Services.AddFluentValidationAutoValidation();
+
+builder.Services.Configure<ApiBehaviorOptions>(options =>
 {
-    options.Password.RequireDigit           = true;
-    options.Password.RequiredLength         = 8;
-    options.Password.RequireUppercase       = false;
-    options.Password.RequireNonAlphanumeric = false;
-    options.User.RequireUniqueEmail         = true;
-    options.SignIn.RequireConfirmedEmail     = false;
-})
-.AddRoles<IdentityRole>()
-.AddEntityFrameworkStores<AppDbContext>()
-.AddDefaultTokenProviders();
+    options.InvalidModelStateResponseFactory = context =>
+    {
+        var errors = context.ModelState
+            .Where(kvp => kvp.Value?.Errors.Count > 0)
+            .SelectMany(kvp => kvp.Value!.Errors.Select(e => new ApiError(kvp.Key, e.ErrorMessage)))
+            .ToList();
+
+        return new BadRequestObjectResult(ApiResponse<object>.Fail("Validation failed", errors));
+    };
+});
 
 // 4. JWT + Google + GitHub
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");
@@ -75,11 +82,14 @@ builder.Services.AddAuthentication(options =>
 {
     options.ClientId     = builder.Configuration["OAuth:Google:ClientId"]!;
     options.ClientSecret = builder.Configuration["OAuth:Google:ClientSecret"]!;
+    options.SignInScheme = IdentityConstants.ExternalScheme;
 })
 .AddGitHub(options =>
 {
     options.ClientId     = builder.Configuration["OAuth:GitHub:ClientId"]!;
     options.ClientSecret = builder.Configuration["OAuth:GitHub:ClientSecret"]!;
+    options.Scope.Add("user:email");
+    options.SignInScheme = IdentityConstants.ExternalScheme;
 });
 
 // 5. CORS
@@ -109,6 +119,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.UseHttpsRedirection();
 app.UseCors("AllowFrontend");
 app.UseAuthentication();
