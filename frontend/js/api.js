@@ -3,7 +3,7 @@
 // Đặt tại: js/api.js
 // ============================================================
 
-const API_URL = 'http://localhost:5500'; // backend đang chạy port 5500
+const API_URL = 'http://localhost:5240'; // backend đang chạy port 5500
 
 // ── Gọi API không cần token (public) ────────────────────────
 async function apiFetch(endpoint, options = {}) {
