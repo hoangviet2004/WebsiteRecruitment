@@ -42,7 +42,7 @@ document.getElementById("registerForm").addEventListener("submit", async functio
         var response = await apiFetch("/api/Auth/register", {
             method: "POST",
             body: JSON.stringify({
-                FullName: fullName,
+                DisplayName: fullName,
                 Email: email,
                 Password: pass,
                 Role: role
@@ -61,7 +61,7 @@ document.getElementById("registerForm").addEventListener("submit", async functio
 
         var msg =
             data?.message ||
-            (Array.isArray(data?.errors) ? data.errors.join(", ") : null) ||
+            (Array.isArray(data?.errors) ? data.errors.map(function(e) { return e.error || e; }).join(", ") : null) ||
             `Đăng ký thất bại (HTTP ${response.status})`;
         alert(msg);
     } catch (err) {
@@ -90,10 +90,16 @@ document.getElementById("loginForm").addEventListener("submit", async function(e
         try { data = await response.json(); } catch (_) {}
 
         if (response.ok) {
-            localStorage.setItem("token", data.token);
-            localStorage.setItem("fullName", data.fullName || "");
-            localStorage.setItem("email", data.email || "");
-            localStorage.setItem("role", data.role || "");
+            const payload = data?.data;
+            const accessToken = payload?.tokens?.accessToken;
+            const refreshToken = payload?.tokens?.refreshToken;
+            const user = payload?.user;
+
+            localStorage.setItem("token", accessToken || "");
+            localStorage.setItem("refreshToken", refreshToken || "");
+            localStorage.setItem("fullName", user?.displayName || "");
+            localStorage.setItem("email", user?.email || "");
+            localStorage.setItem("role", (user?.roles || [])[0] || "");
 
             window.location.href = "../pages/home.html";
             return;
