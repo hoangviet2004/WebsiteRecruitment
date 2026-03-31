@@ -1,0 +1,15 @@
+namespace TechList.Domain.Entities;
+
+public class UserProfile
+{
+    public string UserId { get; set; } = default!;
+
+    public string DisplayName { get; set; } = string.Empty;
+    public string Bio { get; set; } = string.Empty;
+
+    public string? AvatarUrl { get; set; }
+    public string? AvatarPublicId { get; set; }
+
+    public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+}
+

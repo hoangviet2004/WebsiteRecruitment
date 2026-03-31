@@ -61,6 +61,7 @@ async function apiFetchAuth(endpoint, options = {}) {
 function getCurrentUser() {
     return {
         token:    localStorage.getItem('token'),
+        refreshToken: localStorage.getItem('refreshToken'),
         fullName: localStorage.getItem('fullName'),
         email:    localStorage.getItem('email'),
         role:     localStorage.getItem('role')
@@ -73,7 +74,34 @@ function isLoggedIn() {
 }
 
 // ── Đăng xuất ─────────────────────────────────────────────────
-function logout() {
+async function refreshAccessToken() {
+    const refreshToken = localStorage.getItem('refreshToken');
+    if (!refreshToken) return false;
+
+    const response = await apiFetch('/api/auth/refresh-token', {
+        method: 'POST',
+        body: JSON.stringify({ refreshToken })
+    });
+
+    if (!response?.ok) return false;
+
+    const data = await response.json();
+    const payload = data?.data;
+    if (!payload?.tokens?.accessToken || !payload?.tokens?.refreshToken) return false;
+
+    localStorage.setItem('token', payload.tokens.accessToken);
+    localStorage.setItem('refreshToken', payload.tokens.refreshToken);
+    return true;
+}
+
+async function logout() {
+    const refreshToken = localStorage.getItem('refreshToken');
+    if (refreshToken) {
+        await apiFetch('/api/auth/logout', {
+            method: 'POST',
+            body: JSON.stringify({ refreshToken })
+        });
+    }
     localStorage.clear();
     window.location.href = '../pages/auth.html#login';
 }

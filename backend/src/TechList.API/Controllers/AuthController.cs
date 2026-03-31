@@ -1,100 +1,194 @@
+using System.Net.Http.Headers;
+using System.Security.Claims;
+using System.Text.Json;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.Tokens;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
+using TechList.API.Common;
+using TechList.Application.Auth.Interfaces;
+using TechList.Application.Auth.Models;
 using TechList.Infrastructure.Identity;
 
 namespace TechList.API.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/auth")]
 public class AuthController : ControllerBase
 {
-    private readonly UserManager<ApplicationUser> _userManager;
-    private readonly IConfiguration              _config;
+    private readonly IAuthService _authService;
+    private readonly SignInManager<ApplicationUser> _signInManager;
+    private readonly IHttpClientFactory _httpClientFactory;
+    private readonly ILogger<AuthController> _logger;
 
-    public AuthController(UserManager<ApplicationUser> userManager, IConfiguration config)
+    public AuthController(
+        IAuthService authService,
+        SignInManager<ApplicationUser> signInManager,
+        IHttpClientFactory httpClientFactory,
+        ILogger<AuthController> logger)
     {
-        _userManager = userManager;
-        _config      = config;
+        _authService = authService;
+        _signInManager = signInManager;
+        _httpClientFactory = httpClientFactory;
+        _logger = logger;
     }
 
-    // ── ĐĂNG KÝ ─────────────────────────────────────────────
     [HttpPost("register")]
-    public async Task<IActionResult> Register([FromBody] RegisterDto dto)
+    public async Task<ActionResult<ApiResponse<object>>> Register([FromBody] RegisterRequest request, CancellationToken ct)
     {
-        // Kiểm tra email đã tồn tại chưa
-        var existingUser = await _userManager.FindByEmailAsync(dto.Email);
-        if (existingUser != null)
-            return BadRequest(new { message = "Email đã được sử dụng" });
-
-        var user = new ApplicationUser
-        {
-            UserName = dto.Email,
-            Email    = dto.Email,
-            FullName = dto.FullName,
-            Role     = dto.Role
-        };
-
-        var result = await _userManager.CreateAsync(user, dto.Password);
-        if (!result.Succeeded)
-            return BadRequest(new { errors = result.Errors.Select(e => e.Description) });
-
-        return Ok(new { message = "Đăng ký thành công!" });
+        await _authService.RegisterAsync(request, ct);
+        return Ok(ApiResponse<object>.Ok(null!, "Registered successfully"));
     }
 
-    // ── ĐĂNG NHẬP ────────────────────────────────────────────
     [HttpPost("login")]
-    public async Task<IActionResult> Login([FromBody] LoginDto dto)
+    public async Task<ActionResult<ApiResponse<LoginResponse>>> Login([FromBody] LoginRequest request, CancellationToken ct)
     {
-        var user = await _userManager.FindByEmailAsync(dto.Email);
-        if (user == null)
-            return Unauthorized(new { message = "Email hoặc mật khẩu không đúng" });
+        var ip = HttpContext.Connection.RemoteIpAddress?.ToString();
+        var ua = Request.Headers.UserAgent.ToString();
 
-        var isPasswordValid = await _userManager.CheckPasswordAsync(user, dto.Password);
-        if (!isPasswordValid)
-            return Unauthorized(new { message = "Email hoặc mật khẩu không đúng" });
-
-        var token = GenerateJwtToken(user);
-
-        return Ok(new
+        try
         {
-            token    = token,
-            fullName = user.FullName,
-            email    = user.Email,
-            role     = user.Role
-        });
+            var result = await _authService.LoginAsync(request, ip, ua, ct);
+            _logger.LogInformation("Login success for {Email}", request.Email);
+            return Ok(ApiResponse<LoginResponse>.Ok(result, "Login successful"));
+        }
+        catch
+        {
+            _logger.LogWarning("Login failed for {Email}", request.Email);
+            throw;
+        }
     }
 
-    // ── TẠO JWT TOKEN ─────────────────────────────────────────
-    private string GenerateJwtToken(ApplicationUser user)
+    [HttpGet("google")]
+    public IActionResult Google([FromQuery] string? returnUrl = null)
     {
-        var jwtSettings = _config.GetSection("JwtSettings");
-        var key         = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["SecretKey"]!));
-        var creds       = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-
-        var claims = new[]
-        {
-            new Claim(ClaimTypes.NameIdentifier, user.Id),
-            new Claim(ClaimTypes.Email,          user.Email!),
-            new Claim(ClaimTypes.Name,            user.FullName),
-            new Claim(ClaimTypes.Role,            user.Role)
-        };
-
-        var token = new JwtSecurityToken(
-            issuer:             jwtSettings["Issuer"],
-            audience:           jwtSettings["Audience"],
-            claims:             claims,
-            expires:            DateTime.UtcNow.AddMinutes(double.Parse(jwtSettings["ExpiryMinutes"]!)),
-            signingCredentials: creds
-        );
-
-        return new JwtSecurityTokenHandler().WriteToken(token);
+        var redirectUrl = Url.Action(nameof(GoogleCallback), "Auth", new { returnUrl })!;
+        var props = _signInManager.ConfigureExternalAuthenticationProperties("Google", redirectUrl);
+        return Challenge(props, "Google");
     }
+
+    [HttpGet("google/callback")]
+    public async Task<IActionResult> GoogleCallback([FromQuery] string? returnUrl = null, CancellationToken ct = default)
+    {
+        var info = await _signInManager.GetExternalLoginInfoAsync();
+        if (info is null) throw new InvalidOperationException("External login info not found");
+
+        var provider = info.LoginProvider;
+        var providerKey = info.ProviderKey;
+        var email = info.Principal.FindFirstValue(ClaimTypes.Email) ?? info.Principal.FindFirstValue("email");
+        var name = info.Principal.FindFirstValue(ClaimTypes.Name);
+
+        if (string.IsNullOrWhiteSpace(email))
+            throw new InvalidOperationException("Email not provided by Google");
+
+        var ip = HttpContext.Connection.RemoteIpAddress?.ToString();
+        var ua = Request.Headers.UserAgent.ToString();
+
+        try
+        {
+            var result = await _authService.ExternalLoginAsync(provider, providerKey, email, name, ip, ua, ct);
+            _logger.LogInformation("OAuth {Provider} success for {Email}", provider, email);
+            await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
+            return OAuthReturn(returnUrl, result);
+        }
+        catch
+        {
+            _logger.LogWarning("OAuth {Provider} failed", provider);
+            throw;
+        }
+    }
+
+    [HttpGet("github")]
+    public IActionResult GitHub([FromQuery] string? returnUrl = null)
+    {
+        var redirectUrl = Url.Action(nameof(GitHubCallback), "Auth", new { returnUrl })!;
+        var props = _signInManager.ConfigureExternalAuthenticationProperties("GitHub", redirectUrl);
+        return Challenge(props, "GitHub");
+    }
+
+    [HttpGet("github/callback")]
+    public async Task<IActionResult> GitHubCallback([FromQuery] string? returnUrl = null, CancellationToken ct = default)
+    {
+        var info = await _signInManager.GetExternalLoginInfoAsync();
+        if (info is null) throw new InvalidOperationException("External login info not found");
+
+        var provider = info.LoginProvider; // "GitHub"
+        var providerKey = info.ProviderKey;
+
+        var email = info.Principal.FindFirstValue(ClaimTypes.Email) ?? info.Principal.FindFirstValue("email");
+        var name = info.Principal.FindFirstValue(ClaimTypes.Name) ?? info.Principal.FindFirstValue("name");
+
+        // GitHub may not return email in claims. Resolve via GitHub API using access_token.
+        if (string.IsNullOrWhiteSpace(email))
+        {
+            var ghToken = info.AuthenticationTokens?.FirstOrDefault(t => t.Name == "access_token")?.Value;
+            if (!string.IsNullOrWhiteSpace(ghToken))
+                email = await ResolveGitHubPrimaryEmailAsync(ghToken, ct);
+        }
+
+        if (string.IsNullOrWhiteSpace(email))
+            throw new InvalidOperationException("Email not available from GitHub. Ensure scope 'user:email' and a verified email exists.");
+
+        var ip = HttpContext.Connection.RemoteIpAddress?.ToString();
+        var ua = Request.Headers.UserAgent.ToString();
+
+        try
+        {
+            var result = await _authService.ExternalLoginAsync(provider, providerKey, email, name, ip, ua, ct);
+            _logger.LogInformation("OAuth {Provider} success for {Email}", provider, email);
+            await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
+            return OAuthReturn(returnUrl, result);
+        }
+        catch
+        {
+            _logger.LogWarning("OAuth {Provider} failed", provider);
+            throw;
+        }
+    }
+
+    [HttpPost("refresh-token")]
+    public async Task<ActionResult<ApiResponse<LoginResponse>>> RefreshToken([FromBody] RefreshTokenRequest request, CancellationToken ct)
+    {
+        var ip = HttpContext.Connection.RemoteIpAddress?.ToString();
+        var ua = Request.Headers.UserAgent.ToString();
+        var result = await _authService.RefreshAsync(request.RefreshToken, ip, ua, ct);
+        return Ok(ApiResponse<LoginResponse>.Ok(result, "Token refreshed"));
+    }
+
+    [HttpPost("logout")]
+    public async Task<ActionResult<ApiResponse<object>>> Logout([FromBody] RefreshTokenRequest request, CancellationToken ct)
+    {
+        var ip = HttpContext.Connection.RemoteIpAddress?.ToString();
+        await _authService.LogoutAsync(request.RefreshToken, ip, ct);
+        return Ok(ApiResponse<object>.Ok(null!, "Logged out"));
+    }
+
+    private IActionResult OAuthReturn(string? returnUrl, LoginResponse result)
+    {
+        if (string.IsNullOrWhiteSpace(returnUrl))
+            return Ok(ApiResponse<LoginResponse>.Ok(result, "OAuth login successful"));
+
+        // Demo-friendly redirect (production: prefer HttpOnly refresh cookie + code exchange)
+        var redirect = $"{returnUrl}#accessToken={Uri.EscapeDataString(result.Tokens.AccessToken)}&refreshToken={Uri.EscapeDataString(result.Tokens.RefreshToken)}";
+        return Redirect(redirect);
+    }
+
+    private async Task<string?> ResolveGitHubPrimaryEmailAsync(string accessToken, CancellationToken ct)
+    {
+        var client = _httpClientFactory.CreateClient();
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+        client.DefaultRequestHeaders.UserAgent.ParseAdd("TechListAPI");
+        client.DefaultRequestHeaders.Accept.ParseAdd("application/vnd.github+json");
+
+        using var resp = await client.GetAsync("https://api.github.com/user/emails", ct);
+        if (!resp.IsSuccessStatusCode) return null;
+
+        var json = await resp.Content.ReadAsStringAsync(ct);
+        var emails = JsonSerializer.Deserialize<List<GitHubEmail>>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+        var primary = emails?.FirstOrDefault(e => e.Primary && e.Verified)?.Email
+                      ?? emails?.FirstOrDefault(e => e.Verified)?.Email;
+        return primary;
+    }
+
+    private sealed record GitHubEmail(string Email, bool Primary, bool Verified);
 }
-
-// ── DTOs ──────────────────────────────────────────────────────
-public record RegisterDto(string FullName, string Email, string Password, string Role);
-public record LoginDto(string Email, string Password);
