@@ -9,7 +9,9 @@ using TechList.API.Middleware;
 using TechList.Application;
 using TechList.Infrastructure;
 using TechList.Infrastructure.Identity;
-
+using TechList.Infrastructure.Persistence;
+using TechList.Domain.Enums;
+using TechList.Domain.Entities;
 var builder = WebApplication.CreateBuilder(args);
 
 // 1. Controllers & Swagger
@@ -117,6 +119,61 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+}
+
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    try
+    {
+        var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
+        var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+        var db = services.GetRequiredService<AppDbContext>();
+
+        foreach (var role in AppRole.All)
+        {
+            if (!await roleManager.RoleExistsAsync(role))
+            {
+                await roleManager.CreateAsync(new IdentityRole(role));
+            }
+        }
+
+        var adminEmail = "admin@techlist.com";
+        var adminPass = "Admin@123";
+        var adminUser = await userManager.FindByEmailAsync(adminEmail);
+        
+        if (adminUser == null)
+        {
+            adminUser = new ApplicationUser
+            {
+                UserName = adminEmail,
+                Email = adminEmail,
+                EmailConfirmed = true,
+                FullName = "System Admin",
+                CreatedAt = DateTime.UtcNow
+            };
+
+            var result = await userManager.CreateAsync(adminUser, adminPass);
+            if (result.Succeeded)
+            {
+                await userManager.AddToRoleAsync(adminUser, AppRole.Admin);
+                
+                db.UserProfiles.Add(new UserProfile
+                {
+                    UserId = adminUser.Id,
+                    DisplayName = "Super Admin",
+                    Bio = "System Administrator",
+                    UpdatedAt = DateTime.UtcNow
+                });
+                await db.SaveChangesAsync();
+            }
+        }
+    }
+    catch (Exception ex)
+    {
+        var logger = services.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "An error occurred while seeding the database.");
+    }
 }
 
 app.UseMiddleware<ExceptionHandlingMiddleware>();
