@@ -1,5 +1,5 @@
 function loadSidebar() {
-  fetch('/components/sidebar.html')
+  fetch('../components/sidebar.html')
     .then(res => res.text())
     .then(data => {
       document.getElementById('sidebar-container').innerHTML = data;
