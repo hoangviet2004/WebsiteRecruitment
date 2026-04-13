@@ -99,9 +99,14 @@ document.getElementById("loginForm").addEventListener("submit", async function(e
             localStorage.setItem("refreshToken", refreshToken || "");
             localStorage.setItem("fullName", user?.displayName || "");
             localStorage.setItem("email", user?.email || "");
-            localStorage.setItem("role", (user?.roles || [])[0] || "");
+            const role = (user?.roles || [])[0] || "";
+            localStorage.setItem("role", role);
 
-            window.location.href = "../pages/home.html";
+            if (role.toLowerCase() === "admin") {
+                window.location.href = "../pages/admin.html";
+            } else {
+                window.location.href = "../pages/home.html";
+            }
             return;
         }
 

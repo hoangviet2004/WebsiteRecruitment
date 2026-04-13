@@ -33,6 +33,9 @@ public sealed class AuthService : IAuthService
 
     public async Task RegisterAsync(RegisterRequest request, CancellationToken ct)
     {
+        if (request.Role != AppRole.Candidate && request.Role != AppRole.Recruiter)
+            throw new InvalidOperationException("Invalid role specified.");
+
         var existing = await _userManager.FindByEmailAsync(request.Email);
         if (existing is not null)
             throw new InvalidOperationException("Email already exists");
