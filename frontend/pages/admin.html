@@ -1,11 +1,25 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin</title>
+  <meta charset="UTF-8">
+  <title>Admin</title>
+  <link rel="stylesheet" href="/assets/css/style.css">
 </head>
 <body>
-    
+
+<div id="sidebar-container"></div>
+
+<div class="content">
+  <h1>Dashboard Admin</h1>
+</div>
+
+<script src="../js/guard.js"></script>
+<script src="../js/sidebar.js"></script>
+
+<script>
+  requireAdmin();     // check quyền
+  loadSidebar();      // load sidebar
+</script>
+
 </body>
 </html>
