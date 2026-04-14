@@ -25,13 +25,16 @@ public sealed class AdminService : IAdminService
     {
         var users = await _userManager.Users.AsNoTracking().ToListAsync(ct);
         var profiles = await _db.UserProfiles.AsNoTracking().ToListAsync(ct);
+        var userLogins = await _db.UserLogins.AsNoTracking().ToListAsync(ct);
         var userDtos = new List<UserDto>();
         
         foreach (var user in users)
         {
             var role = (await _userManager.GetRolesAsync(user)).FirstOrDefault() ?? "Unknown";
             var profile = profiles.FirstOrDefault(p => p.UserId == user.Id);
-            userDtos.Add(new UserDto(user.Id, user.Email!, user.FullName, role, profile?.IsApproved ?? false, user.CreatedAt));
+            var login = userLogins.FirstOrDefault(l => l.UserId == user.Id);
+            var provider = login?.LoginProvider ?? "Local";
+            userDtos.Add(new UserDto(user.Id, user.Email!, user.FullName, role, profile?.IsApproved ?? false, provider, user.CreatedAt));
         }
 
         return userDtos.OrderByDescending(x => x.CreatedAt).ToList();
