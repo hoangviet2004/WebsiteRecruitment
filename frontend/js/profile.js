@@ -8,6 +8,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     const phoneInput = document.getElementById('phone');
     const form = document.getElementById('profile-form');
     const btnSave = document.querySelector('.btn-save');
+    
+    // Thuộc tính avatar
+    const avatarInput = document.getElementById('avatar-input');
+    const avatarPreview = document.getElementById('avatar-preview');
+    const avatarLoading = document.getElementById('avatar-loading');
 
     // 1. Lấy thông tin mặc định có sẵn từ hệ thống
     const currentUser = getCurrentUser(); // từ api.js
@@ -25,6 +30,16 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (profile) {
                 // Hiển thị tên từ DB nếu có, không thì lấy từ sessionStorage login
                 fullNameInput.value = profile.displayName || currentUser.fullName || '';
+                
+                // Hiển thị avatar
+                const displayNameForAvatar = profile.displayName || currentUser.fullName || 'User';
+                if (profile.avatarUrl) {
+                    avatarPreview.src = profile.avatarUrl;
+                    sessionStorage.setItem('avatarUrl', profile.avatarUrl);
+                    if (typeof renderNavRight === 'function') renderNavRight();
+                } else {
+                    avatarPreview.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(displayNameForAvatar)}&background=3b82f6&color=fff&size=150`;
+                }
             }
         }
     } catch (e) {
@@ -83,4 +98,64 @@ document.addEventListener('DOMContentLoaded', async () => {
             btnSave.disabled = false;
         }
     });
+
+    // 4. Logic thay đổi ảnh đại diện (Tự động tải lên ngay khi chọn ảnh)
+    if (avatarInput) {
+        avatarInput.addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            // 1) Tạo luồng hiển thị trước avatar cho người dùng thấy nhanh
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                avatarPreview.src = ev.target.result;
+            };
+            reader.readAsDataURL(file);
+
+            // 2) Bắt đầu gọi API Upload Image
+            avatarLoading.style.display = 'block';
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                // Chúng ta tự tạo fetch vì apiFetchAuth hiện bị gán ứng với json không gửi được FormData dễ dàng
+                const baseToken = sessionStorage.getItem('token');
+                if (!baseToken) {
+                    alert('Bạn chưa đăng nhập!');
+                    return;
+                }
+
+                const response = await fetch(`${API_URL}/api/profile/avatar`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${baseToken}`
+                    },
+                    body: formData // Form data tự sinh Boundary
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    if (result.data && result.data.avatarUrl) {
+                        // Nhận lại link cloud từ api trả về
+                        avatarPreview.src = result.data.avatarUrl;
+                        sessionStorage.setItem('avatarUrl', result.data.avatarUrl);
+                        if (typeof renderNavRight === 'function') renderNavRight();
+                        
+                        alert('Cập nhật ảnh đại diện thành công!');
+                    }
+                } else {
+                    const errText = await response.text();
+                    console.error('Server response:', response.status, errText);
+                    alert(`Đã xảy ra lỗi khi tải ảnh lên (Mã lỗi ${response.status}).\n\nChi tiết: ${errText}`);
+                }
+            } catch (error) {
+                console.error('Lỗi upload avatar:', error);
+                alert('Tải ảnh thất bại, vui lòng thử lại.');
+            } finally {
+                avatarLoading.style.display = 'none';
+                avatarInput.value = ''; // Reset file input để có thể chọn lại đúng file đó lần nữa
+            }
+        });
+    }
 });
