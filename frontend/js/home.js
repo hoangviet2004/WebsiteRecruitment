@@ -144,7 +144,7 @@ async function loadJobs() {
             const timeAgo = getTimeAgo(postDate);
             
             const cardHtml = `
-                <div class="job-card">
+                <div class="job-card" onclick="window.location.href='job-detail.html?id=${job.id}'">
                     <div>
                         <div class="job-card-header">
                             ${logoHtml}
@@ -161,7 +161,7 @@ async function loadJobs() {
                     </div>
                     <div class="job-card-footer">
                         <span class="post-time"><i class="fa-regular fa-clock"></i> ${timeAgo}</span>
-                        <button class="btn-apply" onclick="applyJob('${job.id}')">Ứng tuyển ngay</button>
+                        <button class="btn-save-heart" onclick="event.stopPropagation(); alert('Đã lưu tin!');"><i class="fa-regular fa-heart"></i></button>
                     </div>
                 </div>
             `;

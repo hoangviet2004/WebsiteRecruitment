@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chi tiết công việc - TechList</title>
+    <!-- Thư viện Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    
+    <!-- Google Fonts Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- CSS Assets -->
+    <link rel="stylesheet" href="../assets/css/home.css">
+    <link rel="stylesheet" href="../assets/css/job-detail.css">
+</head>
+<body>
+    <!-- Navbar (Using existing home.css style but cleaner) -->
+    <nav class="homebar" style="background: rgba(255, 255, 255, 0.98); border-bottom: 1px solid #eee;">
+        <div class="left">
+            <a href="home.html" class="logo-svg"><img src="../assets/logo.svg" alt="Logo">TechList</a>
+            <ul>
+                <li><a href="home.html">Tìm việc làm</a></li>
+                <li><a href="#">Hồ sơ & CV</a></li>
+                <li><a href="#">Công ty</a></li>
+            </ul>
+        </div>
+        <div class="right" id="nav-right"></div>
+    </nav>
+
+    <!-- Main Container -->
+    <main class="job-detail-page">
+        <!-- Breadcrumbs -->
+        <div class="breadcrumb">
+            <a href="home.html">Trang chủ</a> <i class="fa-solid fa-chevron-right"></i>
+            <a href="home.html">Tìm việc làm</a> <i class="fa-solid fa-chevron-right"></i>
+            <span id="bc-job-title" class="current-page">Đang tải...</span>
+        </div>
+
+        <div class="main-layout">
+            <!-- Cột nội dung (70%) -->
+            <div class="content-col">
+                
+                <!-- Skeleton Loader trước khi có data -->
+                <div id="job-skeleton">
+                    <div class="job-header-card phantom"></div>
+                    <div class="job-body-card phantom"></div>
+                </div>
+
+                <!-- Dữ liệu thực tế -->
+                <div id="job-actual-data" style="display: none;">
+                    
+                    <!-- Khối 1: Tiêu đề & Tóm tắt -->
+                    <div class="job-header-card">
+                        <h1 id="detail-title">Đang tải tiêu đề...</h1>
+                        
+                        <div class="job-quick-info">
+                            <div class="info-item">
+                                <div class="icon-circle"><i class="fa-solid fa-sack-dollar"></i></div>
+                                <div class="info-text">
+                                    <span class="label">Mức lương</span>
+                                    <strong id="detail-salary">...</strong>
+                                </div>
+                            </div>
+                            
+                            <div class="info-item">
+                                <div class="icon-circle"><i class="fa-solid fa-location-dot"></i></div>
+                                <div class="info-text">
+                                    <span class="label">Địa điểm</span>
+                                    <strong id="detail-location">...</strong>
+                                </div>
+                            </div>
+                            
+                            <div class="info-item">
+                                <div class="icon-circle"><i class="fa-solid fa-briefcase"></i></div>
+                                <div class="info-text">
+                                    <span class="label">Hình thức</span>
+                                    <strong id="detail-type">...</strong>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="salary-insight">
+                            <a href="#"><i class="fa-solid fa-chart-line"></i> Xem mức lương thị trường cho vị trí này <i class="fa-solid fa-angles-right"></i></a>
+                        </div>
+
+                        <div class="job-deadline">
+                            <i class="fa-regular fa-clock"></i> Hạn nộp hồ sơ: <strong id="detail-expire-date">...</strong> 
+                            <span class="countdown" id="detail-expire-countdown">(Đang tính toán...)</span>
+                        </div>
+
+                        <div class="action-buttons">
+                            <button class="btn-apply-big" onclick="applyThisJob()"><i class="fa-regular fa-paper-plane"></i> Ứng tuyển ngay</button>
+                            <button class="btn-save-job"><i class="fa-regular fa-heart"></i> Lưu tin</button>
+                        </div>
+                    </div>
+
+                    <!-- Khối 2: Chi tiết Mô tả công việc -->
+                    <div class="job-body-card">
+                        <h2 class="section-title">Chi tiết tin tuyển dụng</h2>
+                        
+                        <div class="job-requirements-summary">
+                            <div class="req-row">
+                                <span class="req-label">Hình thức:</span>
+                                <div class="tags-group" id="detail-tags">
+                                    <span class="tag-pill">Full-time</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="content-block">
+                            <h3>Mô tả công việc</h3>
+                            <div class="text-format" id="detail-desc">Đang cập nhật...</div>
+                        </div>
+
+                        <div class="content-block">
+                            <h3>Yêu cầu ứng viên</h3>
+                            <div class="text-format" id="detail-req">Đang cập nhật...</div>
+                        </div>
+
+                        <div class="content-block">
+                            <h3>Quyền lợi</h3>
+                            <div class="text-format" id="detail-ben">Đang cập nhật...</div>
+                        </div>
+
+                        <!-- Sticky Apply Button Bottom -->
+                        <div class="bottom-apply">
+                            <button class="btn-apply-big" onclick="applyThisJob()">Ứng tuyển ngay</button>
+                            <button class="btn-save-job">Lưu tin</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cột bên phải (30% - Thông tin công ty) -->
+            <div class="sidebar-col">
+                <div class="company-sidebar-card">
+                    <div class="company-summary">
+                        <div class="company-logo-box" id="detail-company-logo">
+                            <!-- JS Inject -->
+                        </div>
+                        <h3 id="detail-company-name">Tên Công Ty</h3>
+                    </div>
+                    
+                    <div class="company-meta">
+                        <div class="meta-row">
+                            <i class="fa-solid fa-users"></i>
+                            <span><strong>Quy mô:</strong> 50-150 nhân viên</span>
+                        </div>
+                        <div class="meta-row">
+                            <i class="fa-solid fa-building"></i>
+                            <span><strong>Địa điểm:</strong> <span id="detail-company-location">Đang cập nhật...</span></span>
+                        </div>
+                    </div>
+                    
+                    <a href="#" class="btn-view-company">Xem trang công ty <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- JS Files -->
+    <script src="../js/api.js"></script>
+    <script src="../js/home.js"></script>
+    <script src="../js/job-detail.js"></script>
+</body>
+</html>
