@@ -31,11 +31,20 @@ function renderNavRight() {
         return;
     }
 
-    // Đã đăng nhập: lấy 2 chữ cái đầu của tên để hiện trong avatar
-    var initials = getInitials(fullName);
+    // Đã đăng nhập: lấy 2 chữ cái đầu của tên để hiện trong avatar hoặc link ảnh nếu có
+    var avatarUrl = sessionStorage.getItem('avatarUrl');
+    var avatarHtml = '';
+    
+    if (avatarUrl && avatarUrl !== 'null' && avatarUrl !== 'undefined') {
+        avatarHtml = `<img src="${avatarUrl}" class="user-avatar" style="padding:0; object-fit:cover;" alt="Avatar">`;
+    } else {
+        var initials = getInitials(fullName);
+        avatarHtml = `<div class="user-avatar">${initials}</div>`;
+    }
+
     navRight.innerHTML = `
         <div class="user-menu" id="userMenu">
-            <div class="user-avatar">${initials}</div>
+            ${avatarHtml}
             <span class="user-name">${fullName}</span>
 
             <div class="user-dropdown">
