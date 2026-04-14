@@ -65,10 +65,20 @@ async function loadUsers() {
             });
             roleSelectHtml += `</select>`;
 
+            let emailHtml = `<strong>${u.email}</strong> ${!isApproved ? '<i class="fa-solid fa-clock text-warning"></i>' : ''}`;
+            
+            // Render Provider block
+            let providerIcon = '';
+            if(u.provider === 'Google') providerIcon = '<i class="fa-brands fa-google text-danger"></i>';
+            else if(u.provider === 'GitHub') providerIcon = '<i class="fa-brands fa-github text-dark"></i>';
+            else providerIcon = '<i class="fa-solid fa-envelope text-primary"></i>';
+            
+            const providerHtml = `<small style="display:block; margin-top:4px;">${providerIcon} ${u.provider}</small>`;
+
             html += `
                 <tr ${trClass}>
                     <td><small>${u.id.substring(0, 8)}...</small></td>
-                    <td><strong>${u.email}</strong> ${!isApproved ? '<i class="fa-solid fa-clock text-warning"></i>' : ''}</td>
+                    <td>${emailHtml}${providerHtml}</td>
                     <td>${u.displayName || '-'}</td>
                     <td>${roleSelectHtml}</td>
                     <td>${statusBadge}</td>

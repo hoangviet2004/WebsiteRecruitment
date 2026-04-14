@@ -9,7 +9,14 @@
     --text-primary: #1e293b;
     --text-secondary: #64748b;
     --border-color: #e2e8f0;
+    --warning: #f59e0b;
 }
+
+/* Utilities */
+.text-danger { color: var(--primary-red) !important; }
+.text-primary { color: var(--primary-blue) !important; }
+.text-warning { color: var(--warning) !important; }
+.text-dark { color: var(--text-primary) !important; }
 
 body {
     background-color: var(--bg-main);
