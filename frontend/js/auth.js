@@ -95,12 +95,12 @@ document.getElementById("loginForm").addEventListener("submit", async function(e
             const refreshToken = payload?.tokens?.refreshToken;
             const user = payload?.user;
 
-            localStorage.setItem("token", accessToken || "");
-            localStorage.setItem("refreshToken", refreshToken || "");
-            localStorage.setItem("fullName", user?.displayName || "");
-            localStorage.setItem("email", user?.email || "");
+            sessionStorage.setItem("token", accessToken || "");
+            sessionStorage.setItem("refreshToken", refreshToken || "");
+            sessionStorage.setItem("fullName", user?.displayName || "");
+            sessionStorage.setItem("email", user?.email || "");
             const role = (user?.roles || [])[0] || "";
-            localStorage.setItem("role", role);
+            sessionStorage.setItem("role", role);
 
             if (role.toLowerCase() === "admin") {
                 window.location.href = "../pages/admin.html";
