@@ -31,7 +31,7 @@ public sealed class ExceptionHandlingMiddleware : IMiddleware
         catch (Exception ex)
         {
             _logger.LogError(ex, "Unhandled exception");
-            await WriteAsync(context, HttpStatusCode.InternalServerError, "Internal server error");
+            await WriteAsync(context, HttpStatusCode.InternalServerError, "Lỗi Server: " + ex.Message + "\n" + ex.StackTrace);
         }
     }
 

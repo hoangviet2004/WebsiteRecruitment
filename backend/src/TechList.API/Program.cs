@@ -80,6 +80,7 @@ builder.Services.AddAuthentication(options =>
             Encoding.UTF8.GetBytes(jwtSettings["SecretKey"]!))
     };
 })
+.AddCookie(IdentityConstants.ExternalScheme)
 .AddGoogle(options =>
 {
     options.ClientId     = builder.Configuration["OAuth:Google:ClientId"]!;
