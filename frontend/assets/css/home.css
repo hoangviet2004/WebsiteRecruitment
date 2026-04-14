@@ -1,359 +1,244 @@
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: 'Inter', sans-serif;
-}
+/* home.css - Dynamic & Glassmorphism Header */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+body { padding-top: 76px; background-color: #f8fafc; color: #1e293b; }
 
-body {
-  padding-top: 70px;
-  background-color: #f4f4f9;
-}
-
+/* ── Navbar Glassmorphism ──────────────────────────────────── */
 .homebar {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-
-  height: 70px;
-  padding: 0 40px;
-  background-color: #ffffff;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  position: fixed; top: 0; left: 0; width: 100%; height: 76px;
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 0 40px; 
+  background-color: rgba(255, 255, 255, 0.85); /* Glass effect */
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05), 0 10px 15px -3px rgba(0, 0, 0, 0.02);
   z-index: 1000;
+  transition: all 0.3s ease;
 }
 
-.homebar .left {
-  display: flex;
-  align-items: center;
-  gap: 40px;
+.homebar .left { display: flex; align-items: center; gap: 48px; }
+.homebar .logo-svg { display: flex; align-items: center; gap: 10px; font-size: 24px; font-weight: 800; color: #0f172a; text-decoration: none; letter-spacing: -0.02em; }
+.homebar .logo-svg img { height: 44px; width: auto; display: block; transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
+.homebar .logo-svg:hover img { transform: scale(1.1) rotate(-8deg); }
+
+.homebar .left ul { display: flex; list-style: none; gap: 32px; }
+.homebar .left ul li a { text-decoration: none; color: #475569; font-weight: 600; font-size: 15px; position: relative; transition: color 0.3s; padding: 8px 0; }
+.homebar .left ul li a::after { content: ''; position: absolute; bottom: 0; left: 0; width: 0; height: 2.5px; background: #3b82f6; transition: width 0.3s ease; border-radius: 2px; }
+.homebar .left ul li a:hover { color: #0f172a; }
+.homebar .left ul li a:hover::after { width: 100%; }
+
+.homebar .right { display: flex; gap: 16px; align-items: center;}
+.homebar .right a, .homebar .right button {
+  display: inline-block; padding: 10px 24px; font-size: 15px; font-weight: 600;
+  border-radius: 12px; transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); text-decoration: none; cursor: pointer;
 }
 
-.homebar .logo-svg {
-  font-size: 24px;
-  font-weight: bold;
-  color: #007bff;
-  text-decoration: none;
-}
+.btn-login { background-color: transparent; border: 1.5px solid #e2e8f0; color: #475569; }
+.btn-login:hover { border-color: #3b82f6; color: #3b82f6; transform: translateY(-2px); box-shadow: 0 4px 10px rgba(59,130,246,0.1); }
 
-.homebar .left ul {
-  display: flex;
-  list-style: none;
-  gap: 25px;
-}
+.btn-register { background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); border: 1.5px solid transparent; color: white; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+.btn-register:hover { transform: translateY(-2px); box-shadow: 0 8px 16px rgba(0,0,0,0.2); background: linear-gradient(135deg, #0f172a 0%, #000 100%); }
 
-.homebar .left ul li a {
-  text-decoration: none;
-  color: #333;
-  font-weight: 500;
-  transition: color 0.3s;
-}
+.content { padding: 40px; }
 
-.homebar .left ul li a:hover {
-  color: #007bff;
-}
-
-.homebar .right {
-  display: flex;
-  gap: 15px;
-}
-
-.homebar .right a {
-  display: inline-block;
-  padding: 10px 20px;
-  font-size: 14px;
-  font-weight: bold;
-  border-radius: 5px;
-  transition: all 0.3s;
-  text-decoration: none;
-}
-
-.btn-login {
-  background-color: transparent;
-  border: 1px solid #137FEC;
-  color: #475569;
-}
-
-.btn-login:hover {
-  background-color: #137FEC;
-  color: white;
-}
-
-.btn-register {
-  background-color: #0D141B;
-  border: 1px solid #137FEC;
-  color: white;
-}
-
-.btn-register:hover {
-  background-color: #137FEC;
-}
-
-
-.logo-svg {
-  display: flex;
-  align-items: center; /* căn giữa theo chiều dọc */
-  gap: 8px; /* khoảng cách giữa logo và chữ */
-  text-decoration: none;
-  color: #007bff;
-  font-size: 20px;
-  font-weight: bold;
-}
-.logo-svg img {
-  height: 40px;
-  width: auto;
-  display: block;
-}
-
-/* ============================================================
-   home.css  –  CSS riêng cho trang Home
-   (Thêm vào file home.css đã có sẵn, hoặc dùng file này thay thế)
-   ============================================================ */
-
-
-/* ── Avatar tròn ──────────────────────────────────────────── */
+/* ── User Avatar & Dropdown ─────────────────────────────── */
 .user-avatar {
-    width: 38px;
-    height: 38px;
-    border-radius: 50%;
-    background-color: #4f46e5;   /* màu nền avatar */
-    color: #ffffff;
-    font-size: 14px;
-    font-weight: 700;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-transform: uppercase;
-    cursor: pointer;
-    flex-shrink: 0;
+    width: 42px; height: 42px; border-radius: 14px;
+    background: linear-gradient(135deg, #6366f1, #3b82f6); color: #ffffff;
+    font-size: 15px; font-weight: 700; display: flex; align-items: center; justify-content: center;
+    cursor: pointer; flex-shrink: 0; transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;
+    box-shadow: 0 4px 10px rgba(59, 130, 246, 0.3);
 }
+.user-menu:hover .user-avatar { transform: translateY(-2px) scale(1.05); box-shadow: 0 8px 15px rgba(59, 130, 246, 0.4); }
 
-/* ── Tên user bên cạnh avatar ─────────────────────────────── */
-.user-name {
-    font-size: 14px;
-    font-weight: 600;
-    color: #1e293b;
-    cursor: pointer;
-}
+.user-name { font-size: 15px; font-weight: 600; color: #1e293b; cursor: pointer; transition: color 0.2s; }
+.user-menu:hover .user-name { color: #3b82f6; }
 
-/* ── Wrapper chứa avatar + tên + dropdown ─────────────────── */
-.user-menu {
-    position: relative;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
+.user-menu { position: relative; display: flex; align-items: center; gap: 12px; cursor: pointer; padding: 6px; border-radius: 16px; transition: background 0.2s; }
+.user-menu:hover { background: rgba(241, 245, 249, 0.9); }
 
-/* ── Dropdown menu ────────────────────────────────────────── */
 .user-dropdown {
-    display: none;                  /* ẩn mặc định */
-    position: absolute;
-    top: calc(100% + 8px);
-    right: 0;
-    background: #ffffff;
-    border: 1px solid #e2e8f0;
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    min-width: 180px;
-    z-index: 100;
+    visibility: hidden; opacity: 0; transform: translateY(12px) scale(0.95);
+    position: absolute; top: calc(100% + 14px); right: 0;
+    background: #ffffff; border: 1px solid rgba(226, 232, 240, 0.8); border-radius: 16px;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+    min-width: 220px; z-index: 100; padding: 8px;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
+.user-menu.open .user-dropdown { visibility: visible; opacity: 1; transform: translateY(0) scale(1); }
 
-/* Hiện dropdown khi có class "open" */
-.user-menu.open .user-dropdown {
-    display: block;
-}
-
-/* ── Từng item trong dropdown ─────────────────────────────── */
 .dropdown-item {
-    display: block;
-    padding: 10px 16px;
-    font-size: 14px;
-    color: #374151;
-    text-decoration: none;
-    background: none;
-    border: none;
-    width: 100%;
-    text-align: left;
-    cursor: pointer;
+    display: flex; align-items: center; padding: 12px 16px; font-size: 14px; font-weight: 500;
+    color: #475569; text-decoration: none; background: transparent; border: none; width: 100%;
+    text-align: left; cursor: pointer; border-radius: 10px; transition: all 0.2s ease;
 }
+.dropdown-item:hover { background-color: #f1f5f9; color: #0f172a; transform: translateX(3px); }
 
-.dropdown-item:hover {
-    background-color: #f1f5f9;
-}
+.dropdown-item.logout { color: #ef4444; font-weight: 600; }
+.dropdown-item.logout:hover { background-color: #fef2f2; color: #dc2626; }
+.dropdown-divider { height: 1px; background-color: #e2e8f0; margin: 6px 0; }
 
-/* Nút đăng xuất màu đỏ */
-.dropdown-item.logout {
-    color: #ef4444;
-}
-
-.dropdown-item.logout:hover {
-    background-color: #fef2f2;
-}
-
-/* Đường kẻ phân cách trong dropdown */
-.dropdown-divider {
-    height: 1px;
-    background-color: #e2e8f0;
-    margin: 4px 0;
-}
-
-/* ============================================================
-   HERO SECTION (GLASSMORPHISM & ANIMATIONS)
-   ============================================================ */
+/* ── Hero Section ────────────────────────────────────────── */
 .hero-section {
     position: relative;
-    width: 100%;
-    min-height: 500px;
+    padding: 100px 40px;
     display: flex;
     justify-content: center;
     align-items: center;
     overflow: hidden;
-    background: #0f172a; /* Nền tối sang trọng */
-    padding: 0 40px;
+    min-height: 50vh;
 }
 
 .hero-bg {
     position: absolute;
     top: 0; left: 0; width: 100%; height: 100%;
+    z-index: 1;
     overflow: hidden;
-    z-index: 0;
+    pointer-events: none;
 }
 
-/* Các khối bóng màu gradient mờ ảo phía sau */
 .blob {
     position: absolute;
     filter: blur(80px);
+    opacity: 0.5;
     border-radius: 50%;
-    opacity: 0.6;
-    animation: float 8s ease-in-out infinite alternate;
+    animation: float 10s infinite alternate cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .blob-1 {
-    top: -10%; left: -10%;
-    width: 500px; height: 500px;
-    background: #4338ca;
+    top: -100px; left: -50px;
+    width: 400px; height: 400px;
+    background: #3b82f6;
 }
 
 .blob-2 {
-    bottom: -20%; right: -10%;
-    width: 600px; height: 600px;
-    background: #0284c7;
-    animation-delay: -4s;
+    bottom: -150px; right: 5%;
+    width: 500px; height: 500px;
+    background: #8b5cf6;
+    animation-delay: -5s;
 }
 
 @keyframes float {
-    0% { transform: translateY(0) scale(1); }
-    100% { transform: translateY(20px) scale(1.1); }
+    0% { transform: translate(0, 0) scale(1); }
+    100% { transform: translate(50px, 40px) scale(1.1); }
 }
 
 .hero-content {
     position: relative;
-    z-index: 1;
+    z-index: 2;
     text-align: center;
-    max-width: 900px;
-    width: 100%;
+    max-width: 800px;
+    animation: fadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes fadeUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
 .hero-title {
-    font-size: 48px;
+    font-size: 56px;
     font-weight: 800;
-    color: #ffffff;
-    line-height: 1.2;
+    color: #0f172a;
+    line-height: 1.15;
     margin-bottom: 20px;
+    letter-spacing: -0.03em;
 }
 
 .hero-title .highlight {
-    background: linear-gradient(90deg, #38bdf8, #818cf8);
+    color: transparent;
+    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
     -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    background-clip: text;
 }
 
 .hero-subtitle {
     font-size: 18px;
-    color: #cbd5e1;
+    color: #475569;
     margin-bottom: 40px;
+    line-height: 1.6;
 }
 
-/* Thanh tìm kiếm Glassmorphism */
+/* ── Search Glass ────────────────────────────────────────── */
 .search-glass {
-    display: flex;
-    align-items: center;
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.08);
     border-radius: 100px;
-    padding: 8px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-    transition: box-shadow 0.3s ease;
-}
-
-.search-glass:hover, .search-glass:focus-within {
-    box-shadow: 0 12px 48px rgba(0, 0, 0, 0.3);
-    border-color: rgba(255, 255, 255, 0.3);
-}
-
-.search-glass .input-group {
-    flex: 1;
+    padding: 10px;
     display: flex;
     align-items: center;
-    padding: 0 20px;
+    gap: 15px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    margin: 0 auto;
+    max-width: 700px;
+}
+
+.search-glass:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 25px 50px rgba(0,0,0,0.12);
+}
+
+.input-group {
+    display: flex;
+    align-items: center;
     gap: 12px;
+    flex: 1;
+    padding: 0 20px;
+    color: #64748b;
 }
 
-.search-glass .input-group i {
-    color: #94a3b8;
+.input-group i {
     font-size: 18px;
+    color: #3b82f6;
 }
 
-.search-glass input {
-    width: 100%;
-    background: transparent;
+.input-group input {
     border: none;
-    outline: none;
-    color: #ffffff;
+    background: transparent;
     font-size: 16px;
-    font-family: inherit;
+    color: #1e293b;
+    width: 100%;
+    outline: none;
+    font-weight: 500;
 }
 
-.search-glass input::placeholder {
+.input-group input::placeholder {
     color: #94a3b8;
+    font-weight: 400;
 }
 
 .divider-vertical {
     width: 1px;
-    height: 30px;
-    background: rgba(255, 255, 255, 0.2);
+    height: 40px;
+    background: #e2e8f0;
 }
 
 .btn-search {
-    background: linear-gradient(90deg, #2563eb, #4f46e5);
+    background: linear-gradient(135deg, #3b82f6, #4f46e5);
     color: #fff;
     border: none;
-    padding: 14px 32px;
+    padding: 16px 36px;
     border-radius: 100px;
     font-size: 16px;
     font-weight: 600;
     cursor: pointer;
-    transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4);
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    white-space: nowrap;
 }
 
 .btn-search:hover {
-    transform: scale(1.05);
-    box-shadow: 0 4px 15px rgba(79, 70, 229, 0.4);
+    transform: translateY(-2px);
+    box-shadow: 0 12px 25px rgba(59, 130, 246, 0.5);
 }
 
-/* ============================================================
-   JOB BOARD SECTION
-   ============================================================ */
+/* ── Job Board Section ───────────────────────────────────── */
 .job-board-container {
+    padding: 60px 40px;
     max-width: 1200px;
     margin: 0 auto;
-    padding: 80px 40px;
 }
 
 .board-header {
@@ -362,148 +247,31 @@ body {
 }
 
 .board-header h2 {
-    font-size: 32px;
-    font-weight: 700;
+    font-size: 36px;
+    font-weight: 800;
     color: #0f172a;
-    margin-bottom: 15px;
+    margin-bottom: 12px;
+    letter-spacing: -0.02em;
 }
 
 .board-header p {
-    font-size: 16px;
     color: #64748b;
+    font-size: 17px;
 }
 
 .job-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-    gap: 25px;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 30px;
 }
 
-/* Thẻ Job Card */
-.job-card {
-    background: #ffffff;
-    border: 1px solid #e2e8f0;
-    border-radius: 16px;
-    padding: 24px;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-}
-
-.job-card:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
-    border-color: #cbd5e1;
-}
-
-.job-card-header {
-    display: flex;
-    gap: 15px;
-    margin-bottom: 20px;
-    align-items: center;
-}
-
-.company-logo {
-    width: 56px;
-    height: 56px;
-    border-radius: 12px;
-    object-fit: contain;
-    border: 1px solid #e2e8f0;
-    background: #f8fafc;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: bold;
-    color: #94a3b8;
-    font-size: 20px;
-}
-
-.job-info h3 {
-    font-size: 18px;
-    font-weight: 700;
-    color: #1e293b;
-    margin-bottom: 6px;
-    line-height: 1.3;
-}
-
-.job-info .company-name {
-    font-size: 14px;
-    color: #64748b;
-    font-weight: 500;
-}
-
-.job-tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin-bottom: 25px;
-}
-
-.tag {
-    padding: 6px 12px;
-    border-radius: 6px;
-    font-size: 13px;
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-
-.tag i {
-    font-size: 12px;
-}
-
-.tag-salary {
-    background: #f0fdf4;
-    color: #16a34a;
-}
-
-.tag-location {
-    background: #eff6ff;
-    color: #2563eb;
-}
-
-.tag-type {
-    background: #fef2f2;
-    color: #dc2626;
-}
-
-.job-card-footer {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-top: 1px solid #f1f5f9;
-    padding-top: 15px;
-}
-
-.post-time {
-    font-size: 13px;
-    color: #94a3b8;
-}
-
-.btn-apply {
-    background: transparent;
-    color: #007bff;
-    border: 1px solid #007bff;
-    padding: 8px 16px;
-    border-radius: 6px;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s;
-}
-
-.btn-apply:hover {
-    background: #007bff;
-    color: #fff;
-}
-
-/* Skeleton Loading Animation */
 .job-skeleton {
-    height: 250px;
-    background: #f1f5f9;
-    border-radius: 16px;
+    background: #fff;
+    border-radius: 20px;
+    height: 220px;
+    padding: 24px;
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02), 0 10px 15px -3px rgba(0,0,0,0.04);
+    border: 1px solid rgba(226,232,240,0.8);
     position: relative;
     overflow: hidden;
 }
@@ -511,12 +279,12 @@ body {
 .job-skeleton::after {
     content: '';
     position: absolute;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
-    transform: translateX(-100%);
+    top: 0; right: 0; bottom: 0; left: 0;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
     animation: shimmer 1.5s infinite;
 }
 
 @keyframes shimmer {
+    0% { transform: translateX(-100%); }
     100% { transform: translateX(100%); }
 }
