@@ -41,6 +41,7 @@ function renderNavRight() {
             <div class="user-dropdown">
                 <a href="../pages/profile.html" class="dropdown-item">Hồ sơ của tôi</a>
                 <a href="#" class="dropdown-item">Cài đặt</a>
+                ${sessionStorage.getItem('role') === 'Recruiter' ? `<div class="dropdown-divider"></div><a href="../pages/recruiter.html" class="dropdown-item" style="color: #4f46e5; font-weight: bold;"><i class="fa-solid fa-briefcase"></i> Kênh Nhà Tuyển Dụng</a>` : ''}
                 <div class="dropdown-divider"></div>
                 <button class="dropdown-item logout" onclick="logout()">Đăng xuất</button>
             </div>
@@ -85,11 +86,12 @@ async function loadJobs() {
     
     try {
         // Gọi API public không cần token (trang chủ ai cũng xem được jobs)
-        const res = await apiFetch('/api/jobs', 'GET');
-        
+        const response = await apiFetch('/api/jobs', { method: 'GET' });
+        const res = await response.json();
+
         jobList.innerHTML = ''; // Clear skeleton
         
-        if (!res.success || !res.data || res.data.length === 0) {
+        if (!response.ok || !res.success || !res.data || res.data.length === 0) {
             jobList.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: #64748b;">Hiện chưa có công việc nào.</p>';
             return;
         }
