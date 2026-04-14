@@ -64,6 +64,7 @@ public sealed class AuthService : IAuthService
             UserId = user.Id,
             DisplayName = request.DisplayName ?? request.Email.Split('@')[0],
             Bio = string.Empty,
+            IsApproved = request.Role == AppRole.Candidate,
             UpdatedAt = DateTime.UtcNow
         });
 
@@ -81,6 +82,9 @@ public sealed class AuthService : IAuthService
 
         var roles = (await _userManager.GetRolesAsync(user)).ToList();
         var profile = await EnsureProfileExistsAsync(user.Id, user.Email!, user.FullName, ct);
+
+        if (roles.Contains(AppRole.Recruiter) && !profile.IsApproved)
+            throw new UnauthorizedAccessException("Tài khoản nhà tuyển dụng của bạn đang chờ Admin phê duyệt.");
 
         return await IssueTokensAsync(user, profile, roles, ip, userAgent, ct);
     }
@@ -254,6 +258,7 @@ public sealed class AuthService : IAuthService
             UserId = userId,
             DisplayName = displayName ?? (!string.IsNullOrWhiteSpace(fallbackDisplayName) ? fallbackDisplayName : email.Split('@')[0]),
             Bio = string.Empty,
+            IsApproved = true, // Legacy profiles assumed true or adjust based on role? We assume true for external login.
             UpdatedAt = DateTime.UtcNow
         };
         _db.UserProfiles.Add(profile);

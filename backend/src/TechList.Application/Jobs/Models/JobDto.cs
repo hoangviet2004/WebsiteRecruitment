@@ -15,5 +15,6 @@ public sealed record JobDto(
     string JobType,
     DateTime ExpiresAt,
     bool IsActive,
+    bool IsApproved,
     DateTime CreatedAt
 );

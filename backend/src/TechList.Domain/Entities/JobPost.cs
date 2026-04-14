@@ -22,6 +22,7 @@ public class JobPost
 
     public DateTime ExpiresAt { get; set; } 
     public bool IsActive { get; set; } = true;
+    public bool IsApproved { get; set; } = true;
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;

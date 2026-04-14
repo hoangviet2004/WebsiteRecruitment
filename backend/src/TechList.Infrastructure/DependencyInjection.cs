@@ -13,6 +13,8 @@ using TechList.Infrastructure.Persistence;
 using TechList.Infrastructure.Profiles;
 using TechList.Infrastructure.Companies;
 using TechList.Infrastructure.Jobs;
+using TechList.Application.Admin.Interfaces;
+using TechList.Infrastructure.Admin;
 
 namespace TechList.Infrastructure;
 
@@ -48,6 +50,7 @@ public static class DependencyInjection
         services.AddScoped<IProfileService, ProfileService>();
         services.AddScoped<ICompanyService, CompanyService>();
         services.AddScoped<IJobService, JobService>();
+        services.AddScoped<IAdminService, AdminService>();
 
         return services;
     }
