@@ -99,6 +99,8 @@ document.getElementById("loginForm").addEventListener("submit", async function(e
             sessionStorage.setItem("refreshToken", refreshToken || "");
             sessionStorage.setItem("fullName", user?.displayName || "");
             sessionStorage.setItem("email", user?.email || "");
+            sessionStorage.setItem("avatarUrl", user?.avatarUrl || "");
+            
             const role = (user?.roles || [])[0] || "";
             sessionStorage.setItem("role", role);
 
