@@ -42,16 +42,37 @@ async function loadUsers() {
         let html = '';
         users.forEach(u => {
             const dateStr = new Date(u.createdAt).toLocaleDateString();
-            const hideBtn = (u.role === 'Admin') ? '' : `<button class="btn-action btn-delete" onclick="deleteUser('${u.id}')" title="Xóa User"><i class="fa-solid fa-trash-can"></i></button>`;
+            const isApproved = u.isApproved !== false; // handle migration default true
             
+            let btnHtml = '';
+            if (!isApproved) {
+                btnHtml += `<button class="btn-action btn-toggle" onclick="approveUser('${u.id}')" title="Phê duyệt"><i class="fa-solid fa-check"></i></button>`;
+            }
+            if (u.role !== 'Admin') {
+                btnHtml += `<button class="btn-action btn-delete" onclick="deleteUser('${u.id}')" title="Từ chối/Xóa"><i class="fa-solid fa-trash-can"></i></button>`;
+            }
+
+            const trClass = !isApproved ? 'style="background-color: #fffbeb;"' : '';
+            const statusBadge = isApproved ? 
+                `<span class="badge badge-active">Hoạt động</span>` : 
+                `<span class="badge badge-inactive">Chờ duyệt</span>`;
+
+            // Role selection dropdown
+            const roles = ['Admin', 'Recruiter', 'Candidate'];
+            let roleSelectHtml = `<select class="role-select" onchange="changeRole('${u.id}', this.value)">`;
+            roles.forEach(r => {
+                roleSelectHtml += `<option value="${r}" ${u.role === r ? 'selected' : ''}>${r}</option>`;
+            });
+            roleSelectHtml += `</select>`;
+
             html += `
-                <tr>
+                <tr ${trClass}>
                     <td><small>${u.id.substring(0, 8)}...</small></td>
-                    <td><strong>${u.email}</strong></td>
+                    <td><strong>${u.email}</strong> ${!isApproved ? '<i class="fa-solid fa-clock text-warning"></i>' : ''}</td>
                     <td>${u.displayName || '-'}</td>
-                    <td><span class="badge ${u.role === 'Admin' ? 'badge-active' : 'badge-inactive'}">${u.role}</span></td>
-                    <td>${dateStr}</td>
-                    <td>${hideBtn}</td>
+                    <td>${roleSelectHtml}</td>
+                    <td>${statusBadge}</td>
+                    <td>${btnHtml}</td>
                 </tr>
             `;
         });
@@ -81,19 +102,32 @@ async function loadJobs() {
         jobs.forEach(j => {
             const dateStr = new Date(j.createdAt).toLocaleDateString();
             const expStr = new Date(j.expiresAt).toLocaleDateString();
-            const stLabel = j.isActive ? '<span class="badge badge-active">Hiển thị</span>' : '<span class="badge badge-inactive">Đã ẩn</span>';
-            const iconEye = j.isActive ? 'fa-eye-slash' : 'fa-eye';
             
+            let stLabel = '';
+            if (!j.isApproved) {
+                stLabel = '<span class="badge badge-inactive">Chờ duyệt</span>';
+            } else {
+                stLabel = j.isActive ? '<span class="badge badge-active">Đã duyệt & Hiện</span>' : '<span class="badge badge-inactive">Đang ẩn</span>';
+            }
+
+            const trClass = !j.isApproved ? 'style="background-color: #fffbeb;"' : '';
+
+            let actionHtml = '';
+            if (!j.isApproved) {
+                actionHtml += `<button class="btn-action btn-toggle" onclick="approveJob('${j.id}')" title="Phê duyệt Tin"><i class="fa-solid fa-check"></i></button>`;
+            } else {
+                const iconEye = j.isActive ? 'fa-eye-slash' : 'fa-eye';
+                actionHtml += `<button class="btn-action btn-toggle" onclick="toggleJob('${j.id}')" title="Bật/Tắt Hiển Thị"><i class="fa-solid ${iconEye}"></i></button>`;
+            }
+
             html += `
-                <tr>
+                <tr ${trClass}>
                     <td><strong>${j.title}</strong></td>
                     <td>${j.companyName}</td>
                     <td>${stLabel}</td>
                     <td>${dateStr}</td>
                     <td>${expStr}</td>
-                    <td>
-                        <button class="btn-action btn-toggle" onclick="toggleJob('${j.id}')" title="Bật/Tắt Hiển Thị"><i class="fa-solid ${iconEye}"></i></button>
-                    </td>
+                    <td>${actionHtml}</td>
                 </tr>
             `;
         });
@@ -158,6 +192,60 @@ async function deleteUser(id) {
     } catch(e) {
         alert("Lỗi mạng: " + e.message);
     }
+}
+
+async function approveUser(id) {
+    if(!confirm("Xác nhận phê duyệt cho tài khoản Nhà tuyển dụng này?")) return;
+    try {
+        const response = await apiFetchAuth(`/api/admin/users/${id}/approve`, { method: 'PUT' });
+        if(response.ok) {
+            alert("Đã duyệt tài khoản thành công!");
+            loadUsers();
+        } else {
+            const error = await response.json();
+            alert("Lỗi: " + error.message);
+        }
+    } catch(e) { alert("Lỗi mạng."); }
+}
+
+async function changeRole(id, newRole) {
+    if(!confirm(`Bạn muốn chuyển Role của tài khoản này thành ${newRole}?`)) {
+        loadUsers(); // revert UI dropdown change
+        return;
+    }
+    
+    try {
+        const response = await apiFetchAuth(`/api/admin/users/${id}/role`, {
+            method: 'PUT',
+            body: JSON.stringify({ newRole: newRole })
+        });
+        
+        if (response.ok) {
+            alert(`Phân quyền ${newRole} thành công!`);
+            loadUsers();
+        } else {
+            const error = await response.json();
+            alert("Lỗi: " + error.message);
+            loadUsers(); // revert UI
+        }
+    } catch(e) {
+        alert("Lỗi kết nối.");
+        loadUsers();
+    }
+}
+
+async function approveJob(id) {
+    if(!confirm("Xác nhận duyệt Tin Tuyển Dụng này để nó được hiển thị lên trang chủ?")) return;
+    try {
+        const response = await apiFetchAuth(`/api/admin/jobs/${id}/approve`, { method: 'PUT' });
+        if(response.ok) {
+            alert("Đã duyệt Job thành công!");
+            loadJobs();
+        } else {
+            const error = await response.json();
+            alert("Lỗi: " + error.message);
+        }
+    } catch(e) { alert("Lỗi kết nối."); }
 }
 
 async function toggleJob(id) {

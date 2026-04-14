@@ -35,6 +35,21 @@ public sealed class AdminController : ControllerBase
         return Ok(ApiResponse<object>.Ok(null!, "User deleted successfully"));
     }
 
+    [HttpPut("users/{id}/approve")]
+    public async Task<ActionResult<ApiResponse<object>>> ApproveUser(string id, CancellationToken ct)
+    {
+        await _adminService.ApproveUserAsync(id, ct);
+        return Ok(ApiResponse<object>.Ok(null!, "User approved successfully"));
+    }
+
+    [HttpPut("users/{id}/role")]
+    public async Task<ActionResult<ApiResponse<object>>> ChangeRole(string id, [FromBody] TechList.Application.Admin.Models.ChangeRoleRequest request, CancellationToken ct)
+    {
+        if (string.IsNullOrWhiteSpace(request.NewRole)) return BadRequest(ApiResponse<object>.Fail("Role cannot be empty"));
+        await _adminService.ChangeUserRoleAsync(id, request.NewRole, ct);
+        return Ok(ApiResponse<object>.Ok(null!, "User role updated successfully"));
+    }
+
     // --- JOBS ---
     [HttpGet("jobs")]
     public async Task<ActionResult<ApiResponse<List<JobDto>>>> GetAllJobs(CancellationToken ct)
@@ -48,6 +63,13 @@ public sealed class AdminController : ControllerBase
     {
         await _adminService.ToggleJobStatusAsync(id, ct);
         return Ok(ApiResponse<object>.Ok(null!, "Job status toggled successfully"));
+    }
+
+    [HttpPut("jobs/{id}/approve")]
+    public async Task<ActionResult<ApiResponse<object>>> ApproveJob(Guid id, CancellationToken ct)
+    {
+        await _adminService.ApproveJobAsync(id, ct);
+        return Ok(ApiResponse<object>.Ok(null!, "Job approved successfully"));
     }
 
     // --- COMPANIES ---

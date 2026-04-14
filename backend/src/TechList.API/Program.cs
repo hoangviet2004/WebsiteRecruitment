@@ -164,6 +164,7 @@ using (var scope = app.Services.CreateScope())
                     UserId = adminUser.Id,
                     DisplayName = "Super Admin",
                     Bio = "System Administrator",
+                    IsApproved = true,
                     UpdatedAt = DateTime.UtcNow
                 });
                 await db.SaveChangesAsync();

@@ -24,12 +24,14 @@ public sealed class AdminService : IAdminService
     public async Task<List<UserDto>> GetAllUsersAsync(CancellationToken ct)
     {
         var users = await _userManager.Users.AsNoTracking().ToListAsync(ct);
+        var profiles = await _db.UserProfiles.AsNoTracking().ToListAsync(ct);
         var userDtos = new List<UserDto>();
         
         foreach (var user in users)
         {
             var role = (await _userManager.GetRolesAsync(user)).FirstOrDefault() ?? "Unknown";
-            userDtos.Add(new UserDto(user.Id, user.Email!, user.FullName, role, user.CreatedAt));
+            var profile = profiles.FirstOrDefault(p => p.UserId == user.Id);
+            userDtos.Add(new UserDto(user.Id, user.Email!, user.FullName, role, profile?.IsApproved ?? false, user.CreatedAt));
         }
 
         return userDtos.OrderByDescending(x => x.CreatedAt).ToList();
@@ -52,6 +54,33 @@ public sealed class AdminService : IAdminService
 
         await _userManager.DeleteAsync(user);
         await _db.SaveChangesAsync(ct);
+    }
+
+    public async Task ApproveUserAsync(string userId, CancellationToken ct)
+    {
+        var profile = await _db.UserProfiles.FirstOrDefaultAsync(x => x.UserId == userId, ct);
+        if (profile == null) throw new InvalidOperationException("Profile not found");
+
+        profile.IsApproved = true;
+        profile.UpdatedAt = DateTime.UtcNow;
+        await _db.SaveChangesAsync(ct);
+    }
+
+    public async Task ChangeUserRoleAsync(string userId, string newRole, CancellationToken ct)
+    {
+        if (newRole != TechList.Domain.Enums.AppRole.Admin &&
+            newRole != TechList.Domain.Enums.AppRole.Recruiter &&
+            newRole != TechList.Domain.Enums.AppRole.Candidate)
+        {
+            throw new InvalidOperationException("Invalid role specified");
+        }
+
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user == null) throw new InvalidOperationException("User not found");
+
+        var currentRoles = await _userManager.GetRolesAsync(user);
+        await _userManager.RemoveFromRolesAsync(user, currentRoles);
+        await _userManager.AddToRoleAsync(user, newRole);
     }
 
     public async Task<List<JobDto>> GetAllJobsAsync(CancellationToken ct)
@@ -77,6 +106,7 @@ public sealed class AdminService : IAdminService
             j.JobType,
             j.ExpiresAt,
             j.IsActive,
+            j.IsApproved,
             j.CreatedAt
         )).ToList();
     }
@@ -87,6 +117,16 @@ public sealed class AdminService : IAdminService
         if (job == null) throw new InvalidOperationException("Job not found");
 
         job.IsActive = !job.IsActive;
+        await _db.SaveChangesAsync(ct);
+    }
+
+    public async Task ApproveJobAsync(Guid jobId, CancellationToken ct)
+    {
+        var job = await _db.JobPosts.FirstOrDefaultAsync(x => x.Id == jobId, ct);
+        if (job == null) throw new InvalidOperationException("Job not found");
+
+        job.IsApproved = true;
+        job.UpdatedAt = DateTime.UtcNow;
         await _db.SaveChangesAsync(ct);
     }
 
