@@ -11,10 +11,10 @@ function go(path) {
 }
 
 function logout() {
-  localStorage.removeItem("token");
-  localStorage.removeItem("refreshToken");
-  localStorage.removeItem("fullName");
-  localStorage.removeItem("email");
-  localStorage.removeItem("role");
+  sessionStorage.removeItem("token");
+  sessionStorage.removeItem("refreshToken");
+  sessionStorage.removeItem("fullName");
+  sessionStorage.removeItem("email");
+  sessionStorage.removeItem("role");
   window.location.href = "../pages/auth.html";
 }

@@ -6,7 +6,7 @@
 
 // ── Bước 1: Nếu là admin thì chuyển ngay sang admin.html ────
 function checkAdminRedirect() {
-    var role = localStorage.getItem('role');
+    var role = sessionStorage.getItem('role');
     if (role === 'Admin') {
         window.location.href = '../pages/admin.html';
     }
@@ -18,9 +18,9 @@ function checkAdminRedirect() {
 // Nếu đã đăng nhập   → hiện avatar tròn + tên user
 function renderNavRight() {
     var navRight = document.getElementById('nav-right');
-    var token    = localStorage.getItem('token');
-    var fullName = localStorage.getItem('fullName') || '';
-    var email    = localStorage.getItem('email')    || '';
+    var token    = sessionStorage.getItem('token');
+    var fullName = sessionStorage.getItem('fullName') || '';
+    var email    = sessionStorage.getItem('email')    || '';
 
     if (!token) {
         // Chưa đăng nhập

@@ -24,7 +24,7 @@ async function apiFetch(endpoint, options = {}) {
 
 // ── Gọi API có token (private - cần đăng nhập) ──────────────
 async function apiFetchAuth(endpoint, options = {}) {
-    const token = localStorage.getItem('token');
+    const token = sessionStorage.getItem('token');
 
     // Chưa đăng nhập → về trang auth
     if (!token) {
@@ -44,7 +44,7 @@ async function apiFetchAuth(endpoint, options = {}) {
 
         // Token hết hạn → về trang login
         if (response.status === 401) {
-            localStorage.clear();
+            sessionStorage.clear();
             alert('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại!');
             window.location.href = '../pages/auth.html#login';
             return;
@@ -57,25 +57,25 @@ async function apiFetchAuth(endpoint, options = {}) {
     }
 }
 
-// ── Lấy thông tin user từ localStorage ───────────────────────
+// ── Lấy thông tin user từ sessionStorage ───────────────────────
 function getCurrentUser() {
     return {
-        token:    localStorage.getItem('token'),
-        refreshToken: localStorage.getItem('refreshToken'),
-        fullName: localStorage.getItem('fullName'),
-        email:    localStorage.getItem('email'),
-        role:     localStorage.getItem('role')
+        token:    sessionStorage.getItem('token'),
+        refreshToken: sessionStorage.getItem('refreshToken'),
+        fullName: sessionStorage.getItem('fullName'),
+        email:    sessionStorage.getItem('email'),
+        role:     sessionStorage.getItem('role')
     };
 }
 
 // ── Kiểm tra đã đăng nhập chưa ───────────────────────────────
 function isLoggedIn() {
-    return !!localStorage.getItem('token');
+    return !!sessionStorage.getItem('token');
 }
 
 // ── Đăng xuất ─────────────────────────────────────────────────
 async function refreshAccessToken() {
-    const refreshToken = localStorage.getItem('refreshToken');
+    const refreshToken = sessionStorage.getItem('refreshToken');
     if (!refreshToken) return false;
 
     const response = await apiFetch('/api/auth/refresh-token', {
@@ -89,19 +89,19 @@ async function refreshAccessToken() {
     const payload = data?.data;
     if (!payload?.tokens?.accessToken || !payload?.tokens?.refreshToken) return false;
 
-    localStorage.setItem('token', payload.tokens.accessToken);
-    localStorage.setItem('refreshToken', payload.tokens.refreshToken);
+    sessionStorage.setItem('token', payload.tokens.accessToken);
+    sessionStorage.setItem('refreshToken', payload.tokens.refreshToken);
     return true;
 }
 
 async function logout() {
-    const refreshToken = localStorage.getItem('refreshToken');
+    const refreshToken = sessionStorage.getItem('refreshToken');
     if (refreshToken) {
         await apiFetch('/api/auth/logout', {
             method: 'POST',
             body: JSON.stringify({ refreshToken })
         });
     }
-    localStorage.clear();
+    sessionStorage.clear();
     window.location.href = '../pages/auth.html#login';
 }
