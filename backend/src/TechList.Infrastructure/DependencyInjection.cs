@@ -4,11 +4,15 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using TechList.Application.Auth.Interfaces;
 using TechList.Application.Profiles.Interfaces;
+using TechList.Application.Companies.Interfaces;
+using TechList.Application.Jobs.Interfaces;
 using TechList.Infrastructure.Auth;
 using TechList.Infrastructure.Identity;
 using TechList.Infrastructure.Options;
 using TechList.Infrastructure.Persistence;
 using TechList.Infrastructure.Profiles;
+using TechList.Infrastructure.Companies;
+using TechList.Infrastructure.Jobs;
 
 namespace TechList.Infrastructure;
 
@@ -42,6 +46,8 @@ public static class DependencyInjection
 
         services.AddScoped<IAvatarStorageService, CloudinaryAvatarStorageService>();
         services.AddScoped<IProfileService, ProfileService>();
+        services.AddScoped<ICompanyService, CompanyService>();
+        services.AddScoped<IJobService, JobService>();
 
         return services;
     }
