@@ -92,9 +92,7 @@ body {
 .btn-register:hover {
   background-color: #137FEC;
 }
-.content {
-  padding: 40px;
-}
+
 
 .logo-svg {
   display: flex;
@@ -201,4 +199,324 @@ body {
     height: 1px;
     background-color: #e2e8f0;
     margin: 4px 0;
+}
+
+/* ============================================================
+   HERO SECTION (GLASSMORPHISM & ANIMATIONS)
+   ============================================================ */
+.hero-section {
+    position: relative;
+    width: 100%;
+    min-height: 500px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    background: #0f172a; /* Nền tối sang trọng */
+    padding: 0 40px;
+}
+
+.hero-bg {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    overflow: hidden;
+    z-index: 0;
+}
+
+/* Các khối bóng màu gradient mờ ảo phía sau */
+.blob {
+    position: absolute;
+    filter: blur(80px);
+    border-radius: 50%;
+    opacity: 0.6;
+    animation: float 8s ease-in-out infinite alternate;
+}
+
+.blob-1 {
+    top: -10%; left: -10%;
+    width: 500px; height: 500px;
+    background: #4338ca;
+}
+
+.blob-2 {
+    bottom: -20%; right: -10%;
+    width: 600px; height: 600px;
+    background: #0284c7;
+    animation-delay: -4s;
+}
+
+@keyframes float {
+    0% { transform: translateY(0) scale(1); }
+    100% { transform: translateY(20px) scale(1.1); }
+}
+
+.hero-content {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    max-width: 900px;
+    width: 100%;
+}
+
+.hero-title {
+    font-size: 48px;
+    font-weight: 800;
+    color: #ffffff;
+    line-height: 1.2;
+    margin-bottom: 20px;
+}
+
+.hero-title .highlight {
+    background: linear-gradient(90deg, #38bdf8, #818cf8);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.hero-subtitle {
+    font-size: 18px;
+    color: #cbd5e1;
+    margin-bottom: 40px;
+}
+
+/* Thanh tìm kiếm Glassmorphism */
+.search-glass {
+    display: flex;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 100px;
+    padding: 8px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    transition: box-shadow 0.3s ease;
+}
+
+.search-glass:hover, .search-glass:focus-within {
+    box-shadow: 0 12px 48px rgba(0, 0, 0, 0.3);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.search-glass .input-group {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    gap: 12px;
+}
+
+.search-glass .input-group i {
+    color: #94a3b8;
+    font-size: 18px;
+}
+
+.search-glass input {
+    width: 100%;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: #ffffff;
+    font-size: 16px;
+    font-family: inherit;
+}
+
+.search-glass input::placeholder {
+    color: #94a3b8;
+}
+
+.divider-vertical {
+    width: 1px;
+    height: 30px;
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.btn-search {
+    background: linear-gradient(90deg, #2563eb, #4f46e5);
+    color: #fff;
+    border: none;
+    padding: 14px 32px;
+    border-radius: 100px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.btn-search:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 15px rgba(79, 70, 229, 0.4);
+}
+
+/* ============================================================
+   JOB BOARD SECTION
+   ============================================================ */
+.job-board-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 80px 40px;
+}
+
+.board-header {
+    text-align: center;
+    margin-bottom: 50px;
+}
+
+.board-header h2 {
+    font-size: 32px;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 15px;
+}
+
+.board-header p {
+    font-size: 16px;
+    color: #64748b;
+}
+
+.job-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 25px;
+}
+
+/* Thẻ Job Card */
+.job-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 24px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.job-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+    border-color: #cbd5e1;
+}
+
+.job-card-header {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+    align-items: center;
+}
+
+.company-logo {
+    width: 56px;
+    height: 56px;
+    border-radius: 12px;
+    object-fit: contain;
+    border: 1px solid #e2e8f0;
+    background: #f8fafc;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    color: #94a3b8;
+    font-size: 20px;
+}
+
+.job-info h3 {
+    font-size: 18px;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 6px;
+    line-height: 1.3;
+}
+
+.job-info .company-name {
+    font-size: 14px;
+    color: #64748b;
+    font-weight: 500;
+}
+
+.job-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 25px;
+}
+
+.tag {
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.tag i {
+    font-size: 12px;
+}
+
+.tag-salary {
+    background: #f0fdf4;
+    color: #16a34a;
+}
+
+.tag-location {
+    background: #eff6ff;
+    color: #2563eb;
+}
+
+.tag-type {
+    background: #fef2f2;
+    color: #dc2626;
+}
+
+.job-card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid #f1f5f9;
+    padding-top: 15px;
+}
+
+.post-time {
+    font-size: 13px;
+    color: #94a3b8;
+}
+
+.btn-apply {
+    background: transparent;
+    color: #007bff;
+    border: 1px solid #007bff;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-apply:hover {
+    background: #007bff;
+    color: #fff;
+}
+
+/* Skeleton Loading Animation */
+.job-skeleton {
+    height: 250px;
+    background: #f1f5f9;
+    border-radius: 16px;
+    position: relative;
+    overflow: hidden;
+}
+
+.job-skeleton::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+    transform: translateX(-100%);
+    animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+    100% { transform: translateX(100%); }
 }

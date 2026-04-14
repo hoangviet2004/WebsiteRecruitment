@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Trang chủ</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="stylesheet" href="../assets/css/home.css">
 </head>
 
@@ -21,12 +22,46 @@
         <div class="right" id="nav-right"></div>
     </nav>
 
-    <div class="content">
-        <h1>Chào mừng đến với trang web</h1>
-        <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
-        <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
-        <p>Cuối trang.</p>
-    </div>
+    <!-- Hero Section -->
+    <header class="hero-section">
+        <div class="hero-bg">
+            <div class="blob blob-1"></div>
+            <div class="blob blob-2"></div>
+        </div>
+        <div class="hero-content">
+            <h1 class="hero-title">Định hướng sự nghiệp của bạn<br>cùng <span class="highlight">TechList</span></h1>
+            <p class="hero-subtitle">Khám phá hàng ngàn cơ hội việc làm IT hàng đầu đang chờ đón bạn.</p>
+            
+            <div class="search-glass">
+                <div class="input-group">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input type="text" id="search-keyword" placeholder="Nhập kỹ năng, chức năng...">
+                </div>
+                <div class="divider-vertical"></div>
+                <div class="input-group">
+                    <i class="fa-solid fa-location-dot"></i>
+                    <input type="text" id="search-location" placeholder="Địa điểm làm việc...">
+                </div>
+                <button class="btn-search" onclick="searchJobs()">Tìm Việc Ngay</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Job Board Section -->
+    <main class="job-board-container">
+        <div class="board-header">
+            <h2>Việc làm hấp dẫn</h2>
+            <p>Nắm bắt cơ hội thăng tiến với những vị trí hot nhất hiện nay.</p>
+        </div>
+        
+        <div class="job-grid" id="job-list">
+            <!-- Skeleton Loading -->
+            <div class="job-skeleton"></div>
+            <div class="job-skeleton"></div>
+            <div class="job-skeleton"></div>
+            <div class="job-skeleton"></div>
+        </div>
+    </main>
     <script src="../js/api.js"></script>
     <script src="../js/home.js"></script>
 </body>
