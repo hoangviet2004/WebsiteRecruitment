@@ -124,8 +124,57 @@ document.getElementById("forgotForm").addEventListener("submit", function(e) {
     alert("Đã gửi email đặt lại mật khẩu!");
 });
 
-// Đọc hash từ URL (khi từ trang home chuyển sang)
+// Đọc hash từ URL (khi từ trang home chuyển sang hoặc OAuth callback)
 var hash = window.location.hash.replace("#", "");
-if (hash === "login" || hash === "register" || hash === "forgot") {
+if (hash.includes("accessToken")) {
+    var params = new URLSearchParams(hash);
+    var token = params.get("accessToken");
+    var refreshToken = params.get("refreshToken");
+    
+    if (token && refreshToken) {
+        // Hàm parse JWT
+        function parseJwt(t) {
+            try {
+                var base64Url = t.split('.')[1];
+                var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+                var jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function(c) {
+                    return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+                }).join(''));
+                return JSON.parse(jsonPayload);
+            } catch (e) {
+                return {};
+            }
+        }
+
+        var decoded = parseJwt(token);
+        sessionStorage.setItem("token", token);
+        sessionStorage.setItem("refreshToken", refreshToken);
+        sessionStorage.setItem("email", decoded.email || "");
+        sessionStorage.setItem("fullName", decoded["display_name"] || decoded.name || "");
+        const role = decoded["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"] || "Candidate";
+        sessionStorage.setItem("role", role);
+
+        if (role.toLowerCase() === "admin") {
+            window.location.href = "../pages/admin.html";
+        } else {
+            window.location.href = "../pages/home.html";
+        }
+    }
+} else if (hash === "login" || hash === "register" || hash === "forgot") {
     showPanel(hash);
 }
+
+// Lắng nghe sự kiện login bằng Google / GitHub
+document.querySelectorAll(".google").forEach(btn => {
+    btn.addEventListener("click", function(e) {
+        e.preventDefault();
+        window.location.href = API_URL + '/api/auth/google?returnUrl=' + encodeURIComponent(window.location.href.split('#')[0]);
+    });
+});
+
+document.querySelectorAll(".github").forEach(btn => {
+    btn.addEventListener("click", function(e) {
+        e.preventDefault();
+        window.location.href = API_URL + '/api/auth/github?returnUrl=' + encodeURIComponent(window.location.href.split('#')[0]);
+    });
+});
