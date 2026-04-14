@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kênh Nhà Tuyển Dụng</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="../assets/css/home.css">
+    <link rel="stylesheet" href="../assets/css/recruiter.css">
+</head>
+<body class="recruiter-body">
+    <nav class="homebar">
+        <div class="left">
+            <a href="home.html" class="logo-svg"><img src="../assets/logo.svg" alt="Logo">TechList <span style="color: #64748b; font-size: 14px; font-weight: 500; margin-left: 10px; border-left: 1px solid #cbd5e1; padding-left: 10px;">Employer Center</span></a>
+        </div>
+        <div class="right" id="nav-right"></div>
+    </nav>
+
+    <div class="dashboard-layout">
+        <aside class="dashboard-sidebar">
+            <div class="sidebar-menu">
+                <a href="#" class="menu-item active" onclick="switchTab('company', this)">
+                    <i class="fa-solid fa-building"></i> Hồ sơ Công ty
+                </a>
+                <a href="#" class="menu-item" onclick="switchTab('jobs', this)">
+                    <i class="fa-solid fa-file-signature"></i> Quản lý Đăng tin
+                </a>
+            </div>
+        </aside>
+
+        <main class="dashboard-content">
+            <!-- TAB 1: Hồ sơ công ty -->
+            <section id="tab-company" class="tab-pane active">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Hồ sơ Công ty</h2>
+                        <p>Quản lý thông tin doanh nghiệp để ứng viên có thể tìm hiểu thêm về bạn.</p>
+                    </div>
+                    <div class="card-body">
+                        <form id="company-form">
+                            <input type="hidden" id="company-id">
+                            <div class="form-group">
+                                <label>Tên Công ty <span class="required">*</span></label>
+                                <input type="text" id="company-name" required placeholder="Nhập tên doanh nghiệp">
+                            </div>
+                            <div class="form-group">
+                                <label>Website</label>
+                                <input type="url" id="company-website" placeholder="https://example.com">
+                            </div>
+                            <div class="form-group">
+                                <label>Địa chỉ công ty</label>
+                                <input type="text" id="company-address" placeholder="Ex: Tòa nhà Bitexco, Q1, TP.HCM">
+                            </div>
+                            <div class="form-group">
+                                <label>Giới thiệu chi tiết</label>
+                                <textarea id="company-desc" rows="5" placeholder="Quy mô công ty, văn hóa, sứ mệnh..."></textarea>
+                            </div>
+                            <button type="submit" class="btn-primary">Lưu Hồ Sơ</button>
+                        </form>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 2: Quản lý tin tuyển dụng -->
+            <section id="tab-jobs" class="tab-pane">
+                <div class="card">
+                    <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <h2>Danh sách Tin tuyển dụng</h2>
+                            <p>Tất cả các tin đăng của công ty bạn sẽ hiện ở đây.</p>
+                        </div>
+                        <button class="btn-primary" onclick="openJobModal()">+ Đăng tin mới</button>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Tiêu đề (Vị trí)</th>
+                                        <th>Trạng thái</th>
+                                        <th>Ngày hết hạn</th>
+                                        <th>Lượt thao tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="job-table-body">
+                                    <tr><td colspan="4" style="text-align: center;">Đang tải dữ liệu...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Modal Form Job -->
+    <div id="job-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="job-modal-title">Đăng tin tuyển dụng mới</h3>
+                <span class="close-btn" onclick="closeJobModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="job-form">
+                    <input type="hidden" id="job-id">
+                    <div class="form-group">
+                        <label>Tiêu đề công việc <span class="required">*</span></label>
+                        <input type="text" id="job-title" required placeholder="Vd: Senior Frontend Developer">
+                    </div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Loại hình</label>
+                            <select id="job-type">
+                                <option value="Full-time">Full-time</option>
+                                <option value="Part-time">Part-time</option>
+                                <option value="Remote">Remote</option>
+                                <option value="Hybrid">Hybrid</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Địa điểm</label>
+                            <input type="text" id="job-location" placeholder="Vd: Hà Nội">
+                        </div>
+                        <div class="form-group">
+                            <label>Lương tối thiểu ($)</label>
+                            <input type="number" id="job-min-salary" placeholder="1000">
+                        </div>
+                        <div class="form-group">
+                            <label>Lương tối đa ($)</label>
+                            <input type="number" id="job-max-salary" placeholder="2000">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Mô tả công việc</label>
+                        <textarea id="job-desc" rows="3" placeholder="Quy trình, nhiệm vụ hàng ngày..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Yêu cầu kỹ năng</label>
+                        <textarea id="job-req" rows="3" placeholder="Bắt buộc: 2 năm ReactJS, Giao tiếp tốt..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Quyền lợi (Phúc lợi)</label>
+                        <textarea id="job-ben" rows="3" placeholder="Đóng bảo hiểm full lương, Mac/PC..."></textarea>
+                    </div>
+                    <div class="form-grid" style="grid-template-columns: 1fr 1fr;">
+                        <div class="form-group">
+                            <label>Hạn nộp hồ sơ <span class="required">*</span></label>
+                            <input type="datetime-local" id="job-expires" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Trạng thái</label>
+                            <select id="job-active">
+                                <option value="true">Đang Mở (Hiển thị on-site)</option>
+                                <option value="false">Khóa (Ẩn)</option>
+                            </select>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeJobModal()">Hủy</button>
+                <button class="btn-primary" onclick="submitJobForm()">Lưu & Xuất bản</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/api.js"></script>
+    <script src="../js/home.js"></script>
+    <script src="../js/recruiter.js"></script>
+</body>
+</html>
