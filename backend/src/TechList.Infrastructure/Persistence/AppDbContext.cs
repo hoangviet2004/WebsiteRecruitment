@@ -13,6 +13,8 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
 
     public DbSet<UserProfile> UserProfiles => Set<UserProfile>();
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
+    public DbSet<Company> Companies => Set<Company>();
+    public DbSet<JobPost> JobPosts => Set<JobPost>();
     
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -47,6 +49,43 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
             e.Property(x => x.RevokedByIp).HasMaxLength(64);
             e.Property(x => x.UserAgent).HasMaxLength(512);
             e.Property(x => x.ReplacedByTokenHash).HasMaxLength(128);
+        });
+
+        builder.Entity<Company>(e =>
+        {
+            e.ToTable("Companies");
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Name).HasMaxLength(200).IsRequired();
+            e.Property(x => x.Description).HasMaxLength(4000);
+            e.Property(x => x.Website).HasMaxLength(300);
+            e.Property(x => x.Address).HasMaxLength(500);
+            e.Property(x => x.LogoUrl).HasMaxLength(1000);
+            e.Property(x => x.LogoPublicId).HasMaxLength(200);
+
+            e.HasOne<ApplicationUser>()
+             .WithMany()
+             .HasForeignKey(x => x.OwnerId)
+             .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        builder.Entity<JobPost>(e =>
+        {
+            e.ToTable("JobPosts");
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Title).HasMaxLength(200).IsRequired();
+            e.Property(x => x.Description).HasMaxLength(4000);
+            e.Property(x => x.Requirements).HasMaxLength(4000);
+            e.Property(x => x.Benefits).HasMaxLength(4000);
+            e.Property(x => x.Location).HasMaxLength(200);
+            e.Property(x => x.JobType).HasMaxLength(50);
+            
+            e.Property(x => x.MinSalary).HasColumnType("decimal(18,2)");
+            e.Property(x => x.MaxSalary).HasColumnType("decimal(18,2)");
+
+            e.HasOne(x => x.Company)
+             .WithMany(c => c.Jobs)
+             .HasForeignKey(x => x.CompanyId)
+             .OnDelete(DeleteBehavior.Cascade);
         });
     }
 }
