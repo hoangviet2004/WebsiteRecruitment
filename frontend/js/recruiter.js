@@ -110,9 +110,14 @@ async function loadMyJobs(companyId) {
 
         res.data.forEach(job => {
             const expDate = new Date(job.expiresAt).toLocaleDateString('vi-VN');
-            const statusHtml = job.isActive 
-                ? '<span style="background:#dcfce7; color:#16a34a; padding: 4px 8px; border-radius: 4px; font-size:12px; font-weight:600;">Đang mở</span>' 
-                : '<span style="background:#fee2e2; color:#dc2626; padding: 4px 8px; border-radius: 4px; font-size:12px; font-weight:600;">Đã ẩn</span>';
+            let statusHtml = '';
+            if (!job.isApproved) {
+                statusHtml = '<span style="background:#fef3c7; color:#d97706; padding: 4px 8px; border-radius: 4px; font-size:12px; font-weight:600;">Chờ duyệt</span>';
+            } else {
+                statusHtml = job.isActive 
+                    ? '<span style="background:#dcfce7; color:#16a34a; padding: 4px 8px; border-radius: 4px; font-size:12px; font-weight:600;">Đang mở</span>' 
+                    : '<span style="background:#fee2e2; color:#dc2626; padding: 4px 8px; border-radius: 4px; font-size:12px; font-weight:600;">Đã ẩn</span>';
+            }
 
             const tr = document.createElement('tr');
             tr.innerHTML = `

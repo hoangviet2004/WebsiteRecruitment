@@ -20,7 +20,7 @@ public sealed class JobService : IJobService
         var jobs = await _db.JobPosts
             .Include(x => x.Company)
             .AsNoTracking()
-            .Where(x => x.IsActive && x.ExpiresAt >= DateTime.UtcNow)
+            .Where(x => x.IsActive && x.IsApproved && x.ExpiresAt >= DateTime.UtcNow)
             .OrderByDescending(x => x.CreatedAt)
             .ToListAsync(ct);
 
@@ -75,6 +75,7 @@ public sealed class JobService : IJobService
             JobType = request.JobType,
             ExpiresAt = request.ExpiresAt,
             IsActive = request.IsActive,
+            IsApproved = false,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
         };
@@ -145,6 +146,7 @@ public sealed class JobService : IJobService
         x.JobType,
         x.ExpiresAt,
         x.IsActive,
+        x.IsApproved,
         x.CreatedAt
     );
 }
