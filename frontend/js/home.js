@@ -33,14 +33,13 @@ function renderNavRight() {
 
     // Đã đăng nhập: lấy 2 chữ cái đầu của tên để hiện trong avatar
     var initials = getInitials(fullName);
-
     navRight.innerHTML = `
         <div class="user-menu" id="userMenu">
             <div class="user-avatar">${initials}</div>
             <span class="user-name">${fullName}</span>
 
             <div class="user-dropdown">
-                <a href="#" class="dropdown-item">Hồ sơ của tôi</a>
+                <a href="../pages/profile.html" class="dropdown-item">Hồ sơ của tôi</a>
                 <a href="#" class="dropdown-item">Cài đặt</a>
                 <div class="dropdown-divider"></div>
                 <button class="dropdown-item logout" onclick="logout()">Đăng xuất</button>
