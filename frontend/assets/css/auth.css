@@ -25,14 +25,14 @@ h2 { color: #0f172a; margin-bottom: 6px; font-size: 26px; font-weight: 700; lett
 /* Form Elements */
 form { text-align: left; }
 label { display: inline-block; font-size: 14px; font-weight: 600; color: #475569; margin-top: 16px; margin-bottom: 8px; transition: color 0.3s; }
-input {
+input, select {
     width: 100%; padding: 14px 18px; font-size: 15px; color: #1e293b;
     background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 12px;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
-input:hover { background: #fff; border-color: #cbd5e1; box-shadow: 0 4px 12px rgba(0,0,0,0.02); }
-input:focus { outline: none; background: #fff; border-color: #3b82f6; box-shadow: 0 0 0 4px rgba(59,130,246,0.15); }
-input:focus + label, form:focus-within label { color: #3b82f6; }
+input:hover, select:hover { background: #fff; border-color: #cbd5e1; box-shadow: 0 4px 12px rgba(0,0,0,0.02); }
+input:focus, select:focus { outline: none; background: #fff; border-color: #3b82f6; box-shadow: 0 0 0 4px rgba(59,130,246,0.15); }
+label:has(+ input:focus), label:has(+ select:focus), label:has(+ .password-wrapper:focus-within) { color: #3b82f6; }
 input::placeholder { color: #94a3b8; }
 
 /* Password & Links */

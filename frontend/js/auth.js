@@ -100,6 +100,7 @@ document.getElementById("loginForm").addEventListener("submit", async function(e
             sessionStorage.setItem("fullName", user?.displayName || "");
             sessionStorage.setItem("email", user?.email || "");
             sessionStorage.setItem("avatarUrl", user?.avatarUrl || "");
+            sessionStorage.setItem("loginProvider", "local");
             
             const role = (user?.roles || [])[0] || "";
             sessionStorage.setItem("role", role);
@@ -153,6 +154,7 @@ if (hash.includes("accessToken")) {
         sessionStorage.setItem("refreshToken", refreshToken);
         sessionStorage.setItem("email", decoded.email || "");
         sessionStorage.setItem("fullName", decoded["display_name"] || decoded.name || "");
+        sessionStorage.setItem("loginProvider", "oauth");
         const role = decoded["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"] || "Candidate";
         sessionStorage.setItem("role", role);
 
