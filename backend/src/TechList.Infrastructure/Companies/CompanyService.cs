@@ -60,9 +60,9 @@ public sealed class CompanyService : ICompanyService
             Id = Guid.NewGuid(),
             OwnerId = userId,
             Name = request.Name,
-            Description = request.Description,
-            Website = request.Website,
-            Address = request.Address,
+            Description = request.Description ?? string.Empty,
+            Website = request.Website ?? string.Empty,
+            Address = request.Address ?? string.Empty,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
         };
@@ -83,9 +83,9 @@ public sealed class CompanyService : ICompanyService
             throw new UnauthorizedAccessException("You can only update your own company.");
 
         company.Name = request.Name;
-        company.Description = request.Description;
-        company.Website = request.Website;
-        company.Address = request.Address;
+        company.Description = request.Description ?? string.Empty;
+        company.Website = request.Website ?? string.Empty;
+        company.Address = request.Address ?? string.Empty;
         company.UpdatedAt = DateTime.UtcNow;
 
         await _db.SaveChangesAsync(ct);

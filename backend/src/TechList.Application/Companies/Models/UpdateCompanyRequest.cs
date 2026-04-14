@@ -9,12 +9,12 @@ public sealed class UpdateCompanyRequest
     public string Name { get; set; } = string.Empty;
 
     [MaxLength(4000)]
-    public string Description { get; set; } = string.Empty;
+    public string? Description { get; set; }
 
     [Url(ErrorMessage = "Invalid URL format")]
     [MaxLength(300)]
-    public string Website { get; set; } = string.Empty;
+    public string? Website { get; set; }
 
     [MaxLength(500)]
-    public string Address { get; set; } = string.Empty;
+    public string? Address { get; set; }
 }
