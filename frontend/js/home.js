@@ -20,10 +20,8 @@ function renderNavRight() {
     var navRight = document.getElementById('nav-right');
     var token    = sessionStorage.getItem('token');
     var fullName = sessionStorage.getItem('fullName') || '';
-    var email    = sessionStorage.getItem('email')    || '';
-
+    
     if (!token) {
-        // Chưa đăng nhập
         navRight.innerHTML = `
             <a href="../pages/auth.html#login"    class="btn-login">Đăng nhập</a>
             <a href="../pages/auth.html#register" class="btn-register">Đăng ký</a>
@@ -31,45 +29,67 @@ function renderNavRight() {
         return;
     }
 
-    // Đã đăng nhập: lấy 2 chữ cái đầu của tên để hiện trong avatar hoặc link ảnh nếu có
-    var avatarUrl = sessionStorage.getItem('avatarUrl');
-    var avatarHtml = '';
-    
-    if (avatarUrl && avatarUrl !== 'null' && avatarUrl !== 'undefined') {
-        avatarHtml = `<img src="${avatarUrl}" class="user-avatar" style="padding:0; object-fit:cover;" alt="Avatar">`;
-    } else {
-        var initials = getInitials(fullName);
-        avatarHtml = `<div class="user-avatar">${initials}</div>`;
-    }
-
-    navRight.innerHTML = `
-        <div class="user-menu" id="userMenu">
-            ${avatarHtml}
-            <span class="user-name">${fullName}</span>
-
-            <div class="user-dropdown">
-                <a href="../pages/profile.html" class="dropdown-item">Hồ sơ của tôi</a>
-                <a href="#" class="dropdown-item">Cài đặt</a>
-                ${sessionStorage.getItem('role') === 'Recruiter' ? `<div class="dropdown-divider"></div><a href="../pages/recruiter.html" class="dropdown-item" style="color: #4f46e5; font-weight: bold;"><i class="fa-solid fa-briefcase"></i> Kênh Nhà Tuyển Dụng</a>` : ''}
-                <div class="dropdown-divider"></div>
-                <button class="dropdown-item logout" onclick="logout()">Đăng xuất</button>
-            </div>
-        </div>
-    `;
-
-    // Gắn sự kiện click để mở/đóng dropdown
-    document.getElementById('userMenu').addEventListener('click', function (e) {
-        this.classList.toggle('open');
-        e.stopPropagation();            // không cho click lan ra ngoài
-    });
-
-    // Click ra ngoài thì đóng dropdown
-    document.addEventListener('click', function () {
-        var menu = document.getElementById('userMenu');
-        if (menu) {
-            menu.classList.remove('open');
+    // Hàm nội bộ để render HTML
+    const updateDOM = (name, url) => {
+        var avatarHtml = '';
+        if (url && url !== 'null' && url !== 'undefined') {
+            avatarHtml = `<img src="${url}" class="user-avatar" style="padding:0; object-fit:cover;" alt="Avatar">`;
+        } else {
+            var initials = getInitials(name);
+            avatarHtml = `<div class="user-avatar">${initials}</div>`;
         }
-    });
+
+        navRight.innerHTML = `
+            <div class="user-menu" id="userMenu">
+                ${avatarHtml}
+                <span class="user-name">${name}</span>
+                <div class="user-dropdown">
+                    <a href="../pages/profile.html" class="dropdown-item">Hồ sơ của tôi</a>
+                    <a href="#" class="dropdown-item">Cài đặt</a>
+                    ${sessionStorage.getItem('role') === 'Recruiter' ? `<div class="dropdown-divider"></div><a href="../pages/recruiter.html" class="dropdown-item" style="color: #4f46e5; font-weight: bold;"><i class="fa-solid fa-briefcase"></i> Kênh Nhà Tuyển Dụng</a>` : ''}
+                    <div class="dropdown-divider"></div>
+                    <button class="dropdown-item logout" onclick="logout()">Đăng xuất</button>
+                </div>
+            </div>
+        `;
+
+        document.getElementById('userMenu').addEventListener('click', function (e) {
+            this.classList.toggle('open');
+            e.stopPropagation();
+        });
+    };
+
+    // 1. Render nhanh với dữ liệu từ Cache (nếu có)
+    updateDOM(fullName, sessionStorage.getItem('avatarUrl'));
+
+    // 2. Tự động kiểm tra ngầm với server để tải Avatar mới nhất nếu session bị thiếu hoặc cũ
+    fetch(`${API_URL}/api/profile/me`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+    })
+    .then(res => res.json())
+    .then(json => {
+        if (json.data) {
+            const realName = json.data.displayName || fullName;
+            const realAvatar = json.data.avatarUrl;
+            
+            // Xử lý cập nhật lại session
+            if (realName) sessionStorage.setItem('fullName', realName);
+            if (realAvatar) sessionStorage.setItem('avatarUrl', realAvatar);
+
+            // Chèn lại avatar mới nhất vào thanh bar
+            updateDOM(realName, realAvatar);
+        }
+    })
+    .catch(() => {}); // Im lặng nếu lỗi (tránh spam console)
+    
+    // Đóng dropdown khi click ra ngoài
+    if (!window._navEventBound) {
+        document.addEventListener('click', function () {
+            var menu = document.getElementById('userMenu');
+            if (menu) menu.classList.remove('open');
+        });
+        window._navEventBound = true;
+    }
 }
 
 
