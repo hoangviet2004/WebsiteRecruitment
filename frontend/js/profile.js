@@ -18,8 +18,17 @@ document.addEventListener('DOMContentLoaded', async () => {
     const currentUser = getCurrentUser(); // từ api.js
     
     // Tạm thời lấy các thông tin chưa có trong DB từ localStorage (Email tự chỉnh, Phone)
-    emailInput.value = localStorage.getItem('profile_email') || currentUser.email || '';
-    phoneInput.value = localStorage.getItem('profile_phone') || '';
+    const userKey = currentUser.email || 'guest';
+    emailInput.value = localStorage.getItem(`profile_email_${userKey}`) || currentUser.email || '';
+    phoneInput.value = localStorage.getItem(`profile_phone_${userKey}`) || '';
+
+    // Khóa email nếu đăng nhập bằng Google/Github (không cho sửa)
+    if (sessionStorage.getItem("loginProvider") === "oauth") {
+        emailInput.readOnly = true;
+        emailInput.style.backgroundColor = '#f3f4f6';
+        emailInput.style.cursor = 'not-allowed';
+        emailInput.title = 'Bạn không thể thay đổi email khi đăng nhập bằng Google hoặc GitHub';
+    }
 
     // 2. Gọi API để lấy thông tin Profile mới nhất từ backend (Họ và tên, môt tả, avatar...)
     try {
@@ -78,8 +87,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                 // Lưu thành công
                 // Đồng bộ ngược lại vào Session và Local storage để các trang khác (như homebar) nhận diện được tên mới
                 sessionStorage.setItem('fullName', newName); // Cập nhật tên trong phiên hiện tại
-                localStorage.setItem('profile_email', newEmail);
-                localStorage.setItem('profile_phone', newPhone);
+                const userKey = currentUser.email || 'guest';
+                localStorage.setItem(`profile_email_${userKey}`, newEmail);
+                localStorage.setItem(`profile_phone_${userKey}`, newPhone);
 
                 alert('Cập nhật thông tin thành công!');
 
