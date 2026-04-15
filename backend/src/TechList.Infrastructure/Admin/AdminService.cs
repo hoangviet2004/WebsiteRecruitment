@@ -62,10 +62,27 @@ public sealed class AdminService : IAdminService
     public async Task ToggleBlockUserAsync(string userId, CancellationToken ct)
     {
         var profile = await _db.UserProfiles.FirstOrDefaultAsync(x => x.UserId == userId, ct);
-        if (profile == null) throw new InvalidOperationException("Profile not found");
+        if (profile == null)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null) throw new InvalidOperationException("User not found");
 
-        profile.IsApproved = !profile.IsApproved;
-        profile.UpdatedAt = DateTime.UtcNow;
+            profile = new UserProfile
+            {
+                UserId = userId,
+                DisplayName = string.IsNullOrWhiteSpace(user.FullName) ? user.Email!.Split('@')[0] : user.FullName,
+                Bio = string.Empty,
+                IsApproved = true, // Toggling from false (implicitly blocked due to null profile) to true
+                UpdatedAt = DateTime.UtcNow
+            };
+            _db.UserProfiles.Add(profile);
+        }
+        else
+        {
+            profile.IsApproved = !profile.IsApproved;
+            profile.UpdatedAt = DateTime.UtcNow;
+        }
+
         await _db.SaveChangesAsync(ct);
     }
 
