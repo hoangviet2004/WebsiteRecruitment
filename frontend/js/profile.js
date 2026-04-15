@@ -16,19 +16,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // 1. Lấy thông tin mặc định có sẵn từ hệ thống
     const currentUser = getCurrentUser(); // từ api.js
+    // Sử dụng thông tin email thực tế từ JWT token (không dùng chung qua localStorage)
+    emailInput.value = currentUser.email || '';
+    emailInput.readOnly = true; // Email không thay đổi qua form này
+    emailInput.style.backgroundColor = '#f8fafc';
     
-    // Tạm thời lấy các thông tin chưa có trong DB từ localStorage (Email tự chỉnh, Phone)
-    const userKey = currentUser.email || 'guest';
-    emailInput.value = localStorage.getItem(`profile_email_${userKey}`) || currentUser.email || '';
-    phoneInput.value = localStorage.getItem(`profile_phone_${userKey}`) || '';
-
-    // Khóa email nếu đăng nhập bằng Google/Github (không cho sửa)
-    if (sessionStorage.getItem("loginProvider") === "oauth") {
-        emailInput.readOnly = true;
-        emailInput.style.backgroundColor = '#f3f4f6';
-        emailInput.style.cursor = 'not-allowed';
-        emailInput.title = 'Bạn không thể thay đổi email khi đăng nhập bằng Google hoặc GitHub';
-    }
+    const phoneStorageKey = 'profile_phone_' + (currentUser.email || 'guest');
+    phoneInput.value = localStorage.getItem(phoneStorageKey) || '';
 
     // 2. Gọi API để lấy thông tin Profile mới nhất từ backend (Họ và tên, môt tả, avatar...)
     try {
@@ -84,12 +78,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             });
 
             if (res && res.ok) {
-                // Lưu thành công
-                // Đồng bộ ngược lại vào Session và Local storage để các trang khác (như homebar) nhận diện được tên mới
+                // Đồng bộ ngược lại vào Session để các trang khác (như homebar) nhận diện được tên mới
                 sessionStorage.setItem('fullName', newName); // Cập nhật tên trong phiên hiện tại
-                const userKey = currentUser.email || 'guest';
-                localStorage.setItem(`profile_email_${userKey}`, newEmail);
-                localStorage.setItem(`profile_phone_${userKey}`, newPhone);
+                
+                const phoneStorageKey = 'profile_phone_' + (currentUser.email || 'guest');
+                localStorage.setItem(phoneStorageKey, newPhone);
 
                 alert('Cập nhật thông tin thành công!');
 
