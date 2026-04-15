@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TechList.API.Common;
@@ -31,6 +32,10 @@ public sealed class AdminController : ControllerBase
     [HttpDelete("users/{id}")]
     public async Task<ActionResult<ApiResponse<object>>> DeleteUser(string id, CancellationToken ct)
     {
+        var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (id == currentUserId)
+            return BadRequest(ApiResponse<object>.Fail("Không thể xóa tài khoản của chính mình."));
+
         await _adminService.DeleteUserAsync(id, ct);
         return Ok(ApiResponse<object>.Ok(null!, "User deleted successfully"));
     }
@@ -45,6 +50,10 @@ public sealed class AdminController : ControllerBase
     [HttpPut("users/{id}/role")]
     public async Task<ActionResult<ApiResponse<object>>> ChangeRole(string id, [FromBody] TechList.Application.Admin.Models.ChangeRoleRequest request, CancellationToken ct)
     {
+        var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (id == currentUserId)
+            return BadRequest(ApiResponse<object>.Fail("Không thể thay đổi quyền của chính mình."));
+
         if (string.IsNullOrWhiteSpace(request.NewRole)) return BadRequest(ApiResponse<object>.Fail("Role cannot be empty"));
         await _adminService.ChangeUserRoleAsync(id, request.NewRole, ct);
         return Ok(ApiResponse<object>.Ok(null!, "User role updated successfully"));

@@ -97,6 +97,7 @@ document.getElementById("loginForm").addEventListener("submit", async function(e
 
             sessionStorage.setItem("token", accessToken || "");
             sessionStorage.setItem("refreshToken", refreshToken || "");
+            sessionStorage.setItem("userId", user?.id || "");
             sessionStorage.setItem("fullName", user?.displayName || "");
             sessionStorage.setItem("email", user?.email || "");
             sessionStorage.setItem("avatarUrl", user?.avatarUrl || "");
@@ -152,6 +153,7 @@ if (hash.includes("accessToken")) {
         var decoded = parseJwt(token);
         sessionStorage.setItem("token", token);
         sessionStorage.setItem("refreshToken", refreshToken);
+        sessionStorage.setItem("userId", decoded.sub || decoded["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"] || "");
         sessionStorage.setItem("email", decoded.email || "");
         sessionStorage.setItem("fullName", decoded["display_name"] || decoded.name || "");
         sessionStorage.setItem("loginProvider", "oauth");

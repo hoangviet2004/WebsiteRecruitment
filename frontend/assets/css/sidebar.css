@@ -5,21 +5,41 @@ body { display: flex; margin: 0; font-family: 'Inter', sans-serif; background: #
 .sidebar {
   width: 260px;
   height: 100vh;
-  background: #0f172a; /* deep slate */
+  background: #0f172a;
   color: #f8fafc;
   padding: 24px 16px;
-  box-shadow: 4px 0 20px rgba(0,0,0,0.05); /* soft shadow */
+  box-shadow: 4px 0 20px rgba(0,0,0,0.05);
   transition: width 0.3s ease;
-  position: relative;
+  position: fixed;
+  top: 0;
+  left: 0;
   z-index: 50;
+  overflow-y: auto;
 }
 
-.sidebar div {
+.sidebar h3 {
+  font-size: 18px;
+  font-weight: 700;
+  color: #f8fafc;
+  padding: 0 12px;
+  margin: 0 0 24px 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.sidebar hr {
+  border: none;
+  border-top: 1px solid rgba(148, 163, 184, 0.2);
+  margin: 16px 8px;
+}
+
+.sidebar .nav-item {
   padding: 14px 20px;
-  margin-bottom: 8px;
+  margin-bottom: 4px;
   cursor: pointer;
-  border-radius: 12px; /* modern rounded items */
-  font-size: 15px;
+  border-radius: 12px;
+  font-size: 14px;
   font-weight: 500;
   color: #94a3b8;
   display: flex;
@@ -28,18 +48,21 @@ body { display: flex; margin: 0; font-family: 'Inter', sans-serif; background: #
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.sidebar div:hover {
+.sidebar .nav-item:hover {
   background: rgba(51, 65, 85, 0.6);
   color: #fff;
-  transform: translateX(6px); /* nudge right bounce */
+  transform: translateX(4px);
 }
 
-/* Simulated active class for demonstration (can be triggered by JS) */
-.sidebar div.active {
+.sidebar .nav-item.active {
   background: linear-gradient(135deg, #3b82f6, #2563eb);
   color: #fff;
   box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
   font-weight: 600;
+}
+
+.sidebar .nav-item.active:hover {
+  transform: none;
 }
 
 .content {
