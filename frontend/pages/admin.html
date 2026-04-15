@@ -2,15 +2,11 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
-  <title>Admin Dashboard</title>
-  <!-- Font Awesome -->
+  <title>Admin Dashboard - Tổng Quan</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  
-  <!-- CSS -->
   <link rel="stylesheet" href="../assets/css/sidebar.css">
   <link rel="stylesheet" href="../assets/css/admin.css">
 </head>
@@ -20,86 +16,63 @@
 
 <main class="admin-content">
     <div class="admin-header">
-        <h1>Bảng Thống Kê Tổng Quan</h1>
-        <p class="subtitle">Quản lý và giám sát hoạt động hệ thống.</p>
+        <h1><i class="fa-solid fa-chart-line"></i> Bảng Thống Kê Tổng Quan</h1>
+        <p class="subtitle">Giám sát hoạt động hệ thống.</p>
     </div>
 
-    <!-- TABS -->
-    <div class="admin-tabs">
-        <button class="tab-btn active" onclick="switchTab('users')"><i class="fa-solid fa-users"></i> Tài Khoản</button>
-        <button class="tab-btn" onclick="switchTab('jobs')"><i class="fa-solid fa-briefcase"></i> Tin Tuyển Dụng</button>
-        <button class="tab-btn" onclick="switchTab('companies')"><i class="fa-solid fa-building"></i> Doanh Nghiệp</button>
-    </div>
-
-    <!-- USERS TAB -->
-    <div id="tab-users" class="tab-pane active">
-        <div class="data-card">
-            <div class="table-responsive">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Email</th>
-                            <th>Tên</th>
-                            <th>Quyền (Role)</th>
-                            <th>Ngày Kích Hoạt</th>
-                            <th>Thao tác</th>
-                        </tr>
-                    </thead>
-                    <tbody id="user-table-body">
-                        <!-- JS Render -->
-                        <tr><td colspan="6" style="text-align: center;">Đang tải dữ liệu...</td></tr>
-                    </tbody>
-                </table>
+    <!-- STAT CARDS -->
+    <div class="stats-grid">
+        <div class="stat-card stat-card-blue">
+            <div class="stat-icon"><i class="fa-solid fa-users"></i></div>
+            <div class="stat-info">
+                <span class="stat-number" id="stat-users">--</span>
+                <span class="stat-label">Tài khoản</span>
+            </div>
+        </div>
+        <div class="stat-card stat-card-green">
+            <div class="stat-icon"><i class="fa-solid fa-user-graduate"></i></div>
+            <div class="stat-info">
+                <span class="stat-number" id="stat-candidates">--</span>
+                <span class="stat-label">Ứng viên</span>
+            </div>
+        </div>
+        <div class="stat-card stat-card-purple">
+            <div class="stat-icon"><i class="fa-solid fa-briefcase"></i></div>
+            <div class="stat-info">
+                <span class="stat-number" id="stat-jobs">--</span>
+                <span class="stat-label">Tin tuyển dụng</span>
+            </div>
+        </div>
+        <div class="stat-card stat-card-orange">
+            <div class="stat-icon"><i class="fa-solid fa-building"></i></div>
+            <div class="stat-info">
+                <span class="stat-number" id="stat-companies">--</span>
+                <span class="stat-label">Doanh nghiệp</span>
             </div>
         </div>
     </div>
 
-    <!-- JOBS TAB -->
-    <div id="tab-jobs" class="tab-pane">
-        <div class="data-card">
-            <div class="table-responsive">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Tiêu đề</th>
-                            <th>Doanh nghiệp</th>
-                            <th>Trạng Thái</th>
-                            <th>Ngày Đăng</th>
-                            <th>Hết Hạn</th>
-                            <th>Thao tác</th>
-                        </tr>
-                    </thead>
-                    <tbody id="job-table-body">
-                        <tr><td colspan="6" style="text-align: center;">Đang tải dữ liệu...</td></tr>
-                    </tbody>
-                </table>
+    <!-- PENDING ITEMS -->
+    <div class="admin-header" style="margin-top: 40px;">
+        <h2><i class="fa-solid fa-clock"></i> Chờ Phê Duyệt</h2>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card stat-card-warning">
+            <div class="stat-icon"><i class="fa-solid fa-user-clock"></i></div>
+            <div class="stat-info">
+                <span class="stat-number" id="stat-pending-users">--</span>
+                <span class="stat-label">Tài khoản chờ duyệt</span>
+            </div>
+        </div>
+        <div class="stat-card stat-card-warning">
+            <div class="stat-icon"><i class="fa-solid fa-file-circle-question"></i></div>
+            <div class="stat-info">
+                <span class="stat-number" id="stat-pending-jobs">--</span>
+                <span class="stat-label">Tin tuyển dụng chờ duyệt</span>
             </div>
         </div>
     </div>
-
-    <!-- COMPANIES TAB -->
-    <div id="tab-companies" class="tab-pane">
-        <div class="data-card">
-            <div class="table-responsive">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Logo</th>
-                            <th>Tên Công Ty</th>
-                            <th>Địa chỉ</th>
-                            <th>Website</th>
-                            <th>Thao tác</th>
-                        </tr>
-                    </thead>
-                    <tbody id="company-table-body">
-                        <tr><td colspan="5" style="text-align: center;">Đang tải dữ liệu...</td></tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-
 </main>
 
 <script src="../js/api.js"></script>
@@ -108,8 +81,8 @@
 <script src="../js/admin.js"></script>
 
 <script>
-  requireAdmin();     // check quyền
-  loadSidebar();      // load sidebar
+  requireAdmin();
+  loadSidebar();
 </script>
 
 </body>

@@ -21,7 +21,7 @@ public sealed class ExceptionHandlingMiddleware : IMiddleware
         catch (UnauthorizedAccessException ex)
         {
             _logger.LogWarning(ex, "Unauthorized request");
-            await WriteAsync(context, HttpStatusCode.Unauthorized, "Unauthorized");
+            await WriteAsync(context, HttpStatusCode.Unauthorized, ex.Message);
         }
         catch (InvalidOperationException ex)
         {

@@ -1,14 +1,30 @@
 <div class="sidebar">
-  <h3>Quản trị viên</h3>
+  <h3><i class="fa-solid fa-shield-halved"></i> Quản trị viên</h3>
 
-  <div onclick="go('./admin.html')">Tổng quan</div>
-  <div onclick="go('./accountManagerment.html')">Quản lý tài khoản</div>
-  <div onclick="go('./companyManagement.html')">Quản lý công ty</div>
-  <div onclick="go('./candidateManagement.html')">Quản lý ứng viên</div>
-  <div onclick="go('./jobPostingManagement.html')">Quản lý tin tuyển dụng</div>
-  <div onclick="go('./transactionManagement.html')">Quản lý giao dịch</div>
-  <div onclick="go('./statisticAnalytic.html')">Thống kê và phân tích</div>
+  <div class="nav-item" data-page="admin.html" onclick="go('./admin.html')">
+    <i class="fa-solid fa-chart-line"></i> Tổng quan
+  </div>
+  <div class="nav-item" data-page="accountManagerment.html" onclick="go('./accountManagerment.html')">
+    <i class="fa-solid fa-users"></i> Quản lý tài khoản
+  </div>
+  <div class="nav-item" data-page="candidateManagement.html" onclick="go('./candidateManagement.html')">
+    <i class="fa-solid fa-user-graduate"></i> Quản lý ứng viên
+  </div>
+  <div class="nav-item" data-page="companyManagement.html" onclick="go('./companyManagement.html')">
+    <i class="fa-solid fa-building"></i> Quản lý công ty
+  </div>
+  <div class="nav-item" data-page="jobPostingManagement.html" onclick="go('./jobPostingManagement.html')">
+    <i class="fa-solid fa-briefcase"></i> Quản lý tin tuyển dụng
+  </div>
+  <div class="nav-item" data-page="transactionManagement.html" onclick="go('./transactionManagement.html')">
+    <i class="fa-solid fa-money-bill-transfer"></i> Quản lý giao dịch
+  </div>
+  <div class="nav-item" data-page="statisticAnalytic.html" onclick="go('./statisticAnalytic.html')">
+    <i class="fa-solid fa-chart-pie"></i> Thống kê và phân tích
+  </div>
 
   <hr>
-  <div onclick="logout()">Đăng xuất</div>
+  <div class="nav-item" onclick="logout()">
+    <i class="fa-solid fa-right-from-bracket"></i> Đăng xuất
+  </div>
 </div>

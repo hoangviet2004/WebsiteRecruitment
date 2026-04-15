@@ -64,7 +64,7 @@ public sealed class AuthService : IAuthService
             UserId = user.Id,
             DisplayName = request.DisplayName ?? request.Email.Split('@')[0],
             Bio = string.Empty,
-            IsApproved = request.Role == AppRole.Candidate,
+            IsApproved = true,
             UpdatedAt = DateTime.UtcNow
         });
 
@@ -83,8 +83,8 @@ public sealed class AuthService : IAuthService
         var roles = (await _userManager.GetRolesAsync(user)).ToList();
         var profile = await EnsureProfileExistsAsync(user.Id, user.Email!, user.FullName, ct);
 
-        if (roles.Contains(AppRole.Recruiter) && !profile.IsApproved)
-            throw new UnauthorizedAccessException("Tài khoản nhà tuyển dụng của bạn đang chờ Admin phê duyệt.");
+        if (!profile.IsApproved)
+            throw new UnauthorizedAccessException("Tài khoản của bạn đã bị chặn. Vui lòng liên hệ quản trị viên.");
 
         return await IssueTokensAsync(user, profile, roles, ip, userAgent, ct);
     }
