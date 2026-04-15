@@ -31,32 +31,36 @@ async function loadUsers() {
             if (isSelf) {
                 btnHtml = '<span style="color: #999; font-style: italic;">—</span>';
             } else {
-                if (!isApproved) {
-                    btnHtml += `<button class="btn-action btn-toggle" onclick="approveUser('${u.id}')" title="Phê duyệt"><i class="fa-solid fa-check"></i></button>`;
+                if (isApproved) {
+                    btnHtml += `<button class="btn-action btn-delete" onclick="toggleBlockUser('${u.id}')" title="Chặn tài khoản"><i class="fa-solid fa-ban"></i></button>`;
+                } else {
+                    btnHtml += `<button class="btn-action btn-toggle" onclick="toggleBlockUser('${u.id}')" title="Bỏ chặn tài khoản"><i class="fa-solid fa-unlock"></i></button>`;
                 }
                 if (u.role !== 'Admin') {
-                    btnHtml += `<button class="btn-action btn-delete" onclick="deleteUser('${u.id}')" title="Từ chối/Xóa"><i class="fa-solid fa-trash-can"></i></button>`;
+                    btnHtml += `<button class="btn-action btn-delete" onclick="deleteUser('${u.id}')" title="Xóa tài khoản"><i class="fa-solid fa-trash-can"></i></button>`;
                 }
             }
 
-            const trClass = !isApproved ? 'style="background-color: #fffbeb;"' : '';
+            const trClass = !isApproved ? 'style="background-color: #fef2f2;"' : '';
             const statusBadge = isApproved ? 
                 `<span class="badge badge-active">Hoạt động</span>` : 
-                `<span class="badge badge-inactive">Chờ duyệt</span>`;
+                `<span class="badge badge-blocked">Bị chặn</span>`;
+
+            const roleLabels = { 'Admin': 'Quản trị viên', 'Recruiter': 'Nhà tuyển dụng', 'Candidate': 'Ứng viên' };
 
             let roleHtml = '';
             if (isSelf) {
-                roleHtml = `<span class="badge badge-active" style="background: #6366f1; color: #fff;">${u.role} (Bạn)</span>`;
+                roleHtml = `<span class="badge badge-active" style="background: #6366f1; color: #fff;">${roleLabels[u.role] || u.role} (Bạn)</span>`;
             } else {
-                const roles = ['Admin', 'Recruiter', 'Candidate'];
+                const roles = ['Recruiter', 'Candidate'];
                 roleHtml = `<select class="role-select" onchange="changeRole('${u.id}', this.value)">`;
                 roles.forEach(r => {
-                    roleHtml += `<option value="${r}" ${u.role === r ? 'selected' : ''}>${r}</option>`;
+                    roleHtml += `<option value="${r}" ${u.role === r ? 'selected' : ''}>${roleLabels[r]}</option>`;
                 });
                 roleHtml += `</select>`;
             }
 
-            let emailHtml = `<strong>${u.email}</strong> ${!isApproved ? '<i class="fa-solid fa-clock text-warning"></i>' : ''}`;
+            let emailHtml = `<strong>${u.email}</strong> ${!isApproved ? '<i class="fa-solid fa-ban text-danger"></i>' : ''}`;
             
             let providerIcon = '';
             if(u.provider === 'Google') providerIcon = '<i class="fa-brands fa-google text-danger"></i>';
@@ -99,12 +103,12 @@ async function deleteUser(id) {
     }
 }
 
-async function approveUser(id) {
-    if(!confirm("Xác nhận phê duyệt cho tài khoản Nhà tuyển dụng này?")) return;
+async function toggleBlockUser(id) {
+    if(!confirm("Bạn có chắc chắn muốn thay đổi trạng thái chặn của tài khoản này?")) return;
     try {
-        const response = await apiFetchAuth(`/api/admin/users/${id}/approve`, { method: 'PUT' });
+        const response = await apiFetchAuth(`/api/admin/users/${id}/toggle-block`, { method: 'PUT' });
         if(response.ok) {
-            alert("Đã duyệt tài khoản thành công!");
+            alert("Đã cập nhật trạng thái tài khoản!");
             loadUsers();
         } else {
             const error = await response.json();
@@ -114,7 +118,9 @@ async function approveUser(id) {
 }
 
 async function changeRole(id, newRole) {
-    if(!confirm(`Bạn muốn chuyển Role của tài khoản này thành ${newRole}?`)) {
+    const roleLabels = { 'Recruiter': 'Nhà tuyển dụng', 'Candidate': 'Ứng viên' };
+    const label = roleLabels[newRole] || newRole;
+    if(!confirm(`Bạn muốn chuyển quyền của tài khoản này thành ${label}?`)) {
         loadUsers();
         return;
     }
@@ -126,7 +132,7 @@ async function changeRole(id, newRole) {
         });
         
         if (response.ok) {
-            alert(`Phân quyền ${newRole} thành công!`);
+            alert(`Phân quyền ${label} thành công!`);
             loadUsers();
         } else {
             const error = await response.json();

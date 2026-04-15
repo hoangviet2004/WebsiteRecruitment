@@ -40,11 +40,15 @@ public sealed class AdminController : ControllerBase
         return Ok(ApiResponse<object>.Ok(null!, "User deleted successfully"));
     }
 
-    [HttpPut("users/{id}/approve")]
-    public async Task<ActionResult<ApiResponse<object>>> ApproveUser(string id, CancellationToken ct)
+    [HttpPut("users/{id}/toggle-block")]
+    public async Task<ActionResult<ApiResponse<object>>> ToggleBlockUser(string id, CancellationToken ct)
     {
-        await _adminService.ApproveUserAsync(id, ct);
-        return Ok(ApiResponse<object>.Ok(null!, "User approved successfully"));
+        var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (id == currentUserId)
+            return BadRequest(ApiResponse<object>.Fail("Không thể chặn tài khoản của chính mình."));
+
+        await _adminService.ToggleBlockUserAsync(id, ct);
+        return Ok(ApiResponse<object>.Ok(null!, "User block status toggled successfully"));
     }
 
     [HttpPut("users/{id}/role")]

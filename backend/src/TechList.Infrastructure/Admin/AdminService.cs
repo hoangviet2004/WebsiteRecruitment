@@ -59,12 +59,12 @@ public sealed class AdminService : IAdminService
         await _db.SaveChangesAsync(ct);
     }
 
-    public async Task ApproveUserAsync(string userId, CancellationToken ct)
+    public async Task ToggleBlockUserAsync(string userId, CancellationToken ct)
     {
         var profile = await _db.UserProfiles.FirstOrDefaultAsync(x => x.UserId == userId, ct);
         if (profile == null) throw new InvalidOperationException("Profile not found");
 
-        profile.IsApproved = true;
+        profile.IsApproved = !profile.IsApproved;
         profile.UpdatedAt = DateTime.UtcNow;
         await _db.SaveChangesAsync(ct);
     }

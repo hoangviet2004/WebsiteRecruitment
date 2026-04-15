@@ -156,6 +156,10 @@ tbody tr:hover {
     background: rgba(245, 158, 11, 0.1);
     color: #f59e0b;
 }
+.badge-blocked {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+}
 
 /* Action Buttons */
 .btn-action {
