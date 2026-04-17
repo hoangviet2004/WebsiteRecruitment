@@ -29,6 +29,13 @@ public sealed class AdminController : ControllerBase
         return Ok(ApiResponse<List<UserDto>>.Ok(result));
     }
 
+    [HttpGet("candidates/{id}/profile")]
+    public async Task<ActionResult<ApiResponse<TechList.Application.Admin.Models.CandidateProfileDto>>> GetCandidateProfile(string id, CancellationToken ct)
+    {
+        var result = await _adminService.GetCandidateProfileAsync(id, ct);
+        return Ok(ApiResponse<TechList.Application.Admin.Models.CandidateProfileDto>.Ok(result));
+    }
+
     [HttpDelete("users/{id}")]
     public async Task<ActionResult<ApiResponse<object>>> DeleteUser(string id, CancellationToken ct)
     {

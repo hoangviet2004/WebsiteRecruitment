@@ -4,15 +4,32 @@
 
 document.addEventListener('DOMContentLoaded', async () => {
     const fullNameInput = document.getElementById('fullName');
-    const emailInput = document.getElementById('email');
-    const phoneInput = document.getElementById('phone');
-    const form = document.getElementById('profile-form');
+    const emailInput    = document.getElementById('email');
+    const phoneInput    = document.getElementById('phone');
+    const bioInput      = document.getElementById('bio');
+    const bioCountEl    = document.getElementById('bio-count');
+    const bioCounter    = bioInput?.closest('.form-group')?.querySelector('.bio-counter');
+    const form    = document.getElementById('profile-form');
     const btnSave = document.querySelector('.btn-save');
     
     // Thuộc tính avatar
-    const avatarInput = document.getElementById('avatar-input');
+    const avatarInput   = document.getElementById('avatar-input');
     const avatarPreview = document.getElementById('avatar-preview');
     const avatarLoading = document.getElementById('avatar-loading');
+
+    // Bộ đếm ký tự Bio (định nghĩa sớm để dùng khi load API)
+    function updateBioCounter() {
+        if (!bioInput || !bioCountEl || !bioCounter) return;
+        const len = bioInput.value.length;
+        bioCountEl.textContent = len;
+        bioCounter.classList.remove('warn', 'limit');
+        if (len >= 500) bioCounter.classList.add('limit');
+        else if (len >= 400) bioCounter.classList.add('warn');
+    }
+
+    if (bioInput) {
+        bioInput.addEventListener('input', updateBioCounter);
+    }
 
     // 1. Lấy thông tin mặc định có sẵn từ hệ thống
     const currentUser = getCurrentUser(); // từ api.js
@@ -33,7 +50,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (profile) {
                 // Hiển thị tên từ DB nếu có, không thì lấy từ sessionStorage login
                 fullNameInput.value = profile.displayName || currentUser.fullName || '';
-                
+
+                // Điền bio
+                if (bioInput) {
+                    bioInput.value = profile.bio || '';
+                    updateBioCounter();
+                }
+
                 // Hiển thị avatar
                 const displayNameForAvatar = profile.displayName || currentUser.fullName || 'User';
                 if (profile.avatarUrl) {
@@ -54,12 +77,19 @@ document.addEventListener('DOMContentLoaded', async () => {
     form.addEventListener('submit', async (e) => {
         e.preventDefault(); // Ngăn trình duyệt tải lại trang
 
-        const newName = fullNameInput.value.trim();
+        const newName  = fullNameInput.value.trim();
         const newEmail = emailInput.value.trim();
         const newPhone = phoneInput.value.trim();
+        const newBio   = bioInput ? bioInput.value.trim() : '';
 
         if (!newName) {
             alert('Vui lòng nhập họ và tên!');
+            return;
+        }
+
+        if (newBio.length > 500) {
+            alert('Giới thiệu bản thân không được vượt quá 500 ký tự!');
+            bioInput.focus();
             return;
         }
 
@@ -68,12 +98,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         btnSave.disabled = true;
 
         try {
-            // Gửi API cập nhật Profile (Hiện backend đang hỗ trợ DisplayName và Bio)
+            // Gửi API cập nhật Profile (DisplayName và Bio)
             const res = await apiFetchAuth('/api/profile/me', {
                 method: 'PUT',
                 body: JSON.stringify({ 
                     displayName: newName, 
-                    bio: '' // Hiện tại mình chưa có input mô tả nên truyền rỗng hoặc string cũ
+                    bio: newBio
                 })
             });
 

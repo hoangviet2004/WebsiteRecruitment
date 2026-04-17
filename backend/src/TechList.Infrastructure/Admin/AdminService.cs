@@ -41,6 +41,34 @@ public sealed class AdminService : IAdminService
         return userDtos.OrderByDescending(x => x.CreatedAt).ToList();
     }
 
+    public async Task<CandidateProfileDto> GetCandidateProfileAsync(string userId, CancellationToken ct)
+    {
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user is null) throw new InvalidOperationException("User not found");
+
+        var roles = await _userManager.GetRolesAsync(user);
+        if (!roles.Contains(TechList.Domain.Enums.AppRole.Candidate))
+            throw new InvalidOperationException("User is not a candidate");
+
+        var profile = await _db.UserProfiles.AsNoTracking()
+            .SingleOrDefaultAsync(x => x.UserId == userId, ct);
+
+        var login = await _db.UserLogins.AsNoTracking()
+            .FirstOrDefaultAsync(x => x.UserId == userId, ct);
+
+        return new CandidateProfileDto(
+            UserId: user.Id,
+            Email: user.Email!,
+            FullName: user.FullName,
+            DisplayName: profile?.DisplayName ?? user.FullName,
+            Bio: profile?.Bio ?? string.Empty,
+            AvatarUrl: profile?.AvatarUrl,
+            IsApproved: profile?.IsApproved ?? false,
+            Provider: login?.LoginProvider ?? "Local",
+            CreatedAt: user.CreatedAt
+        );
+    }
+
     public async Task DeleteUserAsync(string userId, CancellationToken ct)
     {
         var user = await _userManager.FindByIdAsync(userId);
@@ -159,7 +187,7 @@ public sealed class AdminService : IAdminService
             .ToListAsync(ct);
 
         return companies.Select(c => new CompanyDto(
-            c.Id, c.OwnerId, c.Name, c.Description, c.Website, c.Address, c.LogoUrl)).ToList();
+            c.Id, c.OwnerId, c.Name, c.Description, c.Website, c.Address, c.CompanySize, c.LogoUrl)).ToList();
     }
 
     public async Task DeleteCompanyAsync(Guid companyId, CancellationToken ct)

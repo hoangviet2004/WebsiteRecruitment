@@ -7,6 +7,7 @@ namespace TechList.Application.Admin.Interfaces;
 public interface IAdminService
 {
     Task<List<UserDto>> GetAllUsersAsync(CancellationToken ct);
+    Task<CandidateProfileDto> GetCandidateProfileAsync(string userId, CancellationToken ct);
     Task DeleteUserAsync(string userId, CancellationToken ct);
     Task ToggleBlockUserAsync(string userId, CancellationToken ct);
     Task ChangeUserRoleAsync(string userId, string newRole, CancellationToken ct);

@@ -11,7 +11,10 @@ public class Company
     public string Description { get; set; } = string.Empty;
     public string Website { get; set; } = string.Empty;
     public string Address { get; set; } = string.Empty;
-    
+
+    // Quy mô công ty (VD: "1-50", "50-150", "150-500", "500+")
+    public string? CompanySize { get; set; }
+
     // Logo Information
     public string? LogoUrl { get; set; }
     public string? LogoPublicId { get; set; }
