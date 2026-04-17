@@ -34,7 +34,8 @@ public sealed class AdminService : IAdminService
             var profile = profiles.FirstOrDefault(p => p.UserId == user.Id);
             var login = userLogins.FirstOrDefault(l => l.UserId == user.Id);
             var provider = login?.LoginProvider ?? "Local";
-            userDtos.Add(new UserDto(user.Id, user.Email!, user.FullName, role, profile?.IsApproved ?? false, provider, user.CreatedAt));
+            var isApproved = role == TechList.Domain.Enums.AppRole.Admin ? true : (profile?.IsApproved ?? false);
+            userDtos.Add(new UserDto(user.Id, user.Email!, user.FullName, role, isApproved, provider, user.CreatedAt));
         }
 
         return userDtos.OrderByDescending(x => x.CreatedAt).ToList();
