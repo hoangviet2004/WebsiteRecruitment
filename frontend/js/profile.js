@@ -57,6 +57,23 @@ document.addEventListener('DOMContentLoaded', async () => {
                     updateBioCounter();
                 }
 
+                const skillsInput = document.getElementById('skills');
+                if (skillsInput) skillsInput.value = profile.skills || '';
+                
+                const experienceInput = document.getElementById('experience');
+                if (experienceInput) experienceInput.value = profile.experience || '';
+
+                if (profile.cvUrl) {
+                    const cvEmpty = document.getElementById('cv-empty');
+                    const cvPreview = document.getElementById('cv-preview');
+                    const cvLink = document.getElementById('cv-link');
+                    if (cvEmpty && cvPreview && cvLink) {
+                        cvEmpty.style.display = 'none';
+                        cvPreview.style.display = 'flex';
+                        cvLink.href = profile.cvUrl;
+                    }
+                }
+
                 // Hiển thị avatar
                 const displayNameForAvatar = profile.displayName || currentUser.fullName || 'User';
                 if (profile.avatarUrl) {
@@ -81,6 +98,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         const newEmail = emailInput.value.trim();
         const newPhone = phoneInput.value.trim();
         const newBio   = bioInput ? bioInput.value.trim() : '';
+        const newSkills = document.getElementById('skills') ? document.getElementById('skills').value.trim() : '';
+        const newExperience = document.getElementById('experience') ? document.getElementById('experience').value.trim() : '';
 
         if (!newName) {
             alert('Vui lòng nhập họ và tên!');
@@ -103,7 +122,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                 method: 'PUT',
                 body: JSON.stringify({ 
                     displayName: newName, 
-                    bio: newBio
+                    bio: newBio,
+                    skills: newSkills,
+                    experience: newExperience
                 })
             });
 
@@ -188,6 +209,70 @@ document.addEventListener('DOMContentLoaded', async () => {
             } finally {
                 avatarLoading.style.display = 'none';
                 avatarInput.value = ''; // Reset file input để có thể chọn lại đúng file đó lần nữa
+            }
+        });
+    }
+
+    // 5. Logic thay đổi CV (Upload PDF)
+    const cvInput = document.getElementById('cv-input');
+    const cvLoading = document.getElementById('cv-loading');
+    const cvEmpty = document.getElementById('cv-empty');
+    const cvPreview = document.getElementById('cv-preview');
+    const cvLink = document.getElementById('cv-link');
+
+    if (cvInput) {
+        cvInput.addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            if (file.type !== 'application/pdf') {
+                alert('Vui lòng chọn file định dạng PDF!');
+                cvInput.value = '';
+                return;
+            }
+
+            if (cvLoading) cvLoading.style.display = 'block';
+            if (cvEmpty) cvEmpty.style.display = 'none';
+            if (cvPreview) cvPreview.style.display = 'none';
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                const baseToken = sessionStorage.getItem('token');
+                if (!baseToken) {
+                    alert('Bạn chưa đăng nhập!');
+                    return;
+                }
+
+                const response = await fetch(`${API_URL}/api/profile/cv`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${baseToken}`
+                    },
+                    body: formData
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    if (result.data && result.data.cvUrl) {
+                        if (cvLink) cvLink.href = result.data.cvUrl;
+                        if (cvPreview) cvPreview.style.display = 'flex';
+                        alert('Tải lên CV thành công!');
+                    }
+                } else {
+                    const errText = await response.text();
+                    console.error('Server response:', response.status, errText);
+                    alert(`Đã xảy ra lỗi khi tải CV lên.\n\nChi tiết: ${errText}`);
+                    if (cvEmpty) cvEmpty.style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Lỗi upload CV:', error);
+                alert('Tải CV thất bại, vui lòng thử lại.');
+                if (cvEmpty) cvEmpty.style.display = 'block';
+            } finally {
+                if (cvLoading) cvLoading.style.display = 'none';
+                cvInput.value = '';
             }
         });
     }

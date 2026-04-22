@@ -56,5 +56,24 @@ public sealed class ProfileController : ControllerBase
         var profile = await _profiles.UpdateAvatarAsync(userId, stream, file.FileName, ct);
         return Ok(ApiResponse<ProfileDto>.Ok(profile, "Avatar updated"));
     }
+
+    [HttpPost("cv")]
+    [RequestSizeLimit(10_000_000)]
+    public async Task<ActionResult<ApiResponse<ProfileDto>>> UploadCv(IFormFile file, CancellationToken ct)
+    {
+        if (file is null || file.Length == 0)
+            throw new InvalidOperationException("File is required");
+
+        if (file.ContentType != "application/pdf")
+            return BadRequest(ApiResponse<object>.Fail("Chỉ hỗ trợ file định dạng PDF"));
+
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirstValue("sub");
+        if (string.IsNullOrWhiteSpace(userId))
+            throw new UnauthorizedAccessException("Missing user id");
+
+        await using var stream = file.OpenReadStream();
+        var profile = await _profiles.UpdateCvAsync(userId, stream, file.FileName, ct);
+        return Ok(ApiResponse<ProfileDto>.Ok(profile, "CV uploaded successfully"));
+    }
 }
 

@@ -47,6 +47,7 @@ public static class DependencyInjection
         services.AddSingleton<IRefreshTokenService, RefreshTokenService>();
 
         services.AddScoped<IAvatarStorageService, CloudinaryAvatarStorageService>();
+        services.AddScoped<ICvStorageService, CloudinaryCvStorageService>();
         services.AddScoped<IProfileService, ProfileService>();
         services.AddScoped<ICompanyService, CompanyService>();
         services.AddScoped<IJobService, JobService>();

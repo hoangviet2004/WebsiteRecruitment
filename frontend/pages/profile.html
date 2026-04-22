@@ -22,7 +22,8 @@
     </nav>
 
     <div class="content profile-container">
-        <div class="profile-card">
+        <div class="profile-grid">
+            <div class="profile-card">
             <h2>Thông tin cá nhân</h2>
             <p class="subtitle">Quản lý thông tin hồ sơ để bảo mật tài khoản</p>
             
@@ -61,6 +62,42 @@
                 
                 <button type="submit" class="btn-save">Lưu thay đổi</button>
             </form>
+        </div>
+
+        <div class="profile-card">
+            <h2>Hồ sơ & Năng lực</h2>
+            <p class="subtitle">Bổ sung CV, kỹ năng và kinh nghiệm để nhà tuyển dụng chú ý</p>
+            
+            <div class="form-group cv-upload-group">
+                <label>CV đính kèm (Chỉ hỗ trợ PDF)</label>
+                <div class="cv-upload-box">
+                    <input type="file" id="cv-input" accept="application/pdf" hidden>
+                    <div class="cv-preview" id="cv-preview" style="display: none;">
+                        <i class="fa-solid fa-file-pdf" style="color: #ef4444; font-size: 24px;"></i>
+                        <a href="#" id="cv-link" target="_blank">Xem CV hiện tại</a>
+                        <button type="button" class="btn-change-cv" onclick="document.getElementById('cv-input').click()">Thay đổi</button>
+                    </div>
+                    <div class="cv-empty" id="cv-empty">
+                        <i class="fa-solid fa-cloud-arrow-up" style="color: #64748b; font-size: 24px; margin-bottom: 8px; display: block;"></i>
+                        <p>Tải lên CV của bạn (.pdf)</p>
+                        <button type="button" class="btn-upload-cv" onclick="document.getElementById('cv-input').click()">Chọn file</button>
+                    </div>
+                    <div class="cv-loading" id="cv-loading" style="display: none; color: #3b82f6; font-weight: 500;">
+                        <i class="fa-solid fa-spinner fa-spin"></i> Đang tải lên...
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="skills">Kỹ năng chuyên môn</label>
+                <textarea id="skills" name="skills" placeholder="VD: ReactJS, .NET Core, SQL Server, Tiếng Anh giao tiếp..." rows="4" form="profile-form"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="experience">Kinh nghiệm làm việc</label>
+                <textarea id="experience" name="experience" placeholder="Mô tả quá trình làm việc của bạn..." rows="5" form="profile-form"></textarea>
+            </div>
+        </div>
         </div>
     </div>
 
