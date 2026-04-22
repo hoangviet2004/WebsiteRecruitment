@@ -49,7 +49,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             const profile = dataResponse.data;
             if (profile) {
                 // Hiển thị tên từ DB nếu có, không thì lấy từ sessionStorage login
-                fullNameInput.value = profile.displayName || currentUser.fullName || '';
+                const nameToShow = profile.displayName || currentUser.fullName || '';
+                fullNameInput.value = nameToShow;
+
+                const displayNameHeader = document.getElementById('display-name-header');
+                const displayEmailHeader = document.getElementById('display-email-header');
+                if (displayNameHeader) displayNameHeader.textContent = nameToShow;
+                if (displayEmailHeader) displayEmailHeader.textContent = currentUser.email || '';
 
                 // Điền bio
                 if (bioInput) {
@@ -136,6 +142,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                 localStorage.setItem(phoneStorageKey, newPhone);
 
                 alert('Cập nhật thông tin thành công!');
+
+                const displayNameHeader = document.getElementById('display-name-header');
+                if (displayNameHeader) displayNameHeader.textContent = newName;
 
                 // Cập nhật lại thanh điều hướng (nếu có sử dụng renderNavRight từ home.js)
                 if (typeof renderNavRight === 'function') {

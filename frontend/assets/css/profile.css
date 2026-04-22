@@ -9,16 +9,80 @@
     min-height: calc(100vh - 70px); /* Assuming homebar is 70px */
 }
 
-.profile-grid {
+.profile-form-wrapper {
     display: flex;
-    gap: 32px;
+    flex-direction: column;
+    align-items: center;
     width: 100%;
-    max-width: 1200px;
-    align-items: flex-start;
+    max-width: 1100px;
 }
 
+/* Header */
+.profile-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 32px;
+    width: 100%;
+}
+
+.header-titles h2 {
+    font-size: 32px;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 8px;
+    letter-spacing: -0.02em;
+}
+
+.header-titles .subtitle {
+    color: #64748b;
+    font-size: 15px;
+}
+
+.header-actions {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+}
+
+.header-actions .btn-save {
+    width: auto;
+    margin-top: 0;
+}
+
+.btn-discard {
+    padding: 14px 28px;
+    background-color: #fff;
+    border: 1px solid #cbd5e1;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    color: #334155;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.btn-discard:hover {
+    background-color: #f1f5f9;
+}
+
+/* Rows & Grid */
+.profile-row {
+    display: flex;
+    gap: 24px;
+    width: 100%;
+    margin-bottom: 24px;
+}
+
+.row-1 .card-info { flex: 2; }
+.row-1 .card-cv { flex: 1; display: flex; flex-direction: column; }
+.row-2 .card-about { flex: 1; }
+.row-3 .card-experience { flex: 2; }
+.row-3 .card-skills { flex: 1; }
+
 @media (max-width: 900px) {
-    .profile-grid {
+    .profile-row {
         flex-direction: column;
     }
 }
@@ -26,74 +90,57 @@
 /* ── Card Styling ────────────────────────────────────────── */
 .profile-card {
     background: #ffffff;
-    flex: 1;
     width: 100%;
-    padding: 40px 48px;
-    border-radius: 20px;
-    /* Smooth, diffused multi-layered shadow */
-    box-shadow: 
-        0 4px 6px -1px rgba(0, 0, 0, 0.02),
-        0 10px 15px -3px rgba(0, 0, 0, 0.04),
-        0 20px 40px -5px rgba(0, 0, 0, 0.06);
-    border: 1px solid rgba(226, 232, 240, 0.8);
-    position: relative;
+    padding: 32px;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
     /* Entrance Animation */
     animation: fadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-    /* Transition for hover */
-    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s ease;
-}
-
-/* Subtle floating effect on hover */
-.profile-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 
-        0 10px 15px -3px rgba(0, 0, 0, 0.03),
-        0 25px 50px -12px rgba(0, 0, 0, 0.08);
 }
 
 @keyframes fadeUp {
-    0% {
-        opacity: 0;
-        transform: translateY(24px);
-    }
-    100% {
-        opacity: 1;
-        transform: translateY(0);
-    }
+    0% { opacity: 0; transform: translateY(24px); }
+    100% { opacity: 1; transform: translateY(0); }
 }
 
-/* ── Header Typography ────────────────────────────────────── */
-.profile-card h2 {
-    font-size: 28px;
-    font-weight: 700;
+/* ── Card Typography ────────────────────────────────────── */
+.profile-card h3 {
+    font-size: 20px;
+    font-weight: 600;
     color: #0f172a;
-    margin-bottom: 8px;
-    letter-spacing: -0.02em;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
 }
 
-.profile-card .subtitle {
-    font-size: 15px;
+.profile-card h3 i {
+    color: #3b82f6;
+}
+
+.section-subtitle {
+    font-size: 14px;
     color: #64748b;
-    margin-bottom: 32px;
-    padding-bottom: 24px;
-    position: relative;
+    margin-bottom: 24px;
+    margin-top: -16px;
+    line-height: 1.5;
 }
 
-/* Decorative animated underline */
-.profile-card .subtitle::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 40px;
-    height: 3px;
-    background: linear-gradient(90deg, #3b82f6, #8b5cf6);
-    border-radius: 4px;
-    transition: width 0.4s ease;
+/* Info Grid inside row 1 */
+.info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0 24px;
+}
+.phone-group {
+    grid-column: 1 / -1;
 }
 
-.profile-card:hover .subtitle::after {
-    width: 80px; /* Expands on card hover */
+@media (max-width: 600px) {
+    .info-grid {
+        grid-template-columns: 1fr;
+    }
 }
 
 /* ── Form Elements ────────────────────────────────────────── */
@@ -218,6 +265,7 @@
     cursor: pointer;
     display: block;
     width: 100%;
+    white-space: nowrap;
     
     /* Dynamic Shadow */
     box-shadow: 0 8px 20px -6px rgba(59, 130, 246, 0.5);
@@ -260,15 +308,16 @@
 /* ── Avatar Upload Section ────────────────────────────────── */
 .avatar-upload-container {
     display: flex;
-    flex-direction: column;
     align-items: center;
+    gap: 24px;
     margin-bottom: 32px;
+    flex-direction: row;
 }
 
 .avatar-preview-wrap {
     position: relative;
-    width: 120px;
-    height: 120px;
+    width: 80px;
+    height: 80px;
     border-radius: 50%;
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
     border: 4px solid #ffffff;
@@ -327,11 +376,15 @@
 /* ── CV Upload ────────────────────────────────────────────── */
 .cv-upload-box {
     border: 2px dashed #cbd5e1;
-    border-radius: 12px;
-    padding: 24px;
+    border-radius: 16px;
+    padding: 32px 24px;
     text-align: center;
     background-color: #f8fafc;
-    transition: all 0.3s ease;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 160px;
 }
 
 .cv-upload-box:hover {
@@ -377,4 +430,19 @@
 
 .cv-preview a:hover {
     text-decoration: underline;
+}
+
+/* ── Form Actions ─────────────────────────────────────────── */
+.profile-actions {
+    display: flex;
+    justify-content: flex-end;
+    width: 100%;
+    max-width: 1100px;
+    margin-top: 24px;
+}
+
+.profile-actions .btn-save {
+    width: auto;
+    min-width: 200px;
+    margin-top: 0;
 }
