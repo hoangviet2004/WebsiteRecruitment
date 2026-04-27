@@ -15,6 +15,13 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
     public DbSet<Company> Companies => Set<Company>();
     public DbSet<JobPost> JobPosts => Set<JobPost>();
+
+    // ── Transaction Management ──
+    public DbSet<ServicePackage> ServicePackages => Set<ServicePackage>();
+    public DbSet<Subscription> Subscriptions => Set<Subscription>();
+    public DbSet<Transaction> Transactions => Set<Transaction>();
+    public DbSet<Coupon> Coupons => Set<Coupon>();
+    public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
     
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -86,6 +93,83 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
              .WithMany(c => c.Jobs)
              .HasForeignKey(x => x.CompanyId)
              .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // ── ServicePackage ───────────────────────────────────
+        builder.Entity<ServicePackage>(e =>
+        {
+            e.ToTable("ServicePackages");
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Name).HasMaxLength(100).IsRequired();
+            e.Property(x => x.Features).HasMaxLength(4000);
+        });
+
+        // ── Subscription ────────────────────────────────────
+        builder.Entity<Subscription>(e =>
+        {
+            e.ToTable("Subscriptions");
+            e.HasKey(x => x.Id);
+            e.Property(x => x.UserId).HasMaxLength(450).IsRequired();
+            e.Property(x => x.Status).HasMaxLength(50).IsRequired();
+            e.HasIndex(x => new { x.UserId, x.Status });
+
+            e.HasOne(x => x.Package)
+             .WithMany()
+             .HasForeignKey(x => x.PackageId)
+             .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        // ── Transaction ─────────────────────────────────────
+        builder.Entity<Transaction>(e =>
+        {
+            e.ToTable("Transactions");
+            e.HasKey(x => x.Id);
+            e.Property(x => x.TransactionCode).HasMaxLength(50).IsRequired();
+            e.HasIndex(x => x.TransactionCode).IsUnique();
+            e.Property(x => x.UserId).HasMaxLength(450).IsRequired();
+            e.Property(x => x.CompanyName).HasMaxLength(200);
+            e.Property(x => x.PaymentMethod).HasMaxLength(50);
+            e.Property(x => x.Status).HasMaxLength(50);
+            e.Property(x => x.PaymentGatewayRef).HasMaxLength(200);
+            e.Property(x => x.StatusHistory).HasMaxLength(4000);
+            e.Property(x => x.RefundReason).HasMaxLength(1000);
+            e.Property(x => x.RefundedBy).HasMaxLength(450);
+            e.HasIndex(x => x.Status);
+            e.HasIndex(x => x.CreatedAt);
+
+            e.HasOne(x => x.Package)
+             .WithMany()
+             .HasForeignKey(x => x.PackageId)
+             .OnDelete(DeleteBehavior.Restrict);
+
+            e.HasOne(x => x.Coupon)
+             .WithMany()
+             .HasForeignKey(x => x.CouponId)
+             .OnDelete(DeleteBehavior.SetNull);
+        });
+
+        // ── Coupon ───────────────────────────────────────────
+        builder.Entity<Coupon>(e =>
+        {
+            e.ToTable("Coupons");
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Code).HasMaxLength(50).IsRequired();
+            e.HasIndex(x => x.Code).IsUnique();
+            e.Property(x => x.DiscountType).HasMaxLength(50);
+            e.Property(x => x.ApplicablePackageIds).HasMaxLength(2000);
+        });
+
+        // ── AuditLog ────────────────────────────────────────
+        builder.Entity<AuditLog>(e =>
+        {
+            e.ToTable("AuditLogs");
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Action).HasMaxLength(100).IsRequired();
+            e.Property(x => x.EntityType).HasMaxLength(100).IsRequired();
+            e.Property(x => x.EntityId).HasMaxLength(450).IsRequired();
+            e.Property(x => x.PerformedBy).HasMaxLength(450).IsRequired();
+            e.Property(x => x.Details).HasMaxLength(4000);
+            e.HasIndex(x => x.CreatedAt);
         });
     }
 }

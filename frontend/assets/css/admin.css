@@ -748,3 +748,148 @@ tbody tr:hover {
     border-color: var(--primary-blue);
     box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
 }
+
+/* ═══════════════════════════════════════════════════════════
+   Transaction Management — Specific Styles
+   ═══════════════════════════════════════════════════════════ */
+
+/* Modal Forms */
+.modal-form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 16px;
+}
+
+.form-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 6px;
+}
+
+.form-label .required {
+    color: var(--primary-red);
+    margin-left: 3px;
+}
+
+.form-input, .form-textarea {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1.5px solid var(--border-color);
+    border-radius: 8px;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    color: var(--text-primary);
+    background: #f8fafc;
+    transition: all 0.2s;
+    box-sizing: border-box;
+}
+
+.form-input:focus, .form-textarea:focus {
+    border-color: var(--primary-blue);
+    background: #fff;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
+}
+
+.form-textarea {
+    resize: vertical;
+}
+
+.form-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    color: var(--text-primary);
+    cursor: pointer;
+    user-select: none;
+}
+
+.form-checkbox input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--primary-blue);
+    cursor: pointer;
+}
+
+/* Modal Actions (Buttons) */
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border-color);
+}
+
+.tm-btn-primary, .tm-btn-secondary, .tm-btn-danger {
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    font-family: 'Inter', sans-serif;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border: none;
+}
+
+.tm-btn-primary {
+    background: var(--primary-blue);
+    color: #fff;
+    box-shadow: 0 2px 6px rgba(59, 130, 246, 0.25);
+}
+.tm-btn-primary:hover {
+    background: var(--primary-blue-hover);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.35);
+}
+
+.tm-btn-secondary {
+    background: #f1f5f9;
+    color: var(--text-secondary);
+    border: 1px solid var(--border-color);
+}
+.tm-btn-secondary:hover {
+    background: #e2e8f0;
+    color: var(--text-primary);
+}
+
+.tm-btn-danger {
+    background: var(--primary-red);
+    color: #fff;
+    box-shadow: 0 2px 6px rgba(239, 68, 68, 0.25);
+}
+.tm-btn-danger:hover {
+    background: var(--primary-red-hover);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.35);
+}
+
+/* Print Invoice Styles */
+@media print {
+    body * {
+        visibility: hidden;
+    }
+    #modal-txn-detail, #modal-txn-detail * {
+        visibility: visible;
+    }
+    #modal-txn-detail {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        background: transparent;
+        box-shadow: none;
+    }
+    .modal-close-btn {
+        display: none !important;
+    }
+}

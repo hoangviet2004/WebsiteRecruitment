@@ -54,6 +54,7 @@ public static class DependencyInjection
         services.AddScoped<IJobService, JobService>();
         services.AddScoped<IAdminService, AdminService>();
         services.AddScoped<IStatisticsService, StatisticsService>();
+        services.AddScoped<ITransactionManagementService, TransactionManagementService>();
         services.AddMemoryCache();
 
         return services;
