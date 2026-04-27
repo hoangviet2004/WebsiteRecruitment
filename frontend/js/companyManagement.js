@@ -25,7 +25,8 @@ async function loadCompanies() {
         <i class="fa-solid fa-spinner fa-spin" style="font-size:20px;color:#3b82f6;"></i>
         <span style="display:block;margin-top:8px;color:#64748b;">Đang tải dữ liệu...</span>
     </td></tr>`;
-    document.getElementById('cm-count').textContent = '';
+    const cmCount = document.getElementById('cm-count');
+    if (cmCount) cmCount.textContent = '';
 
     try {
         const response = await apiFetchAuth('/api/admin/companies', { method: 'GET' });

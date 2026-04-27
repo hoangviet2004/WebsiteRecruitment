@@ -22,7 +22,8 @@ document.addEventListener('DOMContentLoaded', () => {
 async function loadUsers() {
     const tbody = document.getElementById('user-table-body');
     tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:32px;"><i class="fa-solid fa-spinner fa-spin" style="font-size:20px;color:#3b82f6;"></i><br><span style="margin-top:8px;display:block;color:#64748b;">Đang tải dữ liệu...</span></td></tr>';
-    document.getElementById('am-count').textContent = '';
+    const amCount = document.getElementById('am-count');
+    if (amCount) amCount.textContent = '';
 
     try {
         const response = await apiFetchAuth('/api/admin/users', { method: 'GET' });
