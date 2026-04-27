@@ -187,7 +187,17 @@ public sealed class AdminService : IAdminService
             .ToListAsync(ct);
 
         return companies.Select(c => new CompanyDto(
-            c.Id, c.OwnerId, c.Name, c.Description, c.Website, c.Address, c.CompanySize, c.LogoUrl)).ToList();
+            c.Id, c.OwnerId, c.Name, c.Description, c.Website, c.Address, c.CompanySize, c.LogoUrl, c.IsBlocked, c.CreatedAt)).ToList();
+    }
+
+    public async Task ToggleCompanyStatusAsync(Guid companyId, CancellationToken ct)
+    {
+        var company = await _db.Companies.FirstOrDefaultAsync(x => x.Id == companyId, ct);
+        if (company == null) throw new InvalidOperationException("Company not found");
+
+        company.IsBlocked = !company.IsBlocked;
+        company.UpdatedAt = DateTime.UtcNow;
+        await _db.SaveChangesAsync(ct);
     }
 
     public async Task DeleteCompanyAsync(Guid companyId, CancellationToken ct)

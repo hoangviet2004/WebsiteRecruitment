@@ -109,6 +109,13 @@ public sealed class AdminController : ControllerBase
         return Ok(ApiResponse<object>.Ok(null!, "Company deleted successfully"));
     }
 
+    [HttpPut("companies/{id:guid}/toggle-status")]
+    public async Task<ActionResult<ApiResponse<object>>> ToggleCompanyStatus(Guid id, CancellationToken ct)
+    {
+        await _adminService.ToggleCompanyStatusAsync(id, ct);
+        return Ok(ApiResponse<object>.Ok(null!, "Company status toggled successfully"));
+    }
+
     // ── STATISTICS ──────────────────────────────────────────────────────────
     private static StatisticsQueryDto ParseQuery(string? startDate, string? endDate)
     {

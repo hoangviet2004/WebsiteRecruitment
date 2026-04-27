@@ -93,6 +93,7 @@
                         <th class="am-th-sort" onclick="sortByCol('size')" data-col="size">
                             Quy mô <i class="fa-solid fa-sort am-sort-icon"></i>
                         </th>
+                        <th>Trạng thái</th>
                         <th class="am-th-sort" onclick="sortByCol('createdAt')" data-col="createdAt">
                             Ngày tạo <i class="fa-solid fa-sort-down am-sort-icon active-sort"></i>
                         </th>
@@ -100,7 +101,7 @@
                     </tr>
                 </thead>
                 <tbody id="company-table-body">
-                    <tr><td colspan="7" style="text-align:center;">Đang tải dữ liệu...</td></tr>
+                    <tr><td colspan="8" style="text-align:center;">Đang tải dữ liệu...</td></tr>
                 </tbody>
             </table>
         </div>
@@ -109,6 +110,21 @@
         <div class="am-pagination" id="cm-pagination"></div>
     </div>
 </main>
+
+<!-- Company Profile Modal -->
+<div class="modal-overlay" id="companyProfileModal" onclick="handleModalBackdropClick(event)">
+    <div class="modal-card" id="companyModalCard" style="max-width: 600px;">
+        <div class="modal-header">
+            <h2><i class="fa-solid fa-building"></i> Hồ sơ công ty</h2>
+            <button class="modal-close-btn" onclick="closeCompanyModal()" title="Đóng">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+        <div class="modal-body" id="companyModalBody">
+            <!-- Dynamic content will be injected here -->
+        </div>
+    </div>
+</div>
 
 <script src="../js/api.js"></script>
 <script src="../js/guard.js"></script>

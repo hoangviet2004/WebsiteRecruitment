@@ -17,5 +17,6 @@ public interface IAdminService
     Task ApproveJobAsync(Guid jobId, CancellationToken ct);
 
     Task<List<CompanyDto>> GetAllCompaniesAsync(CancellationToken ct);
+    Task ToggleCompanyStatusAsync(Guid companyId, CancellationToken ct);
     Task DeleteCompanyAsync(Guid companyId, CancellationToken ct);
 }

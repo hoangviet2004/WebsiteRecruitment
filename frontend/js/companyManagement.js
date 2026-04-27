@@ -197,8 +197,23 @@ function renderTable(companies, isEmpty) {
             ? new Date(c.createdAt).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' })
             : '—';
 
+        // Block status badge & button
+        const statusBadge = !c.isBlocked
+            ? '<span class="badge badge-active">Hoạt động</span>'
+            : '<span class="badge badge-blocked">Bị chặn</span>';
+            
+        const toggleBtnHtml = c.isBlocked
+            ? `<button class="btn-action btn-toggle" onclick="toggleCompanyStatus('${c.id}', false)" title="Bỏ chặn công ty">
+                   <i class="fa-solid fa-unlock"></i>
+               </button>`
+            : `<button class="btn-action btn-delete" onclick="toggleCompanyStatus('${c.id}', true)" title="Chặn công ty">
+                   <i class="fa-solid fa-ban"></i>
+               </button>`;
+
+        const rowBg = c.isBlocked ? 'style="background:#fef2f2;"' : '';
+
         html += `
-            <tr>
+            <tr ${rowBg}>
                 <td>
                     <div class="cm-logo-cell">${logoHtml}</div>
                 </td>
@@ -217,8 +232,13 @@ function renderTable(companies, isEmpty) {
                 </td>
                 <td>${webHtml}</td>
                 <td>${sizeBadge}</td>
+                <td>${statusBadge}</td>
                 <td style="white-space:nowrap;color:#64748b;font-size:13px;">${dateStr}</td>
-                <td>
+                <td style="display:flex;gap:6px;align-items:center;">
+                    <button class="btn-action btn-view" onclick="viewCompanyProfile('${c.id}')" title="Xem hồ sơ">
+                        <i class="fa-solid fa-eye"></i>
+                    </button>
+                    ${toggleBtnHtml}
                     <button class="btn-action btn-delete" onclick="deleteCompany('${c.id}')" title="Xóa công ty">
                         <i class="fa-solid fa-trash-can"></i>
                     </button>
@@ -292,6 +312,112 @@ async function deleteCompany(id) {
         showToast('Lỗi kết nối: ' + e.message, 'error');
     }
 }
+
+// ── Toggle company status ─────────────────────────────────────
+async function toggleCompanyStatus(id, isBlocking) {
+    const actionText = isBlocking ? 'chặn' : 'bỏ chặn';
+    if (!confirm(`Bạn có chắc chắn muốn ${actionText} công ty này?`)) return;
+
+    try {
+        const response = await apiFetchAuth(`/api/admin/companies/${id}/toggle-status`, { method: 'PUT' });
+        if (response.ok) {
+            showToast(`Đã ${actionText} công ty thành công!`, 'success');
+            await loadCompanies();
+        } else {
+            let errMsg = 'Không xác định';
+            try {
+                const error = await response.json();
+                errMsg = error.message || error.title || JSON.stringify(error);
+            } catch {
+                errMsg = `HTTP ${response.status} ${response.statusText}`;
+            }
+            showToast('Lỗi: ' + errMsg, 'error');
+        }
+    } catch (e) {
+        showToast('Lỗi kết nối: ' + e.message, 'error');
+    }
+}
+
+// ── View Company Profile Modal ──────────────────────────────────────────────
+function viewCompanyProfile(companyId) {
+    const p = _allCompanies.find(c => c.id === companyId);
+    if (!p) return;
+
+    const modal = document.getElementById('companyProfileModal');
+    const body  = document.getElementById('companyModalBody');
+
+    const logoHtml = p.logoUrl
+        ? `<img src="${p.logoUrl}" class="candidate-avatar" style="border-radius:12px;object-fit:contain;background:#fff;" alt="${escHtml(p.name)}">`
+        : `<div class="candidate-avatar-placeholder" style="border-radius:12px;">${initials(p.name)}</div>`;
+
+    const statusBadge = !p.isBlocked
+        ? `<span class="badge badge-active">Hoạt động</span>`
+        : `<span class="badge badge-blocked">Bị chặn</span>`;
+
+    const createdAt = p.createdAt
+        ? new Date(p.createdAt).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' })
+        : '—';
+
+    const descValue = (p.description && p.description.trim())
+        ? p.description.replace(/\n/g, '<br>')
+        : '<span class="empty" style="color:#94a3b8;font-style:italic;">Chưa có giới thiệu</span>';
+
+    const webLink = p.website
+        ? `<a href="${p.website}" target="_blank" rel="noopener" style="color:#3b82f6;text-decoration:none;"><i class="fa-solid fa-arrow-up-right-from-square" style="margin-right:4px;"></i>${escHtml(p.website)}</a>`
+        : '—';
+
+    body.innerHTML = `
+        <div class="candidate-profile-header" style="display:flex;align-items:center;gap:16px;padding-bottom:20px;border-bottom:1px solid #e2e8f0;margin-bottom:20px;">
+            ${logoHtml}
+            <div class="candidate-header-info">
+                <h3 style="margin:0 0 6px 0;font-size:20px;color:#0f172a;">${escHtml(p.name)}</h3>
+                ${statusBadge}
+            </div>
+        </div>
+
+        <div class="profile-info-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+            <div class="profile-info-item full-width" style="grid-column:1/-1;">
+                <div class="profile-info-label" style="font-size:12px;font-weight:600;color:#64748b;margin-bottom:4px;"><i class="fa-solid fa-location-dot fa-xs"></i> Địa chỉ</div>
+                <div class="profile-info-value" style="font-size:14px;color:#1e293b;">${escHtml(p.address || '—')}</div>
+            </div>
+            <div class="profile-info-item">
+                <div class="profile-info-label" style="font-size:12px;font-weight:600;color:#64748b;margin-bottom:4px;"><i class="fa-solid fa-users fa-xs"></i> Quy mô</div>
+                <div class="profile-info-value" style="font-size:14px;color:#1e293b;">${escHtml(p.companySize || '—')}</div>
+            </div>
+            <div class="profile-info-item">
+                <div class="profile-info-label" style="font-size:12px;font-weight:600;color:#64748b;margin-bottom:4px;"><i class="fa-solid fa-calendar fa-xs"></i> Ngày tạo</div>
+                <div class="profile-info-value" style="font-size:14px;color:#1e293b;">${createdAt}</div>
+            </div>
+            <div class="profile-info-item full-width" style="grid-column:1/-1;">
+                <div class="profile-info-label" style="font-size:12px;font-weight:600;color:#64748b;margin-bottom:4px;"><i class="fa-solid fa-globe fa-xs"></i> Website</div>
+                <div class="profile-info-value" style="font-size:14px;color:#1e293b;">${webLink}</div>
+            </div>
+            <div class="profile-info-item full-width" style="grid-column:1/-1;">
+                <div class="profile-info-label" style="font-size:12px;font-weight:600;color:#64748b;margin-bottom:4px;"><i class="fa-solid fa-align-left fa-xs"></i> Giới thiệu công ty</div>
+                <div class="profile-info-value" style="font-size:14px;color:#1e293b;line-height:1.6;max-height:200px;overflow-y:auto;padding-right:8px;">${descValue}</div>
+            </div>
+            <div class="profile-info-item full-width" style="grid-column:1/-1;">
+                <div class="profile-info-label" style="font-size:12px;font-weight:600;color:#64748b;margin-bottom:4px;"><i class="fa-solid fa-fingerprint fa-xs"></i> ID</div>
+                <div class="profile-info-value" style="font-size:12px; font-family:monospace; color:#64748b;">${p.id}</div>
+            </div>
+        </div>
+    `;
+    modal.classList.add('open');
+}
+
+function closeCompanyModal() {
+    document.getElementById('companyProfileModal').classList.remove('open');
+}
+
+function handleModalBackdropClick(event) {
+    if (event.target === document.getElementById('companyProfileModal')) {
+        closeCompanyModal();
+    }
+}
+
+document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeCompanyModal();
+});
 
 // ── Utilities ─────────────────────────────────────────────────
 function escHtml(str) {

@@ -21,6 +21,9 @@ public class Company
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+    
+    // Status flag for admin control
+    public bool IsBlocked { get; set; } = false;
 
     // Navigation properties
     public ICollection<JobPost> Jobs { get; set; } = new List<JobPost>();
