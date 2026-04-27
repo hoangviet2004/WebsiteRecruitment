@@ -42,6 +42,7 @@ async function loadMyCompany() {
             currentCompanyId = res.data.id;
             document.getElementById('company-id').value = res.data.id;
             document.getElementById('company-name').value = res.data.name || '';
+            document.getElementById('company-taxcode').value = res.data.taxCode || '';
             document.getElementById('company-website').value = res.data.website || '';
             document.getElementById('company-address').value = res.data.address || '';
             document.getElementById('company-desc').value = res.data.description || '';
@@ -63,6 +64,7 @@ document.getElementById('company-form').addEventListener('submit', async functio
     
     const payload = {
         name: document.getElementById('company-name').value,
+        taxCode: document.getElementById('company-taxcode').value,
         website: document.getElementById('company-website').value || null,
         address: document.getElementById('company-address').value || null,
         description: document.getElementById('company-desc').value || null,

@@ -381,6 +381,10 @@ function viewCompanyProfile(companyId) {
                 <div class="profile-info-value" style="font-size:14px;color:#1e293b;">${escHtml(p.address || '—')}</div>
             </div>
             <div class="profile-info-item">
+                <div class="profile-info-label" style="font-size:12px;font-weight:600;color:#64748b;margin-bottom:4px;"><i class="fa-solid fa-file-invoice-dollar fa-xs"></i> Mã số thuế</div>
+                <div class="profile-info-value" style="font-size:14px;color:#1e293b;font-family:monospace;font-weight:500;">${escHtml(p.taxCode || '—')}</div>
+            </div>
+            <div class="profile-info-item">
                 <div class="profile-info-label" style="font-size:12px;font-weight:600;color:#64748b;margin-bottom:4px;"><i class="fa-solid fa-users fa-xs"></i> Quy mô</div>
                 <div class="profile-info-value" style="font-size:14px;color:#1e293b;">${escHtml(p.companySize || '—')}</div>
             </div>

@@ -20,4 +20,8 @@ public sealed class CreateCompanyRequest
 
     [MaxLength(50)]
     public string? CompanySize { get; set; }
+
+    [Required(ErrorMessage = "Tax code is required")]
+    [MaxLength(50)]
+    public string TaxCode { get; set; } = string.Empty;
 }

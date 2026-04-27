@@ -10,6 +10,7 @@ public class Company
     public string Name { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     public string Website { get; set; } = string.Empty;
+    public string TaxCode { get; set; } = string.Empty;
     public string Address { get; set; } = string.Empty;
 
     // Quy mô công ty (VD: "1-50", "50-150", "150-500", "500+")

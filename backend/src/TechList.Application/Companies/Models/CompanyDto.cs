@@ -10,5 +10,6 @@ public sealed record CompanyDto(
     string? CompanySize,
     string? LogoUrl,
     bool IsBlocked,
-    DateTime CreatedAt
+    DateTime CreatedAt,
+    string TaxCode
 );
