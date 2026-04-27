@@ -102,6 +102,66 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
             e.HasKey(x => x.Id);
             e.Property(x => x.Name).HasMaxLength(100).IsRequired();
             e.Property(x => x.Features).HasMaxLength(4000);
+
+            // SEED DATA: Đảm bảo đồng bộ UTF-8 khi đồng đội pull code về
+            e.HasData(
+                new ServicePackage
+                {
+                    Id = Guid.Parse("11111111-1111-1111-1111-111111111111"),
+                    Name = "Free",
+                    Price = 0,
+                    MaxJobPosts = 3,
+                    DurationDays = 30,
+                    Features = "[\"3 tin tuyển dụng/tháng\",\"Hiển thị cơ bản\",\"Hỗ trợ qua email\"]",
+                    IsHighlighted = false,
+                    IsActive = true,
+                    DisplayOrder = 1,
+                    CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc),
+                    UpdatedAt = new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+                },
+                new ServicePackage
+                {
+                    Id = Guid.Parse("22222222-2222-2222-2222-222222222222"),
+                    Name = "Basic",
+                    Price = 299000,
+                    MaxJobPosts = 10,
+                    DurationDays = 30,
+                    Features = "[\"10 tin tuyển dụng/tháng\",\"Hiển thị ưu tiên\",\"Xem hồ sơ ứng viên\",\"Hỗ trợ qua email và chat\"]",
+                    IsHighlighted = false,
+                    IsActive = true,
+                    DisplayOrder = 2,
+                    CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc),
+                    UpdatedAt = new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+                },
+                new ServicePackage
+                {
+                    Id = Guid.Parse("33333333-3333-3333-3333-333333333333"),
+                    Name = "Pro",
+                    Price = 699000,
+                    MaxJobPosts = 30,
+                    DurationDays = 30,
+                    Features = "[\"30 tin tuyển dụng/tháng\",\"Hiển thị nổi bật\",\"Xem & tải hồ sơ ứng viên\",\"Thống kê chi tiết\",\"Hỗ trợ ưu tiên 24/7\"]",
+                    IsHighlighted = true,
+                    IsActive = true,
+                    DisplayOrder = 3,
+                    CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc),
+                    UpdatedAt = new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+                },
+                new ServicePackage
+                {
+                    Id = Guid.Parse("44444444-4444-4444-4444-444444444444"),
+                    Name = "Premium",
+                    Price = 1299000,
+                    MaxJobPosts = -1,
+                    DurationDays = 30,
+                    Features = "[\"Không giới hạn tin tuyển dụng\",\"Hiển thị VIP trên trang chủ\",\"Toàn quyền xem hồ sơ ứng viên\",\"Thống kê nâng cao\",\"Tài khoản quản lý đa người dùng\",\"Hỗ trợ chuyên viên riêng\"]",
+                    IsHighlighted = false,
+                    IsActive = true,
+                    DisplayOrder = 4,
+                    CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc),
+                    UpdatedAt = new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+                }
+            );
         });
 
         // ── Subscription ────────────────────────────────────

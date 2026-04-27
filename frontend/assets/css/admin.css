@@ -800,6 +800,8 @@ tbody tr:hover {
 
 .form-textarea {
     resize: vertical;
+    font-family: 'Inter', sans-serif !important;
+    line-height: 1.6;
 }
 
 .form-checkbox {
