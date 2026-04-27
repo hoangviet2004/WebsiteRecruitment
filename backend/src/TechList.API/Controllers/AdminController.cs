@@ -15,10 +15,12 @@ namespace TechList.API.Controllers;
 public sealed class AdminController : ControllerBase
 {
     private readonly IAdminService _adminService;
+    private readonly IStatisticsService _statisticsService;
 
-    public AdminController(IAdminService adminService)
+    public AdminController(IAdminService adminService, IStatisticsService statisticsService)
     {
         _adminService = adminService;
+        _statisticsService = statisticsService;
     }
 
     // --- USERS ---
@@ -105,5 +107,83 @@ public sealed class AdminController : ControllerBase
     {
         await _adminService.DeleteCompanyAsync(id, ct);
         return Ok(ApiResponse<object>.Ok(null!, "Company deleted successfully"));
+    }
+
+    // ── STATISTICS ──────────────────────────────────────────────────────────
+    private static StatisticsQueryDto ParseQuery(string? startDate, string? endDate)
+    {
+        var end   = string.IsNullOrWhiteSpace(endDate)   ? DateTime.UtcNow : DateTime.Parse(endDate).ToUniversalTime();
+        var start = string.IsNullOrWhiteSpace(startDate) ? end.AddDays(-30)  : DateTime.Parse(startDate).ToUniversalTime();
+        var days  = (end - start).TotalDays;
+        var period = days <= 14 ? "day" : days <= 90 ? "week" : "month";
+        return new StatisticsQueryDto(start, end, period);
+    }
+
+    [HttpGet("statistics/overview")]
+    public async Task<ActionResult<ApiResponse<OverviewStatsDto>>> GetStatisticsOverview(
+        [FromQuery] string? startDate, [FromQuery] string? endDate, CancellationToken ct)
+    {
+        var query  = ParseQuery(startDate, endDate);
+        var result = await _statisticsService.GetOverviewAsync(query, ct);
+        return Ok(ApiResponse<OverviewStatsDto>.Ok(result));
+    }
+
+    [HttpGet("statistics/timeseries")]
+    public async Task<ActionResult<ApiResponse<List<TimeSeriesPointDto>>>> GetTimeSeries(
+        [FromQuery] string? startDate, [FromQuery] string? endDate, CancellationToken ct)
+    {
+        var query  = ParseQuery(startDate, endDate);
+        var result = await _statisticsService.GetTimeSeriesAsync(query, ct);
+        return Ok(ApiResponse<List<TimeSeriesPointDto>>.Ok(result));
+    }
+
+    [HttpGet("statistics/top-skills")]
+    public async Task<ActionResult<ApiResponse<List<SkillStatDto>>>> GetTopSkills(CancellationToken ct)
+    {
+        var result = await _statisticsService.GetTopSkillsAsync(ct);
+        return Ok(ApiResponse<List<SkillStatDto>>.Ok(result));
+    }
+
+    [HttpGet("statistics/job-types")]
+    public async Task<ActionResult<ApiResponse<List<JobTypeStatDto>>>> GetJobTypes(
+        [FromQuery] string? startDate, [FromQuery] string? endDate, CancellationToken ct)
+    {
+        var query  = ParseQuery(startDate, endDate);
+        var result = await _statisticsService.GetJobTypeDistributionAsync(query, ct);
+        return Ok(ApiResponse<List<JobTypeStatDto>>.Ok(result));
+    }
+
+    [HttpGet("statistics/top-companies")]
+    public async Task<ActionResult<ApiResponse<List<TopCompanyDto>>>> GetTopCompanies(
+        [FromQuery] string? startDate, [FromQuery] string? endDate, CancellationToken ct)
+    {
+        var query  = ParseQuery(startDate, endDate);
+        var result = await _statisticsService.GetTopCompaniesAsync(query, ct);
+        return Ok(ApiResponse<List<TopCompanyDto>>.Ok(result));
+    }
+
+    [HttpGet("statistics/top-jobs")]
+    public async Task<ActionResult<ApiResponse<List<TopJobDto>>>> GetTopJobs(
+        [FromQuery] string? startDate, [FromQuery] string? endDate, CancellationToken ct)
+    {
+        var query  = ParseQuery(startDate, endDate);
+        var result = await _statisticsService.GetTopJobsAsync(query, ct);
+        return Ok(ApiResponse<List<TopJobDto>>.Ok(result));
+    }
+
+    [HttpGet("statistics/active-recruiters")]
+    public async Task<ActionResult<ApiResponse<List<ActiveRecruiterDto>>>> GetActiveRecruiters(
+        [FromQuery] string? startDate, [FromQuery] string? endDate, CancellationToken ct)
+    {
+        var query  = ParseQuery(startDate, endDate);
+        var result = await _statisticsService.GetActiveRecruitersAsync(query, ct);
+        return Ok(ApiResponse<List<ActiveRecruiterDto>>.Ok(result));
+    }
+
+    [HttpGet("statistics/candidate-stats")]
+    public async Task<ActionResult<ApiResponse<List<CandidateSkillStatDto>>>> GetCandidateStats(CancellationToken ct)
+    {
+        var result = await _statisticsService.GetCandidateStatsAsync(ct);
+        return Ok(ApiResponse<List<CandidateSkillStatDto>>.Ok(result));
     }
 }

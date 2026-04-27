@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Thống kê & Báo cáo — Admin Dashboard</title>
+  <meta name="description" content="Trang thống kê và báo cáo toàn diện cho Admin: tổng quan hệ thống, biểu đồ phân tích, bảng chi tiết và xuất báo cáo.">
+
+  <!-- Icons & Fonts -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="../assets/css/sidebar.css">
+  <link rel="stylesheet" href="../assets/css/admin.css">
+  <link rel="stylesheet" href="../assets/css/statisticAnalytic.css">
+</head>
+<body>
+
+<div id="sidebar-container"></div>
+
+<main class="admin-content" id="stats-main">
+
+  <!-- ── Page Header ──────────────────────────────────────── -->
+  <div class="admin-header">
+    <h1><i class="fa-solid fa-chart-pie"></i> Thống kê & Báo cáo</h1>
+    <p class="subtitle">Phân tích toàn diện dữ liệu hệ thống tuyển dụng.</p>
+  </div>
+
+  <!-- ── Export + Filter Bar ─────────────────────────────── -->
+  <div class="export-bar">
+    <button class="btn-export btn-export-excel" id="btn-export-excel" onclick="exportExcel()">
+      <i class="fa-solid fa-file-excel"></i> Xuất Excel
+    </button>
+    <button class="btn-export btn-export-pdf" id="btn-export-pdf" onclick="exportPdf()">
+      <i class="fa-solid fa-file-pdf"></i> Xuất PDF
+    </button>
+  </div>
+
+  <div class="filter-bar" id="filter-bar">
+    <label><i class="fa-solid fa-calendar-days"></i> Khoảng thời gian:</label>
+    <button class="filter-btn" id="flt-today"  onclick="setFilter('today')">Hôm nay</button>
+    <button class="filter-btn" id="flt-7d"     onclick="setFilter('7d')">7 ngày</button>
+    <button class="filter-btn active" id="flt-30d" onclick="setFilter('30d')">30 ngày</button>
+    <button class="filter-btn" id="flt-3m"     onclick="setFilter('3m')">3 tháng</button>
+    <button class="filter-btn" id="flt-custom" onclick="setFilter('custom')">Tùy chỉnh</button>
+    <div class="filter-separator"></div>
+    <div class="date-range-group hidden" id="custom-range">
+      <input type="date" class="date-input" id="date-from" onchange="applyCustomRange()">
+      <span style="color:var(--text-secondary);font-size:13px;">→</span>
+      <input type="date" class="date-input" id="date-to" onchange="applyCustomRange()">
+    </div>
+    <!-- Last updated -->
+    <span style="margin-left:auto;font-size:12px;color:var(--text-secondary);" id="last-updated"></span>
+  </div>
+
+  <!-- ── Overview Cards ───────────────────────────────────── -->
+  <div class="overview-grid" id="overview-grid">
+    <!-- Tổng tài khoản -->
+    <div class="overview-card blue">
+      <div class="card-top">
+        <div class="card-icon blue"><i class="fa-solid fa-users"></i></div>
+        <span class="card-badge flat" id="badge-users">—</span>
+      </div>
+      <div class="card-value" id="val-users">--</div>
+      <div class="card-label">Tổng tài khoản</div>
+      <div class="card-sub">
+        <i class="fa-solid fa-user-graduate"></i>
+        <span id="sub-users">Ứng viên: -- | Nhà tuyển dụng: --</span>
+      </div>
+    </div>
+
+    <!-- Tin tuyển dụng -->
+    <div class="overview-card green">
+      <div class="card-top">
+        <div class="card-icon green"><i class="fa-solid fa-briefcase"></i></div>
+        <span class="card-badge flat" id="badge-jobs">—</span>
+      </div>
+      <div class="card-value" id="val-jobs">--</div>
+      <div class="card-label">Tin tuyển dụng đang hoạt động</div>
+      <div class="card-sub">
+        <i class="fa-solid fa-layer-group"></i>
+        <span id="sub-jobs">Tổng: -- tin</span>
+      </div>
+    </div>
+
+    <!-- Lượt ứng tuyển -->
+    <div class="overview-card purple">
+      <div class="card-top">
+        <div class="card-icon purple"><i class="fa-solid fa-file-signature"></i></div>
+        <span class="card-badge flat" id="badge-apps">—</span>
+      </div>
+      <div class="card-value" id="val-apps">--</div>
+      <div class="card-label">Lượt ứng tuyển (ước tính)</div>
+      <div class="card-sub">
+        <i class="fa-solid fa-arrow-trend-up"></i>
+        <span id="sub-apps">So với kỳ trước</span>
+      </div>
+    </div>
+
+    <!-- Công ty -->
+    <div class="overview-card orange">
+      <div class="card-top">
+        <div class="card-icon orange"><i class="fa-solid fa-building"></i></div>
+        <span class="card-badge flat" id="badge-companies">—</span>
+      </div>
+      <div class="card-value" id="val-companies">--</div>
+      <div class="card-label">Doanh nghiệp</div>
+      <div class="card-sub">
+        <i class="fa-solid fa-plus"></i>
+        <span id="sub-companies">Mới trong kỳ: --</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Charts Grid ───────────────────────────────────────── -->
+  <div class="section-header">
+    <span class="section-title"><i class="fa-solid fa-chart-bar"></i> Biểu đồ phân tích</span>
+  </div>
+
+  <div class="charts-grid">
+    <!-- Line Chart: tài khoản & tin đăng mới -->
+    <div class="chart-card span-2">
+      <div class="chart-title"><i class="fa-solid fa-chart-line"></i> Tài khoản mới & Tin đăng mới theo thời gian</div>
+      <div class="chart-subtitle">Theo ngày / tuần / tháng trong khoảng thời gian chọn</div>
+      <div class="chart-container" style="min-height:300px;position:relative;">
+        <canvas id="chart-timeseries"></canvas>
+        <div class="loading-overlay" id="load-timeseries"><div class="spinner"></div></div>
+      </div>
+    </div>
+
+    <!-- Bar Chart: top 10 kỹ năng -->
+    <div class="chart-card">
+      <div class="chart-title"><i class="fa-solid fa-code"></i> Top 10 Kỹ năng IT được tuyển dụng</div>
+      <div class="chart-subtitle">Dựa trên hồ sơ ứng viên & yêu cầu công việc</div>
+      <div class="chart-container sm" style="position:relative;">
+        <canvas id="chart-skills"></canvas>
+        <div class="loading-overlay" id="load-skills"><div class="spinner"></div></div>
+      </div>
+    </div>
+
+    <!-- Pie Chart: loại công việc -->
+    <div class="chart-card" style="display:flex;flex-direction:column;">
+      <div class="chart-title"><i class="fa-solid fa-chart-pie"></i> Phân loại tin tuyển dụng</div>
+      <div class="chart-subtitle">Full-time / Part-time / Remote / Freelance</div>
+      <div class="chart-container sm" style="position:relative;">
+        <canvas id="chart-jobtypes"></canvas>
+        <div class="loading-overlay" id="load-jobtypes"><div class="spinner"></div></div>
+      </div>
+    </div>
+
+    <!-- Horizontal Bar: top 5 công ty -->
+    <div class="chart-card span-2">
+      <div class="chart-title"><i class="fa-solid fa-building-columns"></i> Top 5 Công ty đăng tin nhiều nhất</div>
+      <div class="chart-subtitle">Số lượng tin tuyển dụng theo từng công ty</div>
+      <div class="chart-container sm" style="min-height:220px;position:relative;">
+        <canvas id="chart-companies"></canvas>
+        <div class="loading-overlay" id="load-companies"><div class="spinner"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Detail Tables ─────────────────────────────────────── -->
+  <div class="section-header">
+    <span class="section-title"><i class="fa-solid fa-table-list"></i> Bảng thống kê chi tiết</span>
+  </div>
+
+  <div class="tables-grid">
+    <!-- Top Jobs -->
+    <div class="table-card span-2">
+      <div class="table-card-header">
+        <h3><i class="fa-solid fa-fire"></i> Tin tuyển dụng có lượt ứng tuyển cao nhất</h3>
+      </div>
+      <div class="table-scroll" id="table-top-jobs">
+        <div class="empty-state" style="padding:40px;">
+          <div class="spinner"></div><p style="margin-top:12px;">Đang tải...</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Active Recruiters -->
+    <div class="table-card">
+      <div class="table-card-header">
+        <h3><i class="fa-solid fa-star"></i> Nhà tuyển dụng tích cực nhất</h3>
+      </div>
+      <div class="table-scroll" id="table-recruiters">
+        <div class="empty-state" style="padding:40px;">
+          <div class="spinner"></div><p style="margin-top:12px;">Đang tải...</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Candidate Stats -->
+    <div class="table-card">
+      <div class="table-card-header">
+        <h3><i class="fa-solid fa-user-graduate"></i> Thống kê ứng viên theo kỹ năng & kinh nghiệm</h3>
+      </div>
+      <div class="table-scroll" id="table-candidates">
+        <div class="empty-state" style="padding:40px;">
+          <div class="spinner"></div><p style="margin-top:12px;">Đang tải...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- Scripts -->
+<script src="../js/api.js"></script>
+<script src="../js/guard.js"></script>
+<script src="../js/sidebar.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+<script src="../js/statisticAnalytic.js"></script>
+
+<script>
+  requireAdmin();
+  loadSidebar();
+</script>
+
+</body>
+</html>
