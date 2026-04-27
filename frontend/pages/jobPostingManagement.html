@@ -2,6 +2,7 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Quản Lý Tin Tuyển Dụng</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -20,6 +21,23 @@
         <p class="subtitle">Phê duyệt và quản lý các tin tuyển dụng trên hệ thống.</p>
     </div>
 
+    <!-- Toolbar -->
+    <div class="am-toolbar">
+      <div class="am-search-wrap">
+        <i class="fa-solid fa-magnifying-glass am-search-icon"></i>
+        <input type="text" id="job-search" class="am-search-input" placeholder="Tìm theo tiêu đề hoặc doanh nghiệp..." oninput="filterJobs()" autocomplete="off">
+      </div>
+      <div class="am-select-wrap">
+        <i class="fa-solid fa-filter am-select-icon"></i>
+        <select id="job-filter-status" class="am-select" onchange="filterJobs()">
+          <option value="">Tất cả trạng thái</option>
+          <option value="pending">Chờ duyệt</option>
+          <option value="active">Đã duyệt & Hiện</option>
+          <option value="hidden">Đang ẩn</option>
+        </select>
+      </div>
+    </div>
+
     <div class="data-card">
         <div class="table-responsive">
             <table>
@@ -27,6 +45,7 @@
                     <tr>
                         <th>Tiêu đề</th>
                         <th>Doanh nghiệp</th>
+                        <th>Loại hình</th>
                         <th>Trạng Thái</th>
                         <th>Ngày Đăng</th>
                         <th>Hết Hạn</th>
@@ -34,12 +53,27 @@
                     </tr>
                 </thead>
                 <tbody id="job-table-body">
-                    <tr><td colspan="6" style="text-align: center;">Đang tải dữ liệu...</td></tr>
+                    <tr><td colspan="7" style="text-align: center;">Đang tải dữ liệu...</td></tr>
                 </tbody>
             </table>
         </div>
     </div>
 </main>
+
+<!-- ═══════════════════════════════════════════════════════════
+     MODAL: CHI TIẾT TIN TUYỂN DỤNG
+     ═══════════════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="modal-job-detail">
+  <div class="modal-card" style="max-width:720px;max-height:90vh;overflow-y:auto;">
+    <div class="modal-header">
+      <h2><i class="fa-solid fa-briefcase"></i> Chi tiết tin tuyển dụng</h2>
+      <button class="modal-close-btn" onclick="document.getElementById('modal-job-detail').classList.remove('open')"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal-body" id="job-detail-body">
+      <!-- Filled by JS -->
+    </div>
+  </div>
+</div>
 
 <script src="../js/api.js"></script>
 <script src="../js/guard.js"></script>
