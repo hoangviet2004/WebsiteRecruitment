@@ -48,7 +48,7 @@ async function loadCompanies() {
 function applyFilters() {
     const keyword    = (document.getElementById('cm-search')?.value || '').trim().toLowerCase();
     const sizeFilter = document.getElementById('cm-filter-size')?.value  || '';
-    const logoFilter = document.getElementById('cm-filter-logo')?.value  || '';
+    const statusFilter = document.getElementById('cm-filter-status')?.value || '';
     const sortVal    = document.getElementById('cm-sort')?.value || 'createdAt_desc';
 
     // Toggle clear btn
@@ -69,8 +69,8 @@ function applyFilters() {
             if (!hay.includes(keyword)) return false;
         }
         if (sizeFilter && c.companySize !== sizeFilter) return false;
-        if (logoFilter === 'yes' && !c.logoUrl)  return false;
-        if (logoFilter === 'no'  &&  c.logoUrl)  return false;
+        if (statusFilter === 'active' && c.isBlocked) return false;
+        if (statusFilter === 'blocked' && !c.isBlocked) return false;
         return true;
     });
 
