@@ -26,8 +26,8 @@ body {
 
 .admin-content {
     flex-grow: 1;
-    padding: 40px;
-    margin-left: 260px; /* offset sidebar */
+    padding: 40px 60px; /* Tăng padding 2 bên */
+    margin-left: 280px; /* Tăng khoảng cách so với sidebar (sidebar rộng 260px) */
     min-height: 100vh;
 }
 
