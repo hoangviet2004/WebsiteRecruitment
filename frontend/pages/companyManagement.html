@@ -20,23 +20,93 @@
         <p class="subtitle">Quản lý thông tin các doanh nghiệp trên hệ thống.</p>
     </div>
 
+    <!-- ── Toolbar ─────────────────────────────────────────── -->
+    <div class="am-toolbar">
+        <!-- Search -->
+        <div class="am-search-wrap">
+            <i class="fa-solid fa-magnifying-glass am-search-icon"></i>
+            <input
+                type="text"
+                id="cm-search"
+                class="am-search-input"
+                placeholder="Tìm theo tên, địa chỉ, website..."
+                oninput="applyFilters()"
+                autocomplete="off"
+            >
+            <button class="am-search-clear" id="cm-clear-btn" onclick="clearSearch()" title="Xóa">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <!-- Company size filter -->
+        <div class="am-select-wrap">
+            <i class="fa-solid fa-users-line am-select-icon"></i>
+            <select id="cm-filter-size" class="am-select" onchange="applyFilters()">
+                <option value="">Tất cả quy mô</option>
+                <option value="1-50">1 – 50</option>
+                <option value="50-150">50 – 150</option>
+                <option value="150-500">150 – 500</option>
+                <option value="500+">500+</option>
+            </select>
+        </div>
+
+        <!-- Has logo filter -->
+        <div class="am-select-wrap">
+            <i class="fa-solid fa-image am-select-icon"></i>
+            <select id="cm-filter-logo" class="am-select" onchange="applyFilters()">
+                <option value="">Tất cả</option>
+                <option value="yes">Có logo</option>
+                <option value="no">Chưa có logo</option>
+            </select>
+        </div>
+
+        <!-- Sort dropdown -->
+        <div class="am-select-wrap">
+            <i class="fa-solid fa-arrow-up-wide-short am-select-icon"></i>
+            <select id="cm-sort" class="am-select" onchange="applyFilters()">
+                <option value="createdAt_desc">Mới nhất</option>
+                <option value="createdAt_asc">Cũ nhất</option>
+                <option value="name_asc">Tên A→Z</option>
+                <option value="name_desc">Tên Z→A</option>
+                <option value="address_asc">Địa chỉ A→Z</option>
+            </select>
+        </div>
+
+        <!-- Result count -->
+        <span class="am-result-count" id="cm-count"></span>
+    </div>
+
+    <!-- ── Table ───────────────────────────────────────────── -->
     <div class="data-card">
         <div class="table-responsive">
             <table>
                 <thead>
                     <tr>
-                        <th>Logo</th>
-                        <th>Tên Công Ty</th>
-                        <th>Địa chỉ</th>
+                        <th style="width:56px;">Logo</th>
+                        <th class="am-th-sort" onclick="sortByCol('name')" data-col="name">
+                            Tên Công Ty <i class="fa-solid fa-sort am-sort-icon"></i>
+                        </th>
+                        <th class="am-th-sort" onclick="sortByCol('address')" data-col="address">
+                            Địa chỉ <i class="fa-solid fa-sort am-sort-icon"></i>
+                        </th>
                         <th>Website</th>
+                        <th class="am-th-sort" onclick="sortByCol('size')" data-col="size">
+                            Quy mô <i class="fa-solid fa-sort am-sort-icon"></i>
+                        </th>
+                        <th class="am-th-sort" onclick="sortByCol('createdAt')" data-col="createdAt">
+                            Ngày tạo <i class="fa-solid fa-sort-down am-sort-icon active-sort"></i>
+                        </th>
                         <th>Thao tác</th>
                     </tr>
                 </thead>
                 <tbody id="company-table-body">
-                    <tr><td colspan="5" style="text-align: center;">Đang tải dữ liệu...</td></tr>
+                    <tr><td colspan="7" style="text-align:center;">Đang tải dữ liệu...</td></tr>
                 </tbody>
             </table>
         </div>
+
+        <!-- Pagination -->
+        <div class="am-pagination" id="cm-pagination"></div>
     </div>
 </main>
 
