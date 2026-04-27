@@ -10,11 +10,13 @@ public sealed class ProfileService : IProfileService
 {
     private readonly AppDbContext _db;
     private readonly IAvatarStorageService _avatarStorage;
+    private readonly ICvStorageService _cvStorage;
 
-    public ProfileService(AppDbContext db, IAvatarStorageService avatarStorage)
+    public ProfileService(AppDbContext db, IAvatarStorageService avatarStorage, ICvStorageService cvStorage)
     {
         _db = db;
         _avatarStorage = avatarStorage;
+        _cvStorage = cvStorage;
     }
 
     public async Task<ProfileDto> GetMyProfileAsync(string userId, CancellationToken ct)
@@ -34,6 +36,8 @@ public sealed class ProfileService : IProfileService
 
         profile.DisplayName = request.DisplayName;
         profile.Bio = request.Bio ?? string.Empty;
+        profile.Skills = request.Skills;
+        profile.Experience = request.Experience;
         profile.UpdatedAt = DateTime.UtcNow;
 
         await _db.SaveChangesAsync(ct);
@@ -61,7 +65,28 @@ public sealed class ProfileService : IProfileService
         return ToDto(profile);
     }
 
+    public async Task<ProfileDto> UpdateCvAsync(string userId, Stream content, string fileName, CancellationToken ct)
+    {
+        var profile = await _db.UserProfiles.AsTracking().SingleOrDefaultAsync(x => x.UserId == userId, ct);
+        if (profile is null)
+            throw new InvalidOperationException("Profile not found");
+
+        var oldPublicId = profile.CvPublicId;
+        var (url, publicId) = await _cvStorage.UploadCvAsync(content, fileName, ct);
+
+        profile.CvUrl = url;
+        profile.CvPublicId = publicId;
+        profile.UpdatedAt = DateTime.UtcNow;
+
+        await _db.SaveChangesAsync(ct);
+
+        if (!string.IsNullOrWhiteSpace(oldPublicId) && oldPublicId != publicId)
+            await _cvStorage.DeleteAsync(oldPublicId, ct);
+
+        return ToDto(profile);
+    }
+
     private static ProfileDto ToDto(UserProfile profile) =>
-        new(profile.UserId, profile.DisplayName, profile.Bio, profile.AvatarUrl);
+        new(profile.UserId, profile.DisplayName, profile.Bio, profile.AvatarUrl, profile.CvUrl, profile.Skills, profile.Experience);
 }
 

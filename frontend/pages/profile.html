@@ -22,40 +22,106 @@
     </nav>
 
     <div class="content profile-container">
-        <div class="profile-card">
-            <h2>Thông tin cá nhân</h2>
-            <p class="subtitle">Quản lý thông tin hồ sơ để bảo mật tài khoản</p>
-            
-            <div class="avatar-upload-container">
-                <div class="avatar-preview-wrap">
-                    <img id="avatar-preview" src="https://ui-avatars.com/api/?name=User&background=3b82f6&color=fff&size=150" alt="Avatar">
-                    <label for="avatar-input" class="avatar-edit-overlay" title="Thay đổi ảnh đại diện">
-                        <i class="fa-solid fa-camera"></i>
-                    </label>
+        <form id="profile-form" class="profile-form-wrapper">
+            <!-- Header -->
+            <div class="profile-header">
+                <div class="header-titles">
+                    <h2>Hồ sơ ứng viên</h2>
+                    <p class="subtitle">Quản lý định danh nghề nghiệp và các tài liệu ứng tuyển của bạn.</p>
                 </div>
-                <input type="file" id="avatar-input" accept="image/*" hidden>
-                <div class="avatar-loading" id="avatar-loading" style="display: none;">Đang tải lên...</div>
+                <div class="header-actions">
+                    <button type="button" class="btn-discard" onclick="window.location.reload()">Hủy bỏ</button>
+                    <button type="submit" class="btn-save">Lưu thay đổi</button>
+                </div>
             </div>
 
-            <form id="profile-form">
-                <div class="form-group">
-                    <label for="fullName">Họ và tên</label>
-                    <input type="text" id="fullName" name="fullName" placeholder="Nhập họ và tên của bạn">
-                </div>
-                
-                <div class="form-group">
-                    <label for="email">Email</label>
-                    <input type="email" id="email" name="email" placeholder="Nhập địa chỉ email của bạn">
+            <!-- Row 1: Info & CV -->
+            <div class="profile-row row-1">
+                <div class="profile-card card-info">
+                    <div class="avatar-upload-container row-layout">
+                        <div class="avatar-preview-wrap">
+                            <img id="avatar-preview" src="https://ui-avatars.com/api/?name=User&background=3b82f6&color=fff&size=150" alt="Avatar">
+                            <label for="avatar-input" class="avatar-edit-overlay" title="Thay đổi ảnh đại diện">
+                                <i class="fa-solid fa-camera"></i>
+                            </label>
+                        </div>
+                        <input type="file" id="avatar-input" accept="image/*" hidden>
+                        <div class="avatar-info">
+                            <h4 id="display-name-header">Tên ứng viên</h4>
+                            <p id="display-email-header" style="color: #64748b; margin-top: 4px; font-size: 14px;">email@example.com</p>
+                            <div class="avatar-loading" id="avatar-loading" style="display: none;">Đang tải lên...</div>
+                        </div>
+                    </div>
+
+                    <div class="info-grid">
+                        <div class="form-group">
+                            <label for="fullName">Họ và tên</label>
+                            <input type="text" id="fullName" name="fullName" placeholder="Nhập họ và tên của bạn">
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Email</label>
+                            <input type="email" id="email" name="email" placeholder="Nhập địa chỉ email của bạn">
+                        </div>
+                        <div class="form-group phone-group">
+                            <label for="phone">Số điện thoại</label>
+                            <input type="text" id="phone" name="phone" placeholder="Nhập số điện thoại">
+                        </div>
+                    </div>
                 </div>
 
-                <div class="form-group">
-                    <label for="phone">Số điện thoại</label>
-                    <input type="text" id="phone" name="phone" placeholder="Nhập số điện thoại">
+                <div class="profile-card card-cv">
+                    <h3><i class="fa-solid fa-file-lines"></i> CV đính kèm</h3>
+                    <div class="form-group cv-upload-group">
+                        <div class="cv-upload-box">
+                            <input type="file" id="cv-input" accept="application/pdf" hidden>
+                            <div class="cv-preview" id="cv-preview" style="display: none;">
+                                <i class="fa-solid fa-cloud-arrow-up" style="color: #64748b; font-size: 32px; margin-bottom: 12px; display: block;"></i>
+                                <p style="font-weight: 500; color: #1e293b; margin-bottom: 4px;">PDF lên đến 10MB</p>
+                                <a href="#" id="cv-link" target="_blank">Xem file hiện tại</a>
+                                <button type="button" class="btn-change-cv" style="margin-top: 12px;" onclick="document.getElementById('cv-input').click()">Thay đổi File</button>
+                            </div>
+                            <div class="cv-empty" id="cv-empty">
+                                <i class="fa-solid fa-cloud-arrow-up" style="color: #64748b; font-size: 32px; margin-bottom: 12px; display: block;"></i>
+                                <p style="font-weight: 500; color: #1e293b; margin-bottom: 4px;">PDF lên đến 10MB</p>
+                                <button type="button" class="btn-upload-cv" style="margin-top: 12px; border: none; background: transparent; color: #3b82f6; font-weight: 600;" onclick="document.getElementById('cv-input').click()">Chọn file</button>
+                            </div>
+                            <div class="cv-loading" id="cv-loading" style="display: none; color: #3b82f6; font-weight: 500;">
+                                <i class="fa-solid fa-spinner fa-spin"></i> Đang tải lên...
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                
-                <button type="submit" class="btn-save">Lưu thay đổi</button>
-            </form>
-        </div>
+            </div>
+
+            <!-- Row 2: About Me -->
+            <div class="profile-row row-2">
+                <div class="profile-card card-about">
+                    <h3>Giới thiệu bản thân</h3>
+                    <p class="section-subtitle">Mô tả ngắn gọn về quá trình làm việc và định hướng phát triển của bạn.</p>
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <textarea id="bio" name="bio" placeholder="VD: Tôi là Frontend Developer với 2 năm kinh nghiệm..." rows="4"></textarea>
+                        <span class="bio-counter"><span id="bio-count">0</span> / 500 ký tự</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Row 3: Experience & Skills -->
+            <div class="profile-row row-3">
+                <div class="profile-card card-experience">
+                    <h3>Kinh nghiệm làm việc</h3>
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <textarea id="experience" name="experience" placeholder="Mô tả quá trình làm việc của bạn (công ty, chức vụ, thời gian, mô tả công việc)..." rows="6"></textarea>
+                    </div>
+                </div>
+
+                <div class="profile-card card-skills">
+                    <h3>Kỹ năng chuyên môn</h3>
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <textarea id="skills" name="skills" placeholder="VD: ReactJS, .NET Core, Tiếng Anh giao tiếp..." rows="6"></textarea>
+                    </div>
+                </div>
+            </div>
+        </form>
     </div>
 
     <script src="../js/api.js"></script>

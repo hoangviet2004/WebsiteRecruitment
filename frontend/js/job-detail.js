@@ -91,21 +91,53 @@ async function loadJobDetail(id) {
         const tagsHtml = `<span class="tag-pill">${job.jobType}</span> <span class="tag-pill">${job.location}</span>`;
         document.getElementById('detail-tags').innerHTML = tagsHtml;
 
-        // CỘT PHẢI - Gán Company
+        // CỘT PHẢI - Logo cơ bản (tên và logo từ job data)
         document.getElementById('detail-company-name').innerText = job.companyName;
-        document.getElementById('detail-company-location').innerText = job.location;
-        
-        // Xử lý Logo
+
         const logoBox = document.getElementById('detail-company-logo');
         if (job.companyLogo) {
             logoBox.innerHTML = `<img src="${job.companyLogo}" alt="${job.companyName}">`;
         } else {
-            // Lấy chữ cái tự động nếu không có logo
             const words = job.companyName.trim().split(' ').filter(w => w.length > 0);
             let init = '?';
             if (words.length === 1) init = words[0][0].toUpperCase();
             else if (words.length > 1) init = (words[0][0] + words[words.length - 1][0]).toUpperCase();
             logoBox.innerHTML = init;
+        }
+
+        // Tải thêm thông tin chi tiết của công ty qua API
+        if (job.companyId) {
+            try {
+                const cRes  = await apiFetch('/api/companies/' + job.companyId, { method: 'GET' });
+                const cData = await cRes.json();
+                if (cRes.ok && cData.success && cData.data) {
+                    const c = cData.data;
+
+                    if (c.companySize) {
+                        document.getElementById('detail-company-size').innerText = c.companySize;
+                        document.getElementById('sidebar-size-row').style.display = 'flex';
+                    }
+                    if (c.address && c.address.trim()) {
+                        document.getElementById('detail-company-address').innerText = c.address;
+                        document.getElementById('sidebar-address-row').style.display = 'flex';
+                    }
+                    if (c.website && c.website.trim()) {
+                        const websiteEl = document.getElementById('detail-company-website');
+                        websiteEl.href = c.website;
+                        websiteEl.innerText = c.website.replace(/^https?:\/\//, '');
+                        document.getElementById('sidebar-website-row').style.display = 'flex';
+
+                        const linkEl = document.getElementById('detail-company-link');
+                        linkEl.href = c.website;
+                        linkEl.style.display = 'flex';
+                        document.getElementById('detail-company-link-fallback').style.display = 'none';
+                    }
+                    if (c.description && c.description.trim()) {
+                        document.getElementById('detail-company-desc').innerText = c.description;
+                        document.getElementById('detail-company-desc-wrap').style.display = 'block';
+                    }
+                }
+            } catch (_) { /* Silently ignore nếu không lấy được chi tiết công ty */ }
         }
 
     } catch (error) {

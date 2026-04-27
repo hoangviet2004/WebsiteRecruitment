@@ -15,6 +15,7 @@ using TechList.Infrastructure.Companies;
 using TechList.Infrastructure.Jobs;
 using TechList.Application.Admin.Interfaces;
 using TechList.Infrastructure.Admin;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace TechList.Infrastructure;
 
@@ -47,10 +48,14 @@ public static class DependencyInjection
         services.AddSingleton<IRefreshTokenService, RefreshTokenService>();
 
         services.AddScoped<IAvatarStorageService, CloudinaryAvatarStorageService>();
+        services.AddScoped<ICvStorageService, CloudinaryCvStorageService>();
         services.AddScoped<IProfileService, ProfileService>();
         services.AddScoped<ICompanyService, CompanyService>();
         services.AddScoped<IJobService, JobService>();
         services.AddScoped<IAdminService, AdminService>();
+        services.AddScoped<IStatisticsService, StatisticsService>();
+        services.AddScoped<ITransactionManagementService, TransactionManagementService>();
+        services.AddMemoryCache();
 
         return services;
     }

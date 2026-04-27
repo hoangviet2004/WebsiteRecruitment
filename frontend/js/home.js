@@ -128,46 +128,48 @@ async function loadJobs() {
         const jobs = res.data;
         
         jobs.forEach(job => {
-            const logoHtml = job.companyLogo 
-                ? `<img src="${job.companyLogo}" class="company-logo" alt="${job.companyName}">`
+            // Logo: wrapper div luôn có class, bên trong là <img> hoặc chữ cái
+            const logoHtml = job.companyLogo
+                ? `<div class="company-logo"><img src="${job.companyLogo}" alt="${job.companyName}"></div>`
                 : `<div class="company-logo">${getInitials(job.companyName)}</div>`;
-                
+
+            // Lương — format triệu VND
             let salaryStr = 'Thỏa thuận';
             if (job.minSalary && job.maxSalary) {
-                salaryStr = `$${job.minSalary.toLocaleString()} - $${job.maxSalary.toLocaleString()}`;
+                salaryStr = `${job.minSalary} - ${job.maxSalary} triệu`;
             } else if (job.minSalary) {
-                salaryStr = `Tới $${job.minSalary.toLocaleString()}`;
+                salaryStr = `Tới ${job.minSalary} triệu`;
+            } else if (job.maxSalary) {
+                salaryStr = `Lên đến ${job.maxSalary} triệu`;
             }
-            
-            // Format time ago
-            const postDate = new Date(job.createdAt);
-            const timeAgo = getTimeAgo(postDate);
-            
+
+            const timeAgo = getTimeAgo(new Date(job.createdAt));
+
             const cardHtml = `
                 <div class="job-card" onclick="window.location.href='job-detail.html?id=${job.id}'">
-                    <div>
-                        <div class="job-card-header">
-                            ${logoHtml}
-                            <div class="job-info">
-                                <h3>${job.title}</h3>
-                                <div class="company-name">${job.companyName}</div>
-                            </div>
+                    <div class="job-card-header">
+                        ${logoHtml}
+                        <div class="job-info">
+                            <h3>${job.title}</h3>
+                            <div class="company-name">${job.companyName}</div>
                         </div>
-                        <div class="job-tags">
-                            <span class="tag tag-salary"><i class="fa-solid fa-money-bill-wave"></i> ${salaryStr}</span>
-                            <span class="tag tag-location"><i class="fa-solid fa-map-location-dot"></i> ${job.location}</span>
-                            <span class="tag tag-type"><i class="fa-solid fa-briefcase"></i> ${job.jobType}</span>
-                        </div>
+                    </div>
+                    <div class="job-tags">
+                        <span class="tag tag-salary"><i class="fa-solid fa-money-bill-wave"></i> ${salaryStr}</span>
+                        <span class="tag tag-location"><i class="fa-solid fa-location-dot"></i> ${job.location}</span>
                     </div>
                     <div class="job-card-footer">
                         <span class="post-time"><i class="fa-regular fa-clock"></i> ${timeAgo}</span>
-                        <button class="btn-save-heart" onclick="event.stopPropagation(); alert('Đã lưu tin!');"><i class="fa-regular fa-heart"></i></button>
+                        <button class="btn-save-heart" onclick="event.stopPropagation(); this.classList.toggle('saved'); this.querySelector('i').classList.toggle('fa-solid'); this.querySelector('i').classList.toggle('fa-regular');" title="Lưu tin">
+                            <i class="fa-regular fa-heart"></i>
+                        </button>
                     </div>
                 </div>
             `;
-            
+
             jobList.insertAdjacentHTML('beforeend', cardHtml);
         });
+
         
     } catch (error) {
         console.error('Lỗi khi tải danh sách việc làm:', error);

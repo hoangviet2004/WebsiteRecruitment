@@ -45,6 +45,9 @@ async function loadMyCompany() {
             document.getElementById('company-website').value = res.data.website || '';
             document.getElementById('company-address').value = res.data.address || '';
             document.getElementById('company-desc').value = res.data.description || '';
+            // Quy mô công ty
+            const sizeEl = document.getElementById('company-size');
+            if (sizeEl && res.data.companySize) sizeEl.value = res.data.companySize;
         }
     } catch (e) {
         // Backend throw 500 or 400 if not found, we ignore or log.
@@ -62,7 +65,8 @@ document.getElementById('company-form').addEventListener('submit', async functio
         name: document.getElementById('company-name').value,
         website: document.getElementById('company-website').value || null,
         address: document.getElementById('company-address').value || null,
-        description: document.getElementById('company-desc').value || null
+        description: document.getElementById('company-desc').value || null,
+        companySize: document.getElementById('company-size').value || null
     };
 
     try {

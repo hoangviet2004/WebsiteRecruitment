@@ -20,6 +20,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
     options.SwaggerDoc("v1", new() { Title = "TechList API", Version = "v1" });
+    options.CustomSchemaIds(type => type.FullName);
     options.AddSecurityDefinition("Bearer", new()
     {
         Name         = "Authorization",

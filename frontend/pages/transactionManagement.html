@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quản Lý Giao Dịch — Admin</title>
+  <meta name="description" content="Quản lý gói dịch vụ, giao dịch thanh toán, mã giảm giá và doanh thu hệ thống TechList.">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/sidebar.css">
+  <link rel="stylesheet" href="../assets/css/admin.css">
+</head>
+<body>
+
+<div id="sidebar-container"></div>
+
+<main class="admin-content">
+
+  <!-- ════════════════════ HEADER ═══════════════════════════ -->
+  <div class="admin-header">
+    <h1><i class="fa-solid fa-money-bill-transfer"></i> Quản Lý Giao Dịch</h1>
+    <p class="subtitle">Quản lý gói dịch vụ, thanh toán, mã giảm giá và doanh thu hệ thống.</p>
+  </div>
+
+  <!-- ════════════════════ REVENUE STATS ════════════════════ -->
+  <div class="stats-grid" id="revenue-stats-grid">
+    <div class="stat-card stat-card-green">
+      <div class="stat-icon"><i class="fa-solid fa-coins"></i></div>
+      <div class="stat-info">
+        <span class="stat-number" id="stat-revenue-today">--</span>
+        <span class="stat-label">Doanh thu hôm nay</span>
+      </div>
+    </div>
+    <div class="stat-card stat-card-blue">
+      <div class="stat-icon"><i class="fa-solid fa-chart-line"></i></div>
+      <div class="stat-info">
+        <span class="stat-number" id="stat-revenue-month">--</span>
+        <span class="stat-label">Doanh thu tháng này</span>
+      </div>
+    </div>
+    <div class="stat-card stat-card-purple">
+      <div class="stat-icon"><i class="fa-solid fa-receipt"></i></div>
+      <div class="stat-info">
+        <span class="stat-number" id="stat-total-transactions">--</span>
+        <span class="stat-label">Tổng giao dịch</span>
+      </div>
+    </div>
+    <div class="stat-card stat-card-orange">
+      <div class="stat-icon"><i class="fa-solid fa-rotate-left"></i></div>
+      <div class="stat-info">
+        <span class="stat-number" id="stat-refunded">--</span>
+        <span class="stat-label">Đã hoàn tiền</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════ TABS ═════════════════════════════ -->
+  <div class="admin-tabs" id="tm-tabs">
+    <button class="tab-btn active" onclick="switchTab('packages')" id="tab-btn-packages">
+      <i class="fa-solid fa-box"></i> Gói dịch vụ
+    </button>
+    <button class="tab-btn" onclick="switchTab('subscriptions')" id="tab-btn-subscriptions">
+      <i class="fa-solid fa-users-gear"></i> Subscriptions
+    </button>
+    <button class="tab-btn" onclick="switchTab('transactions')" id="tab-btn-transactions">
+      <i class="fa-solid fa-credit-card"></i> Giao dịch
+    </button>
+    <button class="tab-btn" onclick="switchTab('coupons')" id="tab-btn-coupons">
+      <i class="fa-solid fa-ticket"></i> Mã giảm giá
+    </button>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════
+       TAB 1: GÓI DỊCH VỤ
+       ═══════════════════════════════════════════════════════ -->
+  <div class="tab-pane active" id="pane-packages">
+    <!-- Toolbar -->
+    <div class="am-toolbar">
+      <div class="am-search-wrap">
+        <i class="fa-solid fa-magnifying-glass am-search-icon"></i>
+        <input type="text" id="pkg-search" class="am-search-input" placeholder="Tìm gói dịch vụ..." oninput="renderPackages()" autocomplete="off">
+      </div>
+      <button class="tm-btn-primary" onclick="openPackageModal()">
+        <i class="fa-solid fa-plus"></i> Tạo gói mới
+      </button>
+    </div>
+
+    <!-- Table -->
+    <div class="data-card">
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr>
+              <th>Thứ tự</th>
+              <th>Tên gói</th>
+              <th>Giá (VND)</th>
+              <th>Số tin/tháng</th>
+              <th>Thời hạn</th>
+              <th>Nổi bật</th>
+              <th>Trạng thái</th>
+              <th>Thao tác</th>
+            </tr>
+          </thead>
+          <tbody id="pkg-table-body">
+            <tr><td colspan="8" style="text-align:center;padding:32px;color:#64748b;">Đang tải...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════
+       TAB 2: SUBSCRIPTIONS
+       ═══════════════════════════════════════════════════════ -->
+  <div class="tab-pane" id="pane-subscriptions">
+    <div class="am-toolbar">
+      <div class="am-search-wrap">
+        <i class="fa-solid fa-magnifying-glass am-search-icon"></i>
+        <input type="text" id="sub-search" class="am-search-input" placeholder="Tìm theo email, tên, công ty..." oninput="loadSubscriptions()" autocomplete="off">
+      </div>
+      <div class="am-select-wrap">
+        <i class="fa-solid fa-filter am-select-icon"></i>
+        <select id="sub-filter-status" class="am-select" onchange="loadSubscriptions()">
+          <option value="">Tất cả trạng thái</option>
+          <option value="Active">Đang hoạt động</option>
+          <option value="Expired">Hết hạn</option>
+          <option value="Revoked">Đã thu hồi</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="data-card">
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr>
+              <th>Nhà tuyển dụng</th>
+              <th>Công ty</th>
+              <th>Gói</th>
+              <th>Bắt đầu</th>
+              <th>Kết thúc</th>
+              <th>Còn lại</th>
+              <th>Đã dùng</th>
+              <th>Trạng thái</th>
+              <th>Thao tác</th>
+            </tr>
+          </thead>
+          <tbody id="sub-table-body">
+            <tr><td colspan="9" style="text-align:center;padding:32px;color:#64748b;">Đang tải...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════
+       TAB 3: GIAO DỊCH
+       ═══════════════════════════════════════════════════════ -->
+  <div class="tab-pane" id="pane-transactions">
+    <div class="am-toolbar">
+      <div class="am-search-wrap">
+        <i class="fa-solid fa-magnifying-glass am-search-icon"></i>
+        <input type="text" id="txn-search" class="am-search-input" placeholder="Tìm theo mã GD hoặc công ty..." autocomplete="off">
+      </div>
+      <div class="am-select-wrap">
+        <i class="fa-solid fa-circle-check am-select-icon"></i>
+        <select id="txn-filter-status" class="am-select">
+          <option value="">Tất cả trạng thái</option>
+          <option value="Success">Thành công</option>
+          <option value="Pending">Đang xử lý</option>
+          <option value="Failed">Thất bại</option>
+          <option value="Refunded">Hoàn tiền</option>
+        </select>
+      </div>
+      <div class="am-select-wrap">
+        <i class="fa-solid fa-wallet am-select-icon"></i>
+        <select id="txn-filter-method" class="am-select">
+          <option value="">Tất cả PT thanh toán</option>
+          <option value="VNPay">VNPay</option>
+          <option value="Momo">Momo</option>
+          <option value="Stripe">Stripe</option>
+          <option value="Manual">Thủ công</option>
+        </select>
+      </div>
+      <input type="date" id="txn-from-date" class="am-search-input" style="width:150px;padding:10px 12px;">
+      <input type="date" id="txn-to-date" class="am-search-input" style="width:150px;padding:10px 12px;">
+      <button class="tm-btn-primary" onclick="loadTransactions(1)" style="padding:10px 18px;">
+        <i class="fa-solid fa-search"></i> Lọc
+      </button>
+    </div>
+
+    <div class="data-card">
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr>
+              <th>Mã GD</th>
+              <th>Công ty</th>
+              <th>Gói</th>
+              <th>Số tiền</th>
+              <th>Giảm giá</th>
+              <th>Thanh toán</th>
+              <th>PT thanh toán</th>
+              <th>Trạng thái</th>
+              <th>Thời gian</th>
+              <th>Thao tác</th>
+            </tr>
+          </thead>
+          <tbody id="txn-table-body">
+            <tr><td colspan="10" style="text-align:center;padding:32px;color:#64748b;">Đang tải...</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="am-pagination" id="txn-pagination"></div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════
+       TAB 4: MÃ GIẢM GIÁ
+       ═══════════════════════════════════════════════════════ -->
+  <div class="tab-pane" id="pane-coupons">
+    <div class="am-toolbar">
+      <div class="am-search-wrap">
+        <i class="fa-solid fa-magnifying-glass am-search-icon"></i>
+        <input type="text" id="cpn-search" class="am-search-input" placeholder="Tìm mã giảm giá..." oninput="renderCoupons()" autocomplete="off">
+      </div>
+      <button class="tm-btn-primary" onclick="openCouponModal()">
+        <i class="fa-solid fa-plus"></i> Tạo mã mới
+      </button>
+    </div>
+
+    <div class="data-card">
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr>
+              <th>Mã</th>
+              <th>Loại giảm</th>
+              <th>Giá trị</th>
+              <th>Đã dùng / Tối đa</th>
+              <th>Hết hạn</th>
+              <th>Trạng thái</th>
+              <th>Thao tác</th>
+            </tr>
+          </thead>
+          <tbody id="cpn-table-body">
+            <tr><td colspan="7" style="text-align:center;padding:32px;color:#64748b;">Đang tải...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- ═══════════════════════════════════════════════════════════
+     MODAL: TẠO/SỬA GÓI DỊCH VỤ
+     ═══════════════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="modal-package">
+  <div class="modal-card" style="max-width:560px;">
+    <div class="modal-header">
+      <h2><i class="fa-solid fa-box"></i> <span id="pkg-modal-title">Tạo gói dịch vụ</span></h2>
+      <button class="modal-close-btn" onclick="closeModal('modal-package')"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal-body">
+      <form id="pkg-form" onsubmit="savePackage(event)">
+        <input type="hidden" id="pkg-id">
+        <div class="modal-form-grid">
+          <div class="form-group">
+            <label class="form-label">Tên gói <span class="required">*</span></label>
+            <input type="text" id="pkg-name" class="form-input" placeholder="VD: Basic" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Giá (VND) <span class="required">*</span></label>
+            <input type="number" id="pkg-price" class="form-input" placeholder="VD: 299000" min="0" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Số tin tối đa <span class="required">*</span></label>
+            <input type="number" id="pkg-max-jobs" class="form-input" placeholder="-1 = không giới hạn" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Thời hạn (ngày)</label>
+            <input type="number" id="pkg-duration" class="form-input" value="30" min="1">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Thứ tự hiển thị</label>
+            <input type="number" id="pkg-order" class="form-input" value="0" min="0">
+          </div>
+          <div style="display:flex;gap:24px;align-items:center;padding-top:22px;">
+            <label class="form-checkbox">
+              <input type="checkbox" id="pkg-highlighted"> Nổi bật
+            </label>
+            <label class="form-checkbox">
+              <input type="checkbox" id="pkg-active" checked> Hoạt động
+            </label>
+          </div>
+        </div>
+        <div class="form-group" style="margin-top:12px;">
+          <label class="form-label">Tính năng (mỗi dòng 1 tính năng)</label>
+          <textarea id="pkg-features" class="form-textarea" rows="4" placeholder="VD:&#10;10 tin tuyển dụng/tháng&#10;Hiển thị ưu tiên&#10;Hỗ trợ 24/7"></textarea>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="tm-btn-secondary" onclick="closeModal('modal-package')">Hủy</button>
+          <button type="submit" class="tm-btn-primary"><i class="fa-solid fa-check"></i> Lưu</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     MODAL: TẠO/SỬA MÃ GIẢM GIÁ
+     ═══════════════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="modal-coupon">
+  <div class="modal-card" style="max-width:520px;">
+    <div class="modal-header">
+      <h2><i class="fa-solid fa-ticket"></i> <span id="cpn-modal-title">Tạo mã giảm giá</span></h2>
+      <button class="modal-close-btn" onclick="closeModal('modal-coupon')"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal-body">
+      <form id="cpn-form" onsubmit="saveCoupon(event)">
+        <input type="hidden" id="cpn-id">
+        <div class="modal-form-grid">
+          <div class="form-group">
+            <label class="form-label">Mã giảm giá <span class="required">*</span></label>
+            <input type="text" id="cpn-code" class="form-input" placeholder="VD: SALE20" required style="text-transform:uppercase;">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Loại giảm giá</label>
+            <select id="cpn-type" class="form-input">
+              <option value="Percentage">Phần trăm (%)</option>
+              <option value="FixedAmount">Số tiền cố định (VND)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Giá trị <span class="required">*</span></label>
+            <input type="number" id="cpn-value" class="form-input" placeholder="VD: 20" min="0" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Số lần dùng tối đa</label>
+            <input type="number" id="cpn-max-usage" class="form-input" value="0" min="0" placeholder="0 = không giới hạn">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Ngày hết hạn</label>
+            <input type="date" id="cpn-expires" class="form-input">
+          </div>
+          <div class="form-group" style="display:flex;align-items:center;">
+            <label class="form-checkbox">
+              <input type="checkbox" id="cpn-active" checked> Hoạt động
+            </label>
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="tm-btn-secondary" onclick="closeModal('modal-coupon')">Hủy</button>
+          <button type="submit" class="tm-btn-primary"><i class="fa-solid fa-check"></i> Lưu</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     MODAL: CHI TIẾT GIAO DỊCH
+     ═══════════════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="modal-txn-detail">
+  <div class="modal-card" style="max-width:640px;">
+    <div class="modal-header">
+      <h2><i class="fa-solid fa-file-invoice"></i> Chi tiết giao dịch</h2>
+      <button class="modal-close-btn" onclick="closeModal('modal-txn-detail')"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal-body" id="txn-detail-body">
+      <!-- Filled by JS -->
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     MODAL: HOÀN TIỀN
+     ═══════════════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="modal-refund">
+  <div class="modal-card" style="max-width:480px;">
+    <div class="modal-header">
+      <h2 style="color:#ef4444;"><i class="fa-solid fa-rotate-left"></i> Hoàn tiền giao dịch</h2>
+      <button class="modal-close-btn" onclick="closeModal('modal-refund')"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="refund-txn-id">
+      <p style="font-size:14px;color:#64748b;margin-bottom:16px;">
+        Mã GD: <strong id="refund-txn-code" style="color:#1e293b;">—</strong><br>
+        Số tiền: <strong id="refund-txn-amount" style="color:#ef4444;">—</strong>
+      </p>
+      <div class="form-group">
+        <label class="form-label">Lý do hoàn tiền <span class="required">*</span></label>
+        <textarea id="refund-reason" class="form-textarea" rows="3" placeholder="Nhập lý do hoàn tiền..." required></textarea>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="tm-btn-secondary" onclick="closeModal('modal-refund')">Hủy</button>
+        <button type="button" class="tm-btn-danger" onclick="confirmRefund()">
+          <i class="fa-solid fa-rotate-left"></i> Xác nhận hoàn tiền
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     MODAL: GIA HẠN SUBSCRIPTION
+     ═══════════════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="modal-extend">
+  <div class="modal-card" style="max-width:420px;">
+    <div class="modal-header">
+      <h2><i class="fa-solid fa-calendar-plus"></i> Gia hạn Subscription</h2>
+      <button class="modal-close-btn" onclick="closeModal('modal-extend')"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="extend-sub-id">
+      <div class="form-group">
+        <label class="form-label">Số ngày gia hạn thêm <span class="required">*</span></label>
+        <input type="number" id="extend-days" class="form-input" value="30" min="1" required>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="tm-btn-secondary" onclick="closeModal('modal-extend')">Hủy</button>
+        <button type="button" class="tm-btn-primary" onclick="confirmExtend()">
+          <i class="fa-solid fa-check"></i> Gia hạn
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Scripts -->
+<script src="../js/api.js"></script>
+<script src="../js/guard.js"></script>
+<script src="../js/sidebar.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<script src="../js/transactionManagement.js"></script>
+
+<script>
+  requireAdmin();
+  loadSidebar();
+</script>
+
+</body>
+</html>

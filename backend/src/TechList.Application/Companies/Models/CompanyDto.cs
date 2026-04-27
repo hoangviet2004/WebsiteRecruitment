@@ -7,5 +7,6 @@ public sealed record CompanyDto(
     string Description,
     string Website,
     string Address,
+    string? CompanySize,
     string? LogoUrl
 );

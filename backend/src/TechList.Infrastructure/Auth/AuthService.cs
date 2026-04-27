@@ -83,7 +83,7 @@ public sealed class AuthService : IAuthService
         var roles = (await _userManager.GetRolesAsync(user)).ToList();
         var profile = await EnsureProfileExistsAsync(user.Id, user.Email!, user.FullName, ct);
 
-        if (!profile.IsApproved)
+        if (!roles.Contains(AppRole.Admin) && !profile.IsApproved)
             throw new UnauthorizedAccessException("Tài khoản của bạn đã bị chặn. Vui lòng liên hệ quản trị viên.");
 
         return await IssueTokensAsync(user, profile, roles, ip, userAgent, ct);
@@ -106,6 +106,9 @@ public sealed class AuthService : IAuthService
 
         var roles = (await _userManager.GetRolesAsync(user)).ToList();
         var profile = await EnsureProfileExistsAsync(user.Id, user.Email!, user.FullName, ct);
+
+        if (!roles.Contains(AppRole.Admin) && !profile.IsApproved)
+            throw new UnauthorizedAccessException("Tài khoản của bạn đã bị chặn. Vui lòng liên hệ quản trị viên.");
 
         // Rotation: revoke old token, issue a new one
         existing.RevokedAt = DateTime.UtcNow;

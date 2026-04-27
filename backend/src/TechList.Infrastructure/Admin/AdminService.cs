@@ -34,10 +34,39 @@ public sealed class AdminService : IAdminService
             var profile = profiles.FirstOrDefault(p => p.UserId == user.Id);
             var login = userLogins.FirstOrDefault(l => l.UserId == user.Id);
             var provider = login?.LoginProvider ?? "Local";
-            userDtos.Add(new UserDto(user.Id, user.Email!, user.FullName, role, profile?.IsApproved ?? false, provider, user.CreatedAt));
+            var isApproved = role == TechList.Domain.Enums.AppRole.Admin ? true : (profile?.IsApproved ?? false);
+            userDtos.Add(new UserDto(user.Id, user.Email!, user.FullName, role, isApproved, provider, user.CreatedAt));
         }
 
         return userDtos.OrderByDescending(x => x.CreatedAt).ToList();
+    }
+
+    public async Task<CandidateProfileDto> GetCandidateProfileAsync(string userId, CancellationToken ct)
+    {
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user is null) throw new InvalidOperationException("User not found");
+
+        var roles = await _userManager.GetRolesAsync(user);
+        if (!roles.Contains(TechList.Domain.Enums.AppRole.Candidate))
+            throw new InvalidOperationException("User is not a candidate");
+
+        var profile = await _db.UserProfiles.AsNoTracking()
+            .SingleOrDefaultAsync(x => x.UserId == userId, ct);
+
+        var login = await _db.UserLogins.AsNoTracking()
+            .FirstOrDefaultAsync(x => x.UserId == userId, ct);
+
+        return new CandidateProfileDto(
+            UserId: user.Id,
+            Email: user.Email!,
+            FullName: user.FullName,
+            DisplayName: profile?.DisplayName ?? user.FullName,
+            Bio: profile?.Bio ?? string.Empty,
+            AvatarUrl: profile?.AvatarUrl,
+            IsApproved: profile?.IsApproved ?? false,
+            Provider: login?.LoginProvider ?? "Local",
+            CreatedAt: user.CreatedAt
+        );
     }
 
     public async Task DeleteUserAsync(string userId, CancellationToken ct)
@@ -62,10 +91,27 @@ public sealed class AdminService : IAdminService
     public async Task ToggleBlockUserAsync(string userId, CancellationToken ct)
     {
         var profile = await _db.UserProfiles.FirstOrDefaultAsync(x => x.UserId == userId, ct);
-        if (profile == null) throw new InvalidOperationException("Profile not found");
+        if (profile == null)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null) throw new InvalidOperationException("User not found");
 
-        profile.IsApproved = !profile.IsApproved;
-        profile.UpdatedAt = DateTime.UtcNow;
+            profile = new UserProfile
+            {
+                UserId = userId,
+                DisplayName = string.IsNullOrWhiteSpace(user.FullName) ? user.Email!.Split('@')[0] : user.FullName,
+                Bio = string.Empty,
+                IsApproved = true, // Toggling from false (implicitly blocked due to null profile) to true
+                UpdatedAt = DateTime.UtcNow
+            };
+            _db.UserProfiles.Add(profile);
+        }
+        else
+        {
+            profile.IsApproved = !profile.IsApproved;
+            profile.UpdatedAt = DateTime.UtcNow;
+        }
+
         await _db.SaveChangesAsync(ct);
     }
 
@@ -141,7 +187,7 @@ public sealed class AdminService : IAdminService
             .ToListAsync(ct);
 
         return companies.Select(c => new CompanyDto(
-            c.Id, c.OwnerId, c.Name, c.Description, c.Website, c.Address, c.LogoUrl)).ToList();
+            c.Id, c.OwnerId, c.Name, c.Description, c.Website, c.Address, c.CompanySize, c.LogoUrl)).ToList();
     }
 
     public async Task DeleteCompanyAsync(Guid companyId, CancellationToken ct)

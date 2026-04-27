@@ -4,15 +4,32 @@
 
 document.addEventListener('DOMContentLoaded', async () => {
     const fullNameInput = document.getElementById('fullName');
-    const emailInput = document.getElementById('email');
-    const phoneInput = document.getElementById('phone');
-    const form = document.getElementById('profile-form');
+    const emailInput    = document.getElementById('email');
+    const phoneInput    = document.getElementById('phone');
+    const bioInput      = document.getElementById('bio');
+    const bioCountEl    = document.getElementById('bio-count');
+    const bioCounter    = bioInput?.closest('.form-group')?.querySelector('.bio-counter');
+    const form    = document.getElementById('profile-form');
     const btnSave = document.querySelector('.btn-save');
     
     // Thuộc tính avatar
-    const avatarInput = document.getElementById('avatar-input');
+    const avatarInput   = document.getElementById('avatar-input');
     const avatarPreview = document.getElementById('avatar-preview');
     const avatarLoading = document.getElementById('avatar-loading');
+
+    // Bộ đếm ký tự Bio (định nghĩa sớm để dùng khi load API)
+    function updateBioCounter() {
+        if (!bioInput || !bioCountEl || !bioCounter) return;
+        const len = bioInput.value.length;
+        bioCountEl.textContent = len;
+        bioCounter.classList.remove('warn', 'limit');
+        if (len >= 500) bioCounter.classList.add('limit');
+        else if (len >= 400) bioCounter.classList.add('warn');
+    }
+
+    if (bioInput) {
+        bioInput.addEventListener('input', updateBioCounter);
+    }
 
     // 1. Lấy thông tin mặc định có sẵn từ hệ thống
     const currentUser = getCurrentUser(); // từ api.js
@@ -32,8 +49,37 @@ document.addEventListener('DOMContentLoaded', async () => {
             const profile = dataResponse.data;
             if (profile) {
                 // Hiển thị tên từ DB nếu có, không thì lấy từ sessionStorage login
-                fullNameInput.value = profile.displayName || currentUser.fullName || '';
+                const nameToShow = profile.displayName || currentUser.fullName || '';
+                fullNameInput.value = nameToShow;
+
+                const displayNameHeader = document.getElementById('display-name-header');
+                const displayEmailHeader = document.getElementById('display-email-header');
+                if (displayNameHeader) displayNameHeader.textContent = nameToShow;
+                if (displayEmailHeader) displayEmailHeader.textContent = currentUser.email || '';
+
+                // Điền bio
+                if (bioInput) {
+                    bioInput.value = profile.bio || '';
+                    updateBioCounter();
+                }
+
+                const skillsInput = document.getElementById('skills');
+                if (skillsInput) skillsInput.value = profile.skills || '';
                 
+                const experienceInput = document.getElementById('experience');
+                if (experienceInput) experienceInput.value = profile.experience || '';
+
+                if (profile.cvUrl) {
+                    const cvEmpty = document.getElementById('cv-empty');
+                    const cvPreview = document.getElementById('cv-preview');
+                    const cvLink = document.getElementById('cv-link');
+                    if (cvEmpty && cvPreview && cvLink) {
+                        cvEmpty.style.display = 'none';
+                        cvPreview.style.display = 'flex';
+                        cvLink.href = profile.cvUrl;
+                    }
+                }
+
                 // Hiển thị avatar
                 const displayNameForAvatar = profile.displayName || currentUser.fullName || 'User';
                 if (profile.avatarUrl) {
@@ -54,12 +100,21 @@ document.addEventListener('DOMContentLoaded', async () => {
     form.addEventListener('submit', async (e) => {
         e.preventDefault(); // Ngăn trình duyệt tải lại trang
 
-        const newName = fullNameInput.value.trim();
+        const newName  = fullNameInput.value.trim();
         const newEmail = emailInput.value.trim();
         const newPhone = phoneInput.value.trim();
+        const newBio   = bioInput ? bioInput.value.trim() : '';
+        const newSkills = document.getElementById('skills') ? document.getElementById('skills').value.trim() : '';
+        const newExperience = document.getElementById('experience') ? document.getElementById('experience').value.trim() : '';
 
         if (!newName) {
             alert('Vui lòng nhập họ và tên!');
+            return;
+        }
+
+        if (newBio.length > 500) {
+            alert('Giới thiệu bản thân không được vượt quá 500 ký tự!');
+            bioInput.focus();
             return;
         }
 
@@ -68,12 +123,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         btnSave.disabled = true;
 
         try {
-            // Gửi API cập nhật Profile (Hiện backend đang hỗ trợ DisplayName và Bio)
+            // Gửi API cập nhật Profile (DisplayName và Bio)
             const res = await apiFetchAuth('/api/profile/me', {
                 method: 'PUT',
                 body: JSON.stringify({ 
                     displayName: newName, 
-                    bio: '' // Hiện tại mình chưa có input mô tả nên truyền rỗng hoặc string cũ
+                    bio: newBio,
+                    skills: newSkills,
+                    experience: newExperience
                 })
             });
 
@@ -85,6 +142,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                 localStorage.setItem(phoneStorageKey, newPhone);
 
                 alert('Cập nhật thông tin thành công!');
+
+                const displayNameHeader = document.getElementById('display-name-header');
+                if (displayNameHeader) displayNameHeader.textContent = newName;
 
                 // Cập nhật lại thanh điều hướng (nếu có sử dụng renderNavRight từ home.js)
                 if (typeof renderNavRight === 'function') {
@@ -158,6 +218,70 @@ document.addEventListener('DOMContentLoaded', async () => {
             } finally {
                 avatarLoading.style.display = 'none';
                 avatarInput.value = ''; // Reset file input để có thể chọn lại đúng file đó lần nữa
+            }
+        });
+    }
+
+    // 5. Logic thay đổi CV (Upload PDF)
+    const cvInput = document.getElementById('cv-input');
+    const cvLoading = document.getElementById('cv-loading');
+    const cvEmpty = document.getElementById('cv-empty');
+    const cvPreview = document.getElementById('cv-preview');
+    const cvLink = document.getElementById('cv-link');
+
+    if (cvInput) {
+        cvInput.addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            if (file.type !== 'application/pdf') {
+                alert('Vui lòng chọn file định dạng PDF!');
+                cvInput.value = '';
+                return;
+            }
+
+            if (cvLoading) cvLoading.style.display = 'block';
+            if (cvEmpty) cvEmpty.style.display = 'none';
+            if (cvPreview) cvPreview.style.display = 'none';
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                const baseToken = sessionStorage.getItem('token');
+                if (!baseToken) {
+                    alert('Bạn chưa đăng nhập!');
+                    return;
+                }
+
+                const response = await fetch(`${API_URL}/api/profile/cv`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${baseToken}`
+                    },
+                    body: formData
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    if (result.data && result.data.cvUrl) {
+                        if (cvLink) cvLink.href = result.data.cvUrl;
+                        if (cvPreview) cvPreview.style.display = 'flex';
+                        alert('Tải lên CV thành công!');
+                    }
+                } else {
+                    const errText = await response.text();
+                    console.error('Server response:', response.status, errText);
+                    alert(`Đã xảy ra lỗi khi tải CV lên.\n\nChi tiết: ${errText}`);
+                    if (cvEmpty) cvEmpty.style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Lỗi upload CV:', error);
+                alert('Tải CV thất bại, vui lòng thử lại.');
+                if (cvEmpty) cvEmpty.style.display = 'block';
+            } finally {
+                if (cvLoading) cvLoading.style.display = 'none';
+                cvInput.value = '';
             }
         });
     }

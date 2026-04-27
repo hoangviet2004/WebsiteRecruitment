@@ -17,4 +17,7 @@ public sealed class UpdateCompanyRequest
 
     [MaxLength(500)]
     public string? Address { get; set; }
+
+    [MaxLength(50)]
+    public string? CompanySize { get; set; }
 }
