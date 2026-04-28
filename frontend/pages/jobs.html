@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tìm Việc - TechList</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="../assets/css/home.css">
+    <link rel="stylesheet" href="../assets/css/jobs.css">
+</head>
+
+<body>
+    <!-- Navbar -->
+    <nav class="homebar">
+        <div class="left">
+            <a href="home.html" class="logo-svg"><img src="../assets/logo.svg" alt="Logo">TechList</a>
+            <ul>
+                <li><a href="jobs.html" style="color: #0f172a;">Tìm việc</a></li>
+                <li><a href="#">Công ty</a></li>
+                <li><a href="blog.html">Blog</a></li>
+            </ul>
+        </div>
+        <div class="right" id="nav-right"></div>
+    </nav>
+
+    <!-- Search Hero -->
+    <header class="jobs-hero">
+        <div class="jobs-hero-content">
+            <h1>Tìm kiếm công việc mơ ước của bạn</h1>
+            <div class="jobs-search-glass">
+                <div class="input-group search-keyword-group">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input type="text" id="filter-keyword" placeholder="Chức danh, từ khóa hoặc công ty">
+                </div>
+                <div class="divider-vertical"></div>
+                <div class="input-group">
+                    <i class="fa-solid fa-location-dot"></i>
+                    <select id="filter-location">
+                        <option value="">Tất cả địa điểm</option>
+                        <option value="Hà Nội">Hà Nội</option>
+                        <option value="Hồ Chí Minh">TP. Hồ Chí Minh</option>
+                        <option value="Đà Nẵng">Đà Nẵng</option>
+                        <option value="Khác">Khác</option>
+                    </select>
+                </div>
+                <button class="btn-search" onclick="applyFilters()">Tìm Kiếm</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="jobs-layout">
+        <!-- Sidebar Filters -->
+        <aside class="filters-sidebar">
+            <div class="filters-header">
+                <h2>Bộ lọc</h2>
+                <button class="btn-clear-filters" onclick="clearFilters()">Xóa tất cả</button>
+            </div>
+
+            <!-- Job Type -->
+            <div class="filter-group">
+                <h3>Loại công việc</h3>
+                <label class="custom-checkbox">
+                    <input type="checkbox" name="jobType" value="Full-time">
+                    <span class="checkmark"></span>
+                    Toàn thời gian
+                </label>
+                <label class="custom-checkbox">
+                    <input type="checkbox" name="jobType" value="Part-time">
+                    <span class="checkmark"></span>
+                    Bán thời gian
+                </label>
+                <label class="custom-checkbox">
+                    <input type="checkbox" name="jobType" value="Remote">
+                    <span class="checkmark"></span>
+                    Làm việc từ xa (Remote)
+                </label>
+                <label class="custom-checkbox">
+                    <input type="checkbox" name="jobType" value="Hybrid">
+                    <span class="checkmark"></span>
+                    Thực tập / Khác
+                </label>
+            </div>
+
+            <hr class="filter-divider">
+
+            <!-- Salary -->
+            <div class="filter-group">
+                <h3>Mức lương</h3>
+                <label class="custom-radio">
+                    <input type="radio" name="salaryRange" value="all" checked>
+                    <span class="radiomark"></span>
+                    Tất cả mức lương
+                </label>
+                <label class="custom-radio">
+                    <input type="radio" name="salaryRange" value="0-10000000">
+                    <span class="radiomark"></span>
+                    Dưới 10 triệu
+                </label>
+                <label class="custom-radio">
+                    <input type="radio" name="salaryRange" value="10000000-20000000">
+                    <span class="radiomark"></span>
+                    10 - 20 triệu
+                </label>
+                <label class="custom-radio">
+                    <input type="radio" name="salaryRange" value="20000000-40000000">
+                    <span class="radiomark"></span>
+                    20 - 40 triệu
+                </label>
+                <label class="custom-radio">
+                    <input type="radio" name="salaryRange" value="40000000-999999999">
+                    <span class="radiomark"></span>
+                    Trên 40 triệu
+                </label>
+            </div>
+
+        </aside>
+
+        <!-- Job Results -->
+        <main class="jobs-content">
+            <div class="jobs-content-header">
+                <p id="results-count">Hiển thị <strong>0</strong> việc làm</p>
+                <div class="sort-by">
+                    <label>Sắp xếp theo:</label>
+                    <select id="sort-order" onchange="applyFilters()">
+                        <option value="newest">Mới nhất</option>
+                        <option value="salary_desc">Lương cao nhất</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="jobs-list" id="jobs-list-container">
+                <!-- Skeleton Loading -->
+                <div class="job-list-skeleton"></div>
+                <div class="job-list-skeleton"></div>
+                <div class="job-list-skeleton"></div>
+            </div>
+
+            <!-- Pagination -->
+            <div class="pagination-container" id="pagination-container">
+                <!-- Pagination buttons will be generated here -->
+            </div>
+        </main>
+    </div>
+
+    <script src="../js/api.js"></script>
+    <script src="../js/jobs.js"></script>
+</body>
+
+</html>

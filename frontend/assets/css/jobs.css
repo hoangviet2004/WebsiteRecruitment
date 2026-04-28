@@ -1,0 +1,506 @@
+/* jobs.css - Styling for the Job Search Page */
+
+/* ── Hero Search Section ─────────────────────────────────── */
+.jobs-hero {
+    background: linear-gradient(to bottom, #ffffff, #f8fafc);
+    padding: 60px 40px 40px;
+    text-align: center;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.jobs-hero-content h1 {
+    font-size: 36px;
+    font-weight: 800;
+    color: #0f172a;
+    margin-bottom: 30px;
+    letter-spacing: -0.02em;
+}
+
+.jobs-search-glass {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+    border-radius: 12px;
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.jobs-search-glass .input-group {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0 15px;
+}
+
+.jobs-search-glass .search-keyword-group {
+    flex: 2;
+}
+
+.jobs-search-glass .input-group i {
+    color: #94a3b8;
+    font-size: 18px;
+}
+
+.jobs-search-glass input,
+.jobs-search-glass select {
+    border: none;
+    outline: none;
+    width: 100%;
+    font-size: 15px;
+    color: #1e293b;
+    background: transparent;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.jobs-search-glass input::placeholder {
+    color: #94a3b8;
+    font-weight: 400;
+}
+
+.jobs-search-glass .divider-vertical {
+    width: 1px;
+    height: 30px;
+    background: #e2e8f0;
+}
+
+.jobs-search-glass .btn-search {
+    background: #0f62fe; /* CareerVN blue reference */
+    color: #fff;
+    border: none;
+    padding: 12px 30px;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.jobs-search-glass .btn-search:hover {
+    background: #0353e9;
+}
+
+/* ── Two-column Layout ──────────────────────────────────── */
+.jobs-layout {
+    display: flex;
+    max-width: 1300px;
+    margin: 0 auto;
+    padding: 40px;
+    gap: 30px;
+    align-items: flex-start;
+}
+
+/* ── Sidebar Filters ────────────────────────────────────── */
+.filters-sidebar {
+    width: 280px;
+    flex-shrink: 0;
+}
+
+.filters-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.filters-header h2 {
+    font-size: 20px;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.btn-clear-filters {
+    background: transparent;
+    border: none;
+    color: #0f62fe;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.btn-clear-filters:hover {
+    color: #0043ce;
+    text-decoration: underline;
+}
+
+.filter-divider {
+    border: none;
+    border-top: 1px solid #e2e8f0;
+    margin: 20px 0;
+}
+
+.filter-group h3 {
+    font-size: 15px;
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 16px;
+}
+
+/* Custom Checkbox */
+.custom-checkbox {
+    display: block;
+    position: relative;
+    padding-left: 30px;
+    margin-bottom: 14px;
+    cursor: pointer;
+    font-size: 14px;
+    color: #475569;
+    user-select: none;
+}
+
+.custom-checkbox input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0;
+}
+
+.checkmark {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 20px;
+    width: 20px;
+    background-color: #fff;
+    border: 1px solid #cbd5e1;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+.custom-checkbox:hover input ~ .checkmark {
+    border-color: #0f62fe;
+}
+
+.custom-checkbox input:checked ~ .checkmark {
+    background-color: #0f62fe;
+    border-color: #0f62fe;
+}
+
+.checkmark:after {
+    content: "";
+    position: absolute;
+    display: none;
+}
+
+.custom-checkbox input:checked ~ .checkmark:after {
+    display: block;
+}
+
+.custom-checkbox .checkmark:after {
+    left: 6px;
+    top: 2px;
+    width: 5px;
+    height: 10px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+
+/* Custom Radio */
+.custom-radio {
+    display: block;
+    position: relative;
+    padding-left: 30px;
+    margin-bottom: 14px;
+    cursor: pointer;
+    font-size: 14px;
+    color: #475569;
+    user-select: none;
+}
+
+.custom-radio input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.radiomark {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 20px;
+    width: 20px;
+    background-color: #fff;
+    border: 1px solid #cbd5e1;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+}
+
+.custom-radio:hover input ~ .radiomark {
+    border-color: #0f62fe;
+}
+
+.custom-radio input:checked ~ .radiomark {
+    border-color: #0f62fe;
+}
+
+.radiomark:after {
+    content: "";
+    position: absolute;
+    display: none;
+}
+
+.custom-radio input:checked ~ .radiomark:after {
+    display: block;
+}
+
+.custom-radio .radiomark:after {
+    top: 4px;
+    left: 4px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #0f62fe;
+}
+
+
+/* ── Main Content ───────────────────────────────────────── */
+.jobs-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.jobs-content-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.jobs-content-header p {
+    font-size: 15px;
+    color: #475569;
+}
+
+.jobs-content-header p strong {
+    color: #0f172a;
+}
+
+.sort-by {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.sort-by label {
+    font-size: 14px;
+    color: #64748b;
+}
+
+.sort-by select {
+    padding: 8px 12px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    outline: none;
+    color: #1e293b;
+    font-size: 14px;
+    cursor: pointer;
+    background: #fff;
+}
+
+/* ── Job List ───────────────────────────────────────────── */
+.jobs-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.job-list-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 24px;
+    display: flex;
+    gap: 20px;
+    transition: box-shadow 0.2s ease, border-color 0.2s ease;
+    cursor: pointer;
+    position: relative;
+}
+
+.job-list-card:hover {
+    box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+    border-color: #cbd5e1;
+}
+
+.job-list-card.is-new::before {
+    content: "Mới";
+    position: absolute;
+    top: -1px;
+    right: 20px;
+    background: #059669;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 0 0 4px 4px;
+    text-transform: uppercase;
+}
+
+.job-list-card .btn-bookmark {
+    position: absolute;
+    top: 24px;
+    right: 24px;
+    background: none;
+    border: none;
+    color: #94a3b8;
+    font-size: 20px;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.job-list-card .btn-bookmark:hover,
+.job-list-card .btn-bookmark.active {
+    color: #0f62fe;
+}
+
+.job-list-logo {
+    width: 60px;
+    height: 60px;
+    border: 1px solid #f1f5f9;
+    border-radius: 8px;
+    overflow: hidden;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f8fafc;
+    font-size: 20px;
+    font-weight: bold;
+    color: #3b82f6;
+}
+
+.job-list-logo img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.job-list-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.job-list-info h3 {
+    font-size: 18px;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 6px;
+    padding-right: 40px; /* Space for bookmark */
+}
+
+.job-list-info .company-name {
+    font-size: 14px;
+    color: #475569;
+    font-weight: 500;
+    margin-bottom: 12px;
+}
+
+.job-list-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 14px;
+    font-size: 13px;
+    color: #64748b;
+}
+
+.job-list-meta span {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.job-list-meta .salary-text {
+    color: #059669;
+    font-weight: 600;
+}
+
+.job-list-tags {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 14px;
+}
+
+.job-list-tags .tag {
+    background: #f1f5f9;
+    color: #475569;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    border: none;
+}
+
+.job-list-desc {
+    font-size: 14px;
+    color: #64748b;
+    line-height: 1.6;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* Skeleton */
+.job-list-skeleton {
+    background: #fff;
+    height: 200px;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    position: relative;
+    overflow: hidden;
+}
+.job-list-skeleton::after {
+    content: '';
+    position: absolute;
+    top: 0; right: 0; bottom: 0; left: 0;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent);
+    animation: shimmer 1.5s infinite;
+}
+
+/* ── Pagination ─────────────────────────────────────────── */
+.pagination-container {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 40px;
+}
+
+.page-btn {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    color: #475569;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.page-btn:hover:not(:disabled) {
+    border-color: #cbd5e1;
+    background: #f8fafc;
+}
+
+.page-btn.active {
+    background: #0f62fe;
+    color: #fff;
+    border-color: #0f62fe;
+}
+
+.page-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}

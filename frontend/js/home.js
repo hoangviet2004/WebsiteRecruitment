@@ -249,5 +249,13 @@ function applyJob(id) {
 }
 
 function searchJobs() {
-    alert("Tính năng tìm kiếm đang được xây dựng!");
+    const keyword = document.getElementById('search-keyword').value;
+    const location = document.getElementById('search-location').value;
+    
+    let url = '../pages/jobs.html?';
+    const params = new URLSearchParams();
+    if (keyword) params.append('keyword', keyword);
+    if (location) params.append('location', location);
+    
+    window.location.href = url + params.toString();
 }
