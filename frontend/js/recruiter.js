@@ -169,6 +169,8 @@ async function loadMyCompany() {
             document.getElementById('company-website').value = res.data.website || '';
             document.getElementById('company-address').value = res.data.address || '';
             document.getElementById('company-desc').value = res.data.description || '';
+            document.getElementById('company-email').value = res.data.contactEmail || '';
+            document.getElementById('company-phone').value = res.data.contactPhone || '';
             // Quy mô công ty
             const sizeEl = document.getElementById('company-size');
             if (sizeEl && res.data.companySize) sizeEl.value = res.data.companySize;
@@ -191,7 +193,9 @@ document.getElementById('company-form').addEventListener('submit', async functio
         website: document.getElementById('company-website').value || null,
         address: document.getElementById('company-address').value || null,
         description: document.getElementById('company-desc').value || null,
-        companySize: document.getElementById('company-size').value || null
+        companySize: document.getElementById('company-size').value || null,
+        contactEmail: document.getElementById('company-email').value || null,
+        contactPhone: document.getElementById('company-phone').value || null
     };
 
     try {

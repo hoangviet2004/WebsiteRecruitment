@@ -16,6 +16,9 @@ public class Company
     // Quy mô công ty (VD: "1-50", "50-150", "150-500", "500+")
     public string? CompanySize { get; set; }
 
+    public string? ContactEmail { get; set; }
+    public string? ContactPhone { get; set; }
+
     // Logo Information
     public string? LogoUrl { get; set; }
     public string? LogoPublicId { get; set; }

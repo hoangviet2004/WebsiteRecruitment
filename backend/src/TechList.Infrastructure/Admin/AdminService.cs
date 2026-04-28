@@ -189,7 +189,7 @@ public sealed class AdminService : IAdminService
             .ToListAsync(ct);
 
         return companies.Select(c => new CompanyDto(
-            c.Id, c.OwnerId, c.Name, c.Description, c.Website, c.Address, c.CompanySize, c.LogoUrl, c.IsBlocked, c.CreatedAt, c.TaxCode)).ToList();
+            c.Id, c.OwnerId, c.Name, c.Description, c.Website, c.Address, c.CompanySize, c.LogoUrl, c.IsBlocked, c.CreatedAt, c.TaxCode, c.ContactEmail, c.ContactPhone)).ToList();
     }
 
     public async Task ToggleCompanyStatusAsync(Guid companyId, CancellationToken ct)

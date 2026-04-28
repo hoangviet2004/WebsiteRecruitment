@@ -24,4 +24,11 @@ public sealed class UpdateCompanyRequest
     [Required(ErrorMessage = "Tax code is required")]
     [MaxLength(50)]
     public string TaxCode { get; set; } = string.Empty;
+
+    [EmailAddress(ErrorMessage = "Invalid email format")]
+    [MaxLength(200)]
+    public string? ContactEmail { get; set; }
+
+    [MaxLength(50)]
+    public string? ContactPhone { get; set; }
 }

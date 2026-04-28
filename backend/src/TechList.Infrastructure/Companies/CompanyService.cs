@@ -22,7 +22,7 @@ public sealed class CompanyService : ICompanyService
             .ToListAsync(ct);
 
         return companies.Select(c => new CompanyDto(
-            c.Id, c.OwnerId, c.Name, c.Description, c.Website, c.Address, c.CompanySize, c.LogoUrl, c.IsBlocked, c.CreatedAt, c.TaxCode)).ToList();
+            c.Id, c.OwnerId, c.Name, c.Description, c.Website, c.Address, c.CompanySize, c.LogoUrl, c.IsBlocked, c.CreatedAt, c.TaxCode, c.ContactEmail, c.ContactPhone)).ToList();
     }
 
     public async Task<CompanyDto> GetCompanyByIdAsync(Guid id, CancellationToken ct)
@@ -34,7 +34,7 @@ public sealed class CompanyService : ICompanyService
         if (c is null)
             throw new InvalidOperationException("Company not found");
 
-        return new CompanyDto(c.Id, c.OwnerId, c.Name, c.Description, c.Website, c.Address, c.CompanySize, c.LogoUrl, c.IsBlocked, c.CreatedAt, c.TaxCode);
+        return new CompanyDto(c.Id, c.OwnerId, c.Name, c.Description, c.Website, c.Address, c.CompanySize, c.LogoUrl, c.IsBlocked, c.CreatedAt, c.TaxCode, c.ContactEmail, c.ContactPhone);
     }
 
     public async Task<CompanyDto> GetMyCompanyAsync(string userId, CancellationToken ct)
@@ -46,7 +46,7 @@ public sealed class CompanyService : ICompanyService
         if (c is null)
             throw new InvalidOperationException("You do not have a company profile yet.");
 
-        return new CompanyDto(c.Id, c.OwnerId, c.Name, c.Description, c.Website, c.Address, c.CompanySize, c.LogoUrl, c.IsBlocked, c.CreatedAt, c.TaxCode);
+        return new CompanyDto(c.Id, c.OwnerId, c.Name, c.Description, c.Website, c.Address, c.CompanySize, c.LogoUrl, c.IsBlocked, c.CreatedAt, c.TaxCode, c.ContactEmail, c.ContactPhone);
     }
 
     public async Task<CompanyDto> CreateCompanyAsync(string userId, CreateCompanyRequest request, CancellationToken ct)
@@ -65,6 +65,8 @@ public sealed class CompanyService : ICompanyService
             Address = request.Address ?? string.Empty,
             CompanySize = request.CompanySize,
             TaxCode = request.TaxCode,
+            ContactEmail = request.ContactEmail,
+            ContactPhone = request.ContactPhone,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
         };
@@ -94,7 +96,7 @@ public sealed class CompanyService : ICompanyService
             }
         }
 
-        return new CompanyDto(company.Id, company.OwnerId, company.Name, company.Description, company.Website, company.Address, company.CompanySize, company.LogoUrl, company.IsBlocked, company.CreatedAt, company.TaxCode);
+        return new CompanyDto(company.Id, company.OwnerId, company.Name, company.Description, company.Website, company.Address, company.CompanySize, company.LogoUrl, company.IsBlocked, company.CreatedAt, company.TaxCode, company.ContactEmail, company.ContactPhone);
     }
 
     public async Task<CompanyDto> UpdateCompanyAsync(string userId, Guid companyId, UpdateCompanyRequest request, CancellationToken ct)
@@ -112,11 +114,13 @@ public sealed class CompanyService : ICompanyService
         company.Address = request.Address ?? string.Empty;
         company.CompanySize = request.CompanySize;
         company.TaxCode = request.TaxCode;
+        company.ContactEmail = request.ContactEmail;
+        company.ContactPhone = request.ContactPhone;
         company.UpdatedAt = DateTime.UtcNow;
 
         await _db.SaveChangesAsync(ct);
 
-        return new CompanyDto(company.Id, company.OwnerId, company.Name, company.Description, company.Website, company.Address, company.CompanySize, company.LogoUrl, company.IsBlocked, company.CreatedAt, company.TaxCode);
+        return new CompanyDto(company.Id, company.OwnerId, company.Name, company.Description, company.Website, company.Address, company.CompanySize, company.LogoUrl, company.IsBlocked, company.CreatedAt, company.TaxCode, company.ContactEmail, company.ContactPhone);
     }
 
     public async Task<List<CompanyDto>> GetFeaturedCompaniesAsync(CancellationToken ct)
@@ -134,7 +138,7 @@ public sealed class CompanyService : ICompanyService
         var companies = await _db.Companies
             .Where(c => featuredUserIds.Contains(c.OwnerId) && !c.IsBlocked)
             .OrderByDescending(c => c.CreatedAt)
-            .Select(c => new CompanyDto(c.Id, c.OwnerId, c.Name, c.Description, c.Website, c.Address, c.CompanySize, c.LogoUrl, c.IsBlocked, c.CreatedAt, c.TaxCode))
+            .Select(c => new CompanyDto(c.Id, c.OwnerId, c.Name, c.Description, c.Website, c.Address, c.CompanySize, c.LogoUrl, c.IsBlocked, c.CreatedAt, c.TaxCode, c.ContactEmail, c.ContactPhone))
             .ToListAsync(ct);
 
         return companies;

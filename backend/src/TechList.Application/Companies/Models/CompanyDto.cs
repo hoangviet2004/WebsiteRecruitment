@@ -11,5 +11,7 @@ public sealed record CompanyDto(
     string? LogoUrl,
     bool IsBlocked,
     DateTime CreatedAt,
-    string TaxCode
+    string TaxCode,
+    string? ContactEmail,
+    string? ContactPhone
 );
