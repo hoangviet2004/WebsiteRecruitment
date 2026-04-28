@@ -84,10 +84,6 @@
                             </div>
                         </div>
 
-                        <div class="salary-insight">
-                            <a href="#"><i class="fa-solid fa-chart-line"></i> Xem mức lương thị trường cho vị trí này
-                                <i class="fa-solid fa-angles-right"></i></a>
-                        </div>
 
                         <div class="job-deadline">
                             <i class="fa-regular fa-clock"></i> Hạn nộp hồ sơ: <strong
@@ -172,8 +168,32 @@
 
                     <a id="detail-company-link" href="#" class="btn-view-company" style="display:none;" target="_blank"
                         rel="noopener">Xem trang công ty <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
-                    <a href="home.html" class="btn-view-company" id="detail-company-link-fallback">Xem các việc làm khác
+                    <a href="javascript:void(0)" onclick="viewCompanyProfile()" class="btn-view-company" id="detail-company-link-fallback">Xem công ty
                         <i class="fa-solid fa-arrow-right"></i></a>
+                </div>
+
+                <!-- Thông tin chung -->
+                <div class="company-sidebar-card" style="margin-top: 20px;">
+                    <h3 style="font-size: 16px; font-weight: 700; color: #0f172a; margin-bottom: 16px;">Thông tin chung</h3>
+                    <div class="company-meta">
+                        <div class="meta-row">
+                            <div style="width: 20px; text-align: center; color: #64748b; margin-right: 8px;"><i class="fa-solid fa-graduation-cap"></i></div>
+                            <span><strong>Học vấn:</strong> <span id="detail-education">Không yêu cầu</span></span>
+                        </div>
+                        <div class="meta-row" style="margin-top: 12px;">
+                            <div style="width: 20px; text-align: center; color: #64748b; margin-right: 8px;"><i class="fa-solid fa-briefcase"></i></div>
+                            <span><strong>Kinh nghiệm:</strong> <span id="detail-experience">Không yêu cầu</span></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Việc làm gợi ý -->
+                <div class="company-sidebar-card" style="margin-top: 20px;">
+                    <h3 style="font-size: 16px; font-weight: 700; color: #0f172a; margin-bottom: 16px;">Việc làm gợi ý</h3>
+                    <div id="suggested-jobs-container" style="display: flex; flex-direction: column; gap: 12px;">
+                        <!-- JS Inject -->
+                        <div style="color: #64748b; font-size: 13px;">Đang tải...</div>
+                    </div>
                 </div>
             </div>
         </div>
