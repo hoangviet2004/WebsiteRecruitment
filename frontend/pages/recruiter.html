@@ -34,47 +34,86 @@
         <main class="dashboard-content">
             <!-- TAB 1: Hồ sơ công ty -->
             <section id="tab-company" class="tab-pane active">
-                <div class="card">
-                    <div class="card-header">
-                        <h2>Hồ sơ Công ty</h2>
-                        <p>Quản lý thông tin doanh nghiệp để ứng viên có thể tìm hiểu thêm về bạn.</p>
+                <div class="card" style="padding: 0; overflow: hidden; position: relative;">
+                    <!-- Cover Image Banner -->
+                    <div style="background: #cbd5e1; height: 160px; position: relative; display: flex; align-items: center; justify-content: center; color: #475569; flex-direction: column; cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='#94a3b8'" onmouseout="this.style.background='#cbd5e1'">
+                        <i class="fa-solid fa-camera" style="font-size: 24px; margin-bottom: 8px;"></i>
+                        <span style="font-size: 13px; font-weight: 600;">Tải lên ảnh bìa</span>
                     </div>
-                    <div class="card-body">
+                    
+                    <div style="padding: 60px 40px 40px; position: relative;">
+                        <!-- Logo Upload Box -->
+                        <div style="width: 80px; height: 80px; background: #e2e8f0; border-radius: 8px; border: 4px solid #fff; position: absolute; top: -40px; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                            <i class="fa-solid fa-building" style="font-size: 28px; color: #64748b;"></i>
+                            <div style="position: absolute; bottom: -6px; right: -6px; width: 24px; height: 24px; background: #0056d2; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; border: 2px solid #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                                <i class="fa-solid fa-pen"></i>
+                            </div>
+                        </div>
+                        
+                        <h2 style="font-size: 24px; color: #0f172a; margin-top: 0; margin-bottom: 6px; font-weight: 700;">Tạo hồ sơ công ty</h2>
+                        <p style="color: #475569; font-size: 14px; margin-bottom: 32px;">Vui lòng cung cấp thông tin chính xác để thu hút ứng viên tiềm năng.</p>
+                        
                         <form id="company-form">
                             <input type="hidden" id="company-id">
-                            <div class="form-group">
-                                <label>Tên Công ty <span class="required">*</span></label>
-                                <input type="text" id="company-name" required placeholder="Nhập tên doanh nghiệp">
+                            
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px;">
+                                <div class="form-group" style="margin: 0;">
+                                    <label style="font-size: 13px; font-weight: 600; color: #1e293b;">Tên công ty <span class="required" style="color: #ef4444;">*</span></label>
+                                    <input type="text" id="company-name" required placeholder="Nhập tên công ty" style="margin-top: 8px; font-size: 14px; padding: 12px 14px; border-radius: 6px; width: 100%; box-sizing: border-box; display: block; border: 1px solid #cbd5e1;">
+                                </div>
+                                <div class="form-group" style="margin: 0;">
+                                    <label style="font-size: 13px; font-weight: 600; color: #1e293b;">Mã số thuế <span class="required" style="color: #ef4444;">*</span></label>
+                                    <input type="text" id="company-taxcode" required placeholder="Nhập mã số thuế" style="margin-top: 8px; font-size: 14px; padding: 12px 14px; border-radius: 6px; width: 100%; box-sizing: border-box; display: block; border: 1px solid #cbd5e1;">
+                                </div>
+                                
+                                <div class="form-group" style="margin: 0;">
+                                    <label style="font-size: 13px; font-weight: 600; color: #1e293b;">Email liên hệ</label>
+                                    <input type="email" id="company-email" placeholder="contact@company.com" style="margin-top: 8px; font-size: 14px; padding: 12px 14px; border-radius: 6px; width: 100%; box-sizing: border-box; display: block; border: 1px solid #cbd5e1;">
+                                </div>
+                                <div class="form-group" style="margin: 0;">
+                                    <label style="font-size: 13px; font-weight: 600; color: #1e293b;">Số điện thoại</label>
+                                    <input type="tel" id="company-phone" placeholder="Nhập số điện thoại" style="margin-top: 8px; font-size: 14px; padding: 12px 14px; border-radius: 6px; width: 100%; box-sizing: border-box; display: block; border: 1px solid #cbd5e1;">
+                                </div>
+                                
+                                <div class="form-group" style="margin: 0;">
+                                    <label style="font-size: 13px; font-weight: 600; color: #1e293b;">Website</label>
+                                    <div style="position: relative; margin-top: 8px;">
+                                        <i class="fa-solid fa-globe" style="position: absolute; left: 14px; top: 14px; color: #94a3b8; font-size: 14px;"></i>
+                                        <input type="url" id="company-website" placeholder="https://www.company.com" style="padding-left: 38px; font-size: 14px; padding-top: 12px; padding-bottom: 12px; border-radius: 6px; width: 100%; box-sizing: border-box; display: block; border: 1px solid #cbd5e1;">
+                                    </div>
+                                </div>
+                                <div class="form-group" style="margin: 0;">
+                                    <label style="font-size: 13px; font-weight: 600; color: #1e293b;">Quy mô công ty</label>
+                                    <select id="company-size" style="margin-top: 8px; width: 100%; box-sizing: border-box; display: block; font-size: 14px; padding: 12px 14px; border-radius: 6px; border: 1px solid #cbd5e1;">
+                                        <option value="">Chọn quy mô</option>
+                                        <option value="1-50 nhân viên">1 - 50 nhân viên</option>
+                                        <option value="50-150 nhân viên">50 - 150 nhân viên</option>
+                                        <option value="150-300 nhân viên">150 - 300 nhân viên</option>
+                                        <option value="300-500 nhân viên">300 - 500 nhân viên</option>
+                                        <option value="500-1000 nhân viên">500 - 1.000 nhân viên</option>
+                                        <option value="1000+ nhân viên">Trên 1.000 nhân viên</option>
+                                    </select>
+                                </div>
                             </div>
-                            <div class="form-group">
-                                <label>Mã số thuế <span class="required">*</span></label>
-                                <input type="text" id="company-taxcode" required placeholder="Nhập mã số thuế (Vd: 0101234567)">
+                            
+                            <div class="form-group" style="margin-bottom: 24px;">
+                                <label style="font-size: 13px; font-weight: 600; color: #1e293b;">Địa chỉ trụ sở chính <span class="required" style="color: #ef4444;">*</span></label>
+                                <div style="position: relative; margin-top: 8px;">
+                                    <i class="fa-solid fa-location-dot" style="position: absolute; left: 14px; top: 14px; color: #94a3b8; font-size: 14px;"></i>
+                                    <input type="text" id="company-address" required placeholder="Nhập địa chỉ đầy đủ" style="padding-left: 38px; font-size: 14px; padding-top: 12px; padding-bottom: 12px; border-radius: 6px; width: 100%; box-sizing: border-box; display: block; border: 1px solid #cbd5e1;">
+                                </div>
                             </div>
-                            <div class="form-group">
-                                <label>Website</label>
-                                <input type="url" id="company-website" placeholder="https://example.com">
+                            
+                            <div class="form-group" style="margin-bottom: 32px;">
+                                <label style="font-size: 13px; font-weight: 600; color: #1e293b;">Giới thiệu công ty</label>
+                                <textarea id="company-desc" rows="5" placeholder="Mô tả về lịch sử hình thành, văn hóa, và lĩnh vực hoạt động..." style="margin-top: 8px; font-size: 14px; padding: 12px 14px; border-radius: 6px; width: 100%; box-sizing: border-box; display: block; border: 1px solid #cbd5e1;"></textarea>
                             </div>
-                            <div class="form-group">
-                                <label>Địa chỉ công ty</label>
-                                <input type="text" id="company-address" placeholder="Ex: Tòa nhà Bitexco, Q1, TP.HCM">
+                            
+                            <div style="display: flex; justify-content: flex-end; align-items: center; gap: 16px; border-top: 1px solid #f1f5f9; padding-top: 24px;">
+                                <button type="submit" class="btn-primary" style="display: inline-flex; align-items: center; gap: 8px;">
+                                    Lưu hồ sơ <i class="fa-solid fa-circle-check"></i>
+                                </button>
                             </div>
-                            <div class="form-group">
-                                <label>Quy mô công ty</label>
-                                <select id="company-size">
-                                    <option value="">-- Chọn quy mô --</option>
-                                    <option value="1-50 nhân viên">1 - 50 nhân viên</option>
-                                    <option value="50-150 nhân viên">50 - 150 nhân viên</option>
-                                    <option value="150-300 nhân viên">150 - 300 nhân viên</option>
-                                    <option value="300-500 nhân viên">300 - 500 nhân viên</option>
-                                    <option value="500-1000 nhân viên">500 - 1.000 nhân viên</option>
-                                    <option value="1000+ nhân viên">Trên 1.000 nhân viên</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label>Giới thiệu chi tiết</label>
-                                <textarea id="company-desc" rows="5" placeholder="Quy mô công ty, văn hóa, sứ mệnh..."></textarea>
-                            </div>
-                            <button type="submit" class="btn-primary">Lưu Hồ Sơ</button>
                         </form>
                     </div>
                 </div>
