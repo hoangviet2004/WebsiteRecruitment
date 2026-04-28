@@ -355,6 +355,7 @@ body { padding-top: 76px; background-color: #f8fafc; color: #1e293b; }
     margin-bottom: 5px;
     display: -webkit-box;
     -webkit-line-clamp: 2;
+    line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
     transition: color 0.2s;
@@ -650,6 +651,7 @@ body { padding-top: 76px; background-color: #f8fafc; color: #1e293b; }
     margin-bottom: 12px;
     display: -webkit-box;
     -webkit-line-clamp: 2;
+    line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
 }
@@ -671,6 +673,7 @@ body { padding-top: 76px; background-color: #f8fafc; color: #1e293b; }
     margin-bottom: 20px;
     display: -webkit-box;
     -webkit-line-clamp: 3;
+    line-clamp: 3;
     -webkit-box-orient: vertical;
     overflow: hidden;
     flex: 1;
