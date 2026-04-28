@@ -331,6 +331,8 @@ async function submitJobForm() {
         companyId: currentCompanyId,
         title: document.getElementById('job-title').value,
         jobType: document.getElementById('job-type').value,
+        experience: document.getElementById('job-experience').value,
+        education: document.getElementById('job-education').value,
         location: document.getElementById('job-location').value,
         minSalary: parseSalary(document.getElementById('job-min-salary').value),
         maxSalary: parseSalary(document.getElementById('job-max-salary').value),
@@ -379,6 +381,8 @@ async function editJob(jobId) {
             document.getElementById('job-id').value = job.id;
             document.getElementById('job-title').value = job.title;
             document.getElementById('job-type').value = job.jobType;
+            if (job.experience) document.getElementById('job-experience').value = job.experience;
+            if (job.education) document.getElementById('job-education').value = job.education;
             document.getElementById('job-location').value = job.location;
             document.getElementById('job-min-salary').value = job.minSalary || '';
             document.getElementById('job-max-salary').value = job.maxSalary || '';

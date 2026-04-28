@@ -13,6 +13,8 @@ public sealed record JobDto(
     decimal? MaxSalary,
     string Location,
     string JobType,
+    string? Experience,
+    string? Education,
     DateTime ExpiresAt,
     bool IsActive,
     bool IsApproved,

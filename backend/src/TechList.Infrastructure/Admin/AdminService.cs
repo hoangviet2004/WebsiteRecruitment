@@ -153,6 +153,8 @@ public sealed class AdminService : IAdminService
             j.MaxSalary,
             j.Location,
             j.JobType,
+            j.Experience,
+            j.Education,
             j.ExpiresAt,
             j.IsActive,
             j.IsApproved,

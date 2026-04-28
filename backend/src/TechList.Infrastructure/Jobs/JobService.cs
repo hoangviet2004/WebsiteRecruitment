@@ -118,6 +118,8 @@ public sealed class JobService : IJobService
             MaxSalary = request.MaxSalary,
             Location = request.Location,
             JobType = request.JobType,
+            Experience = request.Experience,
+            Education = request.Education,
             ExpiresAt = request.ExpiresAt,
             IsActive = request.IsActive,
             IsApproved = false,
@@ -154,6 +156,8 @@ public sealed class JobService : IJobService
         job.MaxSalary = request.MaxSalary;
         job.Location = request.Location;
         job.JobType = request.JobType;
+        job.Experience = request.Experience;
+        job.Education = request.Education;
         job.ExpiresAt = request.ExpiresAt;
         job.IsActive = request.IsActive;
         job.UpdatedAt = DateTime.UtcNow;
@@ -206,6 +210,8 @@ public sealed class JobService : IJobService
         x.MaxSalary,
         x.Location,
         x.JobType,
+        x.Experience,
+        x.Education,
         x.ExpiresAt,
         x.IsActive,
         x.IsApproved,
