@@ -303,17 +303,37 @@ function closeJobModal() {
     document.getElementById('job-modal').classList.remove('show');
 }
 
+// Format currency with dots as thousands separator
+function formatCurrency(input) {
+    let val = input.value;
+    // Strip non-digits
+    val = val.replace(/\D/g, '');
+    // Add dots
+    if (val !== '') {
+        val = parseInt(val, 10).toLocaleString('vi-VN');
+    }
+    input.value = val;
+}
+
 async function submitJobForm() {
     const jobId = document.getElementById('job-id').value;
     const isUpdate = !!jobId;
+
+    const parseSalary = (valStr) => {
+        if (!valStr) return null;
+        // Remove dots before parsing
+        const cleanStr = valStr.replace(/\./g, '');
+        const num = parseFloat(cleanStr);
+        return isNaN(num) ? null : num;
+    };
 
     const payload = {
         companyId: currentCompanyId,
         title: document.getElementById('job-title').value,
         jobType: document.getElementById('job-type').value,
         location: document.getElementById('job-location').value,
-        minSalary: parseFloat(document.getElementById('job-min-salary').value) || null,
-        maxSalary: parseFloat(document.getElementById('job-max-salary').value) || null,
+        minSalary: parseSalary(document.getElementById('job-min-salary').value),
+        maxSalary: parseSalary(document.getElementById('job-max-salary').value),
         description: document.getElementById('job-desc').value,
         requirements: document.getElementById('job-req').value,
         benefits: document.getElementById('job-ben').value,

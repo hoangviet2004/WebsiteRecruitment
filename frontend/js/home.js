@@ -179,14 +179,14 @@ async function loadJobs() {
                 ? `<div class="company-logo"><img src="${job.companyLogo}" alt="${job.companyName}"></div>`
                 : `<div class="company-logo">${getInitials(job.companyName)}</div>`;
 
-            // Lương — format triệu VND
+            // Lương — format VNĐ
             let salaryStr = 'Thỏa thuận';
             if (job.minSalary && job.maxSalary) {
-                salaryStr = `${job.minSalary} - ${job.maxSalary} triệu`;
+                salaryStr = `${job.minSalary.toLocaleString('vi-VN')} - ${job.maxSalary.toLocaleString('vi-VN')} VNĐ`;
             } else if (job.minSalary) {
-                salaryStr = `Tới ${job.minSalary} triệu`;
+                salaryStr = `Từ ${job.minSalary.toLocaleString('vi-VN')} VNĐ`;
             } else if (job.maxSalary) {
-                salaryStr = `Lên đến ${job.maxSalary} triệu`;
+                salaryStr = `Lên đến ${job.maxSalary.toLocaleString('vi-VN')} VNĐ`;
             }
 
             const timeAgo = getTimeAgo(new Date(job.createdAt));
