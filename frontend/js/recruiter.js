@@ -26,7 +26,122 @@ function switchTab(tabName, element) {
         loadMyJobs(currentCompanyId);
     } else if (tabName === 'jobs' && !currentCompanyId) {
         document.getElementById('job-table-body').innerHTML = `<tr><td colspan="4" style="text-align:center;color:#ef4444;">Vui lòng tạo Hồ sơ Công ty trước khi đăng tin.</td></tr>`;
+    } else if (tabName === 'packages') {
+        loadPackages();
     }
+}
+
+// ── 2b. Đăng ký Gói dịch vụ ────────────────────────────────
+let _packagesLoaded = false;
+let _currentSubscription = null;
+
+async function loadPackages() {
+    const container = document.getElementById('packages-container');
+
+    try {
+        const [subRes, pkgRes] = await Promise.all([
+            apiFetchAuth('/api/packages/my-subscription', { method: 'GET' }),
+            apiFetch('/api/packages/active', { method: 'GET' })
+        ]);
+
+        const subData = await subRes.json();
+        const pkgData = await pkgRes.json();
+
+        if (!pkgRes.ok || !pkgData.success) throw new Error(pkgData.message || 'Lỗi tải gói dịch vụ');
+
+        _currentSubscription = subData.success ? subData.data : null;
+        const packages = pkgData.data || [];
+
+        if (packages.length === 0) {
+            container.innerHTML = '<div style="text-align:center; padding:48px 0; color:#64748b;"><i class="fa-solid fa-box-open" style="font-size:48px; margin-bottom:16px; color:#cbd5e1;"></i><p>Hiện chưa có gói dịch vụ nào.</p></div>';
+            return;
+        }
+
+        let subInfoHtml = '';
+        if (_currentSubscription && _currentSubscription.hasSubscription) {
+            const s = _currentSubscription;
+            const jobsText = s.maxJobPosts === -1
+                ? '<span style="color:#22c55e;font-weight:700;">Không giới hạn</span>'
+                : '<strong>' + s.jobPostsUsed + '</strong> / ' + s.maxJobPosts + ' tin đã dùng';
+            const endDateStr = new Date(s.endDate).toLocaleDateString('vi-VN', { day:'2-digit', month:'2-digit', year:'numeric' });
+
+            subInfoHtml = '<div class="sub-info-card"><div class="sub-info-header"><i class="fa-solid fa-crown" style="color:#f59e0b;margin-right:8px;"></i>Gói hiện tại: <strong>' + escapeHtmlPkg(s.packageName) + '</strong></div><div class="sub-info-details"><div class="sub-info-item"><i class="fa-solid fa-newspaper"></i><span>Tin đăng: ' + jobsText + '</span></div><div class="sub-info-item"><i class="fa-solid fa-calendar-check"></i><span>Hết hạn: ' + endDateStr + ' (còn ' + s.daysRemaining + ' ngày)</span></div></div></div>';
+        }
+
+        let cardsHtml = '';
+        packages.forEach(function(pkg) {
+            var features = [];
+            try { features = JSON.parse(pkg.features || '[]'); } catch(e) {}
+
+            var featuresHtml = features.map(function(f) {
+                return '<li><i class="fa-solid fa-check" style="color:#22c55e;margin-right:8px;"></i>' + escapeHtmlPkg(f) + '</li>';
+            }).join('');
+
+            var priceStr = pkg.price === 0
+                ? '<span style="color:#22c55e;font-weight:700;">Miễn phí</span>'
+                : '<span style="font-size:28px;font-weight:800;color:#0f172a;">' + formatVND(pkg.price) + '</span><span style="font-size:14px;color:#64748b;font-weight:400;"> / ' + pkg.durationDays + ' ngày</span>';
+
+            var maxJobText = pkg.maxJobPosts === -1
+                ? 'Không giới hạn tin đăng'
+                : 'Tối đa ' + pkg.maxJobPosts + ' tin đăng';
+
+            var isCurrentPkg = _currentSubscription && _currentSubscription.hasSubscription && _currentSubscription.packageId === pkg.id;
+            var highlightClass = pkg.isHighlighted ? ' pkg-highlighted' : '';
+            var currentClass = isCurrentPkg ? ' pkg-current' : '';
+
+            var btnHtml;
+            if (isCurrentPkg) {
+                btnHtml = '<button class="pkg-btn pkg-btn-current" disabled><i class="fa-solid fa-check-circle" style="margin-right:6px;"></i>Đang sử dụng</button>';
+            } else {
+                var btnLabel = pkg.price === 0 ? 'Dùng miễn phí' : 'Đăng ký ngay';
+                btnHtml = '<button class="pkg-btn' + (pkg.isHighlighted ? ' pkg-btn-primary' : '') + '" onclick="selectPackage(\'' + pkg.id + '\', \'' + escapeHtmlPkg(pkg.name) + '\', ' + pkg.price + ')"><i class="fa-solid fa-cart-shopping" style="margin-right:6px;"></i>' + btnLabel + '</button>';
+            }
+
+            var badgeHtml = '';
+            if (isCurrentPkg) {
+                badgeHtml = '<div class="pkg-badge" style="background:linear-gradient(135deg,#22c55e,#16a34a);">Gói hiện tại</div>';
+            } else if (pkg.isHighlighted) {
+                badgeHtml = '<div class="pkg-badge">Phổ biến nhất</div>';
+            }
+
+            cardsHtml += '<div class="pkg-card' + highlightClass + currentClass + '">' + badgeHtml + '<div class="pkg-name">' + escapeHtmlPkg(pkg.name) + '</div><div class="pkg-price">' + priceStr + '</div><div class="pkg-jobs"><i class="fa-solid fa-briefcase" style="margin-right:6px;"></i>' + maxJobText + '</div><ul class="pkg-features">' + featuresHtml + '</ul>' + btnHtml + '</div>';
+        });
+
+        container.innerHTML = subInfoHtml + '<div class="packages-grid">' + cardsHtml + '</div>';
+        _packagesLoaded = true;
+    } catch (e) {
+        container.innerHTML = '<div style="text-align:center; padding:32px 0;"><i class="fa-solid fa-circle-exclamation" style="font-size:32px; color:#ef4444;"></i><p style="margin-top:12px; color:#ef4444; font-weight:600;">Lỗi tải gói dịch vụ</p><p style="color:#64748b; font-size:13px;">' + e.message + '</p></div>';
+    }
+}
+
+async function selectPackage(packageId, packageName, price) {
+    var action = price === 0 ? 'kích hoạt' : 'đăng ký';
+    if (!confirm('Bạn có muốn ' + action + ' gói "' + packageName + '"?')) return;
+
+    try {
+        var response = await apiFetchAuth('/api/packages/register/' + packageId, { method: 'POST' });
+        var res = await response.json();
+
+        if (!response.ok || !res.success) {
+            alert('Lỗi: ' + (res.message || 'Không thể đăng ký gói dịch vụ'));
+            return;
+        }
+
+        alert(res.message || 'Đăng ký gói "' + packageName + '" thành công!');
+        _packagesLoaded = false;
+        loadPackages();
+    } catch (e) {
+        alert('Lỗi kết nối: ' + e.message);
+    }
+}
+
+function formatVND(amount) {
+    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
+}
+
+function escapeHtmlPkg(str) {
+    if (!str) return '';
+    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
 // ── 3. Quản lý Hồ sơ Công ty ───────────────────────────────

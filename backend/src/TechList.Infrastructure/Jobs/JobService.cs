@@ -61,6 +61,51 @@ public sealed class JobService : IJobService
         if (company.OwnerId != userId)
             throw new UnauthorizedAccessException("You do not have permission to post a job for this company.");
 
+        // ── Subscription check ───────────────────────────────
+        var subscription = await _db.Subscriptions
+            .Include(s => s.Package)
+            .Where(s => s.UserId == userId && s.Status == TechList.Domain.Enums.SubscriptionStatus.Active)
+            .OrderByDescending(s => s.CreatedAt)
+            .FirstOrDefaultAsync(ct);
+
+        // Auto-create Free subscription if none exists
+        if (subscription == null)
+        {
+            var freePackage = await _db.ServicePackages
+                .FirstOrDefaultAsync(p => p.Price == 0 && p.IsActive, ct);
+            if (freePackage == null)
+                throw new InvalidOperationException("Không tìm thấy gói dịch vụ mặc định. Vui lòng liên hệ quản trị viên.");
+
+            subscription = new Subscription
+            {
+                UserId = userId,
+                PackageId = freePackage.Id,
+                StartDate = DateTime.UtcNow,
+                EndDate = DateTime.UtcNow.AddDays(freePackage.DurationDays),
+                Status = TechList.Domain.Enums.SubscriptionStatus.Active,
+                JobPostsUsed = 0
+            };
+            subscription.Package = freePackage;
+            _db.Subscriptions.Add(subscription);
+            await _db.SaveChangesAsync(ct);
+        }
+
+        // Check if subscription has expired
+        if (subscription.EndDate < DateTime.UtcNow)
+        {
+            subscription.Status = TechList.Domain.Enums.SubscriptionStatus.Expired;
+            await _db.SaveChangesAsync(ct);
+            throw new InvalidOperationException($"Gói dịch vụ \"{subscription.Package.Name}\" của bạn đã hết hạn. Vui lòng gia hạn hoặc nâng cấp gói.");
+        }
+
+        // Check job post limit (-1 = unlimited)
+        if (subscription.Package.MaxJobPosts != -1 && subscription.JobPostsUsed >= subscription.Package.MaxJobPosts)
+        {
+            throw new InvalidOperationException(
+                $"Bạn đã đạt giới hạn {subscription.Package.MaxJobPosts} tin đăng của gói \"{subscription.Package.Name}\". " +
+                $"Vui lòng nâng cấp gói dịch vụ để đăng thêm tin.");
+        }
+
         var job = new JobPost
         {
             Id = Guid.NewGuid(),
@@ -81,6 +126,11 @@ public sealed class JobService : IJobService
         };
 
         _db.JobPosts.Add(job);
+
+        // Increment job posts used
+        subscription.JobPostsUsed++;
+        subscription.UpdatedAt = DateTime.UtcNow;
+
         await _db.SaveChangesAsync(ct);
 
         // Fetch again to include Company projection

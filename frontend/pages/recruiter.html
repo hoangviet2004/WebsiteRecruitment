@@ -25,6 +25,9 @@
                 <a href="#" class="menu-item" onclick="switchTab('jobs', this)">
                     <i class="fa-solid fa-file-signature"></i> Quản lý Đăng tin
                 </a>
+                <a href="#" class="menu-item" onclick="switchTab('packages', this)">
+                    <i class="fa-solid fa-gem"></i> Đăng ký Gói dịch vụ
+                </a>
             </div>
         </aside>
 
@@ -102,6 +105,24 @@
                                     <tr><td colspan="4" style="text-align: center;">Đang tải dữ liệu...</td></tr>
                                 </tbody>
                             </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 3: Đăng ký gói dịch vụ -->
+            <section id="tab-packages" class="tab-pane">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Đăng ký Gói dịch vụ</h2>
+                        <p>Chọn gói phù hợp để mở rộng khả năng tuyển dụng của bạn.</p>
+                    </div>
+                    <div class="card-body">
+                        <div id="packages-container" class="packages-grid">
+                            <div style="text-align:center; padding:32px 0;">
+                                <i class="fa-solid fa-spinner fa-spin" style="font-size:24px; color:#3b82f6;"></i>
+                                <p style="margin-top:12px; color:#64748b;">Đang tải gói dịch vụ...</p>
+                            </div>
                         </div>
                     </div>
                 </div>

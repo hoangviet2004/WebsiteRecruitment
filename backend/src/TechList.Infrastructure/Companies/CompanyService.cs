@@ -72,6 +72,28 @@ public sealed class CompanyService : ICompanyService
         _db.Companies.Add(company);
         await _db.SaveChangesAsync(ct);
 
+        // Auto-create Free subscription for the new recruiter
+        var freePackage = await _db.ServicePackages
+            .FirstOrDefaultAsync(p => p.Price == 0 && p.IsActive, ct);
+        if (freePackage != null)
+        {
+            var existingSub = await _db.Subscriptions
+                .AnyAsync(s => s.UserId == userId && s.Status == Domain.Enums.SubscriptionStatus.Active, ct);
+            if (!existingSub)
+            {
+                _db.Subscriptions.Add(new Subscription
+                {
+                    UserId = userId,
+                    PackageId = freePackage.Id,
+                    StartDate = DateTime.UtcNow,
+                    EndDate = DateTime.UtcNow.AddDays(freePackage.DurationDays),
+                    Status = Domain.Enums.SubscriptionStatus.Active,
+                    JobPostsUsed = 0
+                });
+                await _db.SaveChangesAsync(ct);
+            }
+        }
+
         return new CompanyDto(company.Id, company.OwnerId, company.Name, company.Description, company.Website, company.Address, company.CompanySize, company.LogoUrl, company.IsBlocked, company.CreatedAt, company.TaxCode);
     }
 

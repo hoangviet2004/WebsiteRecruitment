@@ -282,3 +282,177 @@
     background: #f8fafc;
     border-radius: 0 0 16px 16px;
 }
+
+/* ── Package Pricing Cards ──────────────────────────────── */
+.packages-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 24px;
+}
+
+.pkg-card {
+    position: relative;
+    background: #fff;
+    border: 2px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 28px 24px 24px;
+    display: flex;
+    flex-direction: column;
+    transition: all 0.3s ease;
+}
+
+.pkg-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 24px rgba(0,0,0,0.08);
+}
+
+.pkg-highlighted {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 1px #3b82f6, 0 8px 20px rgba(59,130,246,0.12);
+}
+
+.pkg-badge {
+    position: absolute;
+    top: -12px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(135deg, #3b82f6, #6366f1);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 16px;
+    border-radius: 20px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+}
+
+.pkg-name {
+    font-size: 20px;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 12px;
+    text-align: center;
+}
+
+.pkg-price {
+    text-align: center;
+    margin-bottom: 16px;
+    line-height: 1.4;
+}
+
+.pkg-jobs {
+    text-align: center;
+    background: #f1f5f9;
+    color: #475569;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 8px 12px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.pkg-features {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 24px 0;
+    flex: 1;
+}
+
+.pkg-features li {
+    padding: 7px 0;
+    font-size: 13px;
+    color: #334155;
+    border-bottom: 1px solid #f1f5f9;
+    display: flex;
+    align-items: center;
+}
+
+.pkg-features li:last-child {
+    border-bottom: none;
+}
+
+.pkg-btn {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid #e2e8f0;
+    background: #fff;
+    color: #475569;
+    font-weight: 600;
+    font-size: 14px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.pkg-btn:hover {
+    background: #f8fafc;
+    border-color: #94a3b8;
+    color: #0f172a;
+}
+
+.pkg-btn-primary {
+    background: linear-gradient(135deg, #3b82f6, #6366f1);
+    color: #fff;
+    border-color: transparent;
+}
+
+.pkg-btn-primary:hover {
+    background: linear-gradient(135deg, #2563eb, #4f46e5);
+    border-color: transparent;
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+/* Current package */
+.pkg-current {
+    border-color: #22c55e;
+    box-shadow: 0 0 0 1px #22c55e, 0 4px 12px rgba(34,197,94,0.1);
+}
+
+.pkg-btn-current {
+    background: #f0fdf4;
+    color: #16a34a;
+    border-color: #bbf7d0;
+    cursor: default;
+    font-weight: 700;
+}
+
+/* Subscription info card */
+.sub-info-card {
+    background: linear-gradient(135deg, #eff6ff, #f0f9ff);
+    border: 1px solid #bfdbfe;
+    border-radius: 12px;
+    padding: 20px 24px;
+    margin-bottom: 24px;
+}
+
+.sub-info-header {
+    font-size: 16px;
+    color: #1e293b;
+    margin-bottom: 12px;
+}
+
+.sub-info-details {
+    display: flex;
+    gap: 32px;
+    flex-wrap: wrap;
+}
+
+.sub-info-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    color: #475569;
+}
+
+.sub-info-item i {
+    font-size: 14px;
+    color: #3b82f6;
+}
+
+
