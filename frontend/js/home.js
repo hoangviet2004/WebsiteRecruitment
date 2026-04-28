@@ -108,8 +108,54 @@ function getInitials(fullName) {
 checkAdminRedirect();
 renderNavRight();
 loadJobs();
+loadFeaturedCompanies();
 
 /* ── Hàm Fetch & Render Việc làm (Job Board) ───────────────────── */
+async function loadFeaturedCompanies() {
+    const list = document.getElementById('featured-companies-list');
+    if (!list) return;
+
+    try {
+        const response = await apiFetch('/api/companies/featured', { method: 'GET' });
+        const res = await response.json();
+
+        list.innerHTML = '';
+        
+        if (!response.ok || !res.success || !res.data || res.data.length === 0) {
+            list.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: #64748b;">Chưa có công ty nổi bật nào.</p>';
+            return;
+        }
+
+        const companies = res.data;
+        
+        companies.forEach(company => {
+            const logoHtml = company.logoUrl
+                ? `<div class="company-logo"><img src="${company.logoUrl}" alt="${company.name}"></div>`
+                : `<div class="company-logo">${getInitials(company.name)}</div>`;
+
+            const cardHtml = `
+                <div class="company-card" onclick="window.location.href='#'">
+                    <div class="company-card-header">
+                        ${logoHtml}
+                        <div class="company-info">
+                            <h3>${company.name}</h3>
+                            <div class="company-size"><i class="fa-solid fa-users"></i> ${company.companySize || 'Chưa cập nhật'} nhân viên</div>
+                        </div>
+                    </div>
+                    <div class="company-card-footer">
+                        <span class="tag tag-featured"><i class="fa-solid fa-star"></i> Nổi bật</span>
+                        ${company.address ? `<span class="company-location" title="${company.address}"><i class="fa-solid fa-location-dot"></i> ${company.address}</span>` : ''}
+                    </div>
+                </div>
+            `;
+            list.insertAdjacentHTML('beforeend', cardHtml);
+        });
+
+    } catch (error) {
+        console.error('Lỗi khi tải công ty nổi bật:', error);
+        list.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: #ef4444;">Đã có lỗi xảy ra khi lấy dữ liệu.</p>';
+    }
+}
 async function loadJobs() {
     const jobList = document.getElementById('job-list');
     

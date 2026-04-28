@@ -9,4 +9,5 @@ public interface ICompanyService
     Task<CompanyDto> GetMyCompanyAsync(string userId, CancellationToken ct);
     Task<CompanyDto> CreateCompanyAsync(string userId, CreateCompanyRequest request, CancellationToken ct);
     Task<CompanyDto> UpdateCompanyAsync(string userId, Guid companyId, UpdateCompanyRequest request, CancellationToken ct);
+    Task<List<CompanyDto>> GetFeaturedCompaniesAsync(CancellationToken ct);
 }

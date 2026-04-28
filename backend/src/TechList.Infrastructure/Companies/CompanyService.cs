@@ -118,4 +118,25 @@ public sealed class CompanyService : ICompanyService
 
         return new CompanyDto(company.Id, company.OwnerId, company.Name, company.Description, company.Website, company.Address, company.CompanySize, company.LogoUrl, company.IsBlocked, company.CreatedAt, company.TaxCode);
     }
+
+    public async Task<List<CompanyDto>> GetFeaturedCompaniesAsync(CancellationToken ct)
+    {
+        // Find user IDs who have active Pro or Premium subscriptions
+        var featuredUserIds = await _db.Subscriptions
+            .Include(s => s.Package)
+            .Where(s => s.Status == TechList.Domain.Enums.SubscriptionStatus.Active &&
+                        (s.Package.Name == "Pro" || s.Package.Name == "Premium"))
+            .Select(s => s.UserId)
+            .Distinct()
+            .ToListAsync(ct);
+
+        // Fetch their companies
+        var companies = await _db.Companies
+            .Where(c => featuredUserIds.Contains(c.OwnerId) && !c.IsBlocked)
+            .OrderByDescending(c => c.CreatedAt)
+            .Select(c => new CompanyDto(c.Id, c.OwnerId, c.Name, c.Description, c.Website, c.Address, c.CompanySize, c.LogoUrl, c.IsBlocked, c.CreatedAt, c.TaxCode))
+            .ToListAsync(ct);
+
+        return companies;
+    }
 }
