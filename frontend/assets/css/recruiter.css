@@ -15,7 +15,7 @@
 
 /* Sidebar */
 .dashboard-sidebar {
-    width: 250px;
+    width: 280px;
     flex-shrink: 0;
 }
 
@@ -453,6 +453,38 @@
 .sub-info-item i {
     font-size: 14px;
     color: #3b82f6;
+}
+
+.sub-info-features-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #1e293b;
+    margin-top: 16px;
+    margin-bottom: 8px;
+    border-top: 1px dashed #bfdbfe;
+    padding-top: 16px;
+}
+
+.sub-info-features {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 8px;
+}
+
+.sub-info-features li {
+    font-size: 13px;
+    color: #475569;
+    display: flex;
+    align-items: center;
+}
+
+.sub-info-features li i {
+    color: #22c55e;
+    margin-right: 8px;
+    font-size: 12px;
 }
 
 

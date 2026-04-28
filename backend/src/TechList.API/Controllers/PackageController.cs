@@ -100,7 +100,8 @@ public sealed class PackageController : ControllerBase
             startDate = subscription.StartDate,
             endDate = subscription.EndDate,
             daysRemaining = Math.Max(0, (int)(subscription.EndDate - DateTime.UtcNow).TotalDays),
-            packagePrice = subscription.Package.Price
+            packagePrice = subscription.Package.Price,
+            packageFeatures = subscription.Package.Features
         }));
     }
 
@@ -122,6 +123,12 @@ public sealed class PackageController : ControllerBase
             .OrderByDescending(s => s.CreatedAt)
             .FirstOrDefaultAsync(ct);
 
+        // Count actual job posts from DB
+        var company = await _db.Companies.FirstOrDefaultAsync(c => c.OwnerId == userId, ct);
+        var actualJobCount = company != null
+            ? await _db.JobPosts.CountAsync(j => j.CompanyId == company.Id, ct)
+            : 0;
+
         // For Free package: activate immediately
         if (package.Price == 0)
         {
@@ -142,7 +149,7 @@ public sealed class PackageController : ControllerBase
                 StartDate = DateTime.UtcNow,
                 EndDate = DateTime.UtcNow.AddDays(package.DurationDays),
                 Status = SubscriptionStatus.Active,
-                JobPostsUsed = 0
+                JobPostsUsed = actualJobCount
             };
             _db.Subscriptions.Add(newSub);
             await _db.SaveChangesAsync(ct);
@@ -153,8 +160,6 @@ public sealed class PackageController : ControllerBase
 
         // For paid packages: create a pending transaction (placeholder for payment integration)
         var transactionCode = $"TXN-{DateTime.UtcNow:yyyyMMddHHmmss}-{Guid.NewGuid().ToString("N")[..6].ToUpper()}";
-
-        var company = await _db.Companies.FirstOrDefaultAsync(c => c.OwnerId == userId, ct);
 
         var transaction = new Transaction
         {
@@ -189,7 +194,7 @@ public sealed class PackageController : ControllerBase
             StartDate = DateTime.UtcNow,
             EndDate = DateTime.UtcNow.AddDays(package.DurationDays),
             Status = SubscriptionStatus.Active,
-            JobPostsUsed = 0
+            JobPostsUsed = actualJobCount
         };
         _db.Subscriptions.Add(paidSub);
         await _db.SaveChangesAsync(ct);

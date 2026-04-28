@@ -178,6 +178,18 @@ public sealed class JobService : IJobService
         }
 
         _db.JobPosts.Remove(job);
+
+        // Decrement job posts used counter
+        var subscription = await _db.Subscriptions
+            .Where(s => s.UserId == userId && s.Status == TechList.Domain.Enums.SubscriptionStatus.Active)
+            .OrderByDescending(s => s.CreatedAt)
+            .FirstOrDefaultAsync(ct);
+        if (subscription != null && subscription.JobPostsUsed > 0)
+        {
+            subscription.JobPostsUsed--;
+            subscription.UpdatedAt = DateTime.UtcNow;
+        }
+
         await _db.SaveChangesAsync(ct);
     }
 

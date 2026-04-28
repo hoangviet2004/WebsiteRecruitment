@@ -65,7 +65,15 @@ async function loadPackages() {
                 : '<strong>' + s.jobPostsUsed + '</strong> / ' + s.maxJobPosts + ' tin đã dùng';
             const endDateStr = new Date(s.endDate).toLocaleDateString('vi-VN', { day:'2-digit', month:'2-digit', year:'numeric' });
 
-            subInfoHtml = '<div class="sub-info-card"><div class="sub-info-header"><i class="fa-solid fa-crown" style="color:#f59e0b;margin-right:8px;"></i>Gói hiện tại: <strong>' + escapeHtmlPkg(s.packageName) + '</strong></div><div class="sub-info-details"><div class="sub-info-item"><i class="fa-solid fa-newspaper"></i><span>Tin đăng: ' + jobsText + '</span></div><div class="sub-info-item"><i class="fa-solid fa-calendar-check"></i><span>Hết hạn: ' + endDateStr + ' (còn ' + s.daysRemaining + ' ngày)</span></div></div></div>';
+            let subFeaturesHtml = '';
+            try {
+                const subFeatures = JSON.parse(s.packageFeatures || '[]');
+                if (subFeatures.length > 0) {
+                    subFeaturesHtml = '<div class="sub-info-features-title">Tính năng của gói:</div><ul class="sub-info-features">' + subFeatures.map(f => '<li><i class="fa-solid fa-check"></i>' + escapeHtmlPkg(f) + '</li>').join('') + '</ul>';
+                }
+            } catch(e) {}
+
+            subInfoHtml = '<div class="sub-info-card"><div class="sub-info-header"><i class="fa-solid fa-crown" style="color:#f59e0b;margin-right:8px;"></i>Gói hiện tại: <strong>' + escapeHtmlPkg(s.packageName) + '</strong></div><div class="sub-info-details"><div class="sub-info-item"><i class="fa-solid fa-newspaper"></i><span>Tin đăng: ' + jobsText + '</span></div><div class="sub-info-item"><i class="fa-solid fa-calendar-check"></i><span>Hết hạn: ' + endDateStr + ' (còn ' + s.daysRemaining + ' ngày)</span></div></div>' + subFeaturesHtml + '</div>';
         }
 
         let cardsHtml = '';
@@ -258,10 +266,25 @@ async function loadMyJobs(companyId) {
 }
 
 // ── Modal Logic ────────────────────────────────────────────
-function openJobModal() {
+async function openJobModal() {
     if (!currentCompanyId) {
         alert("Vui lòng cập nhật và lưu Hồ Sơ Công Ty trước khi đăng tin.");
         return;
+    }
+
+    // Check subscription limit before opening modal
+    try {
+        var subRes = await apiFetchAuth('/api/packages/my-subscription', { method: 'GET' });
+        var subData = await subRes.json();
+        if (subData.success && subData.data && subData.data.hasSubscription) {
+            var s = subData.data;
+            if (s.maxJobPosts !== -1 && s.jobPostsUsed >= s.maxJobPosts) {
+                alert('Bạn đã đạt giới hạn ' + s.maxJobPosts + ' tin đăng của gói "' + s.packageName + '".\nVui lòng nâng cấp gói dịch vụ để đăng thêm tin.');
+                return;
+            }
+        }
+    } catch (e) {
+        // If check fails, let the backend handle it
     }
     
     document.getElementById('job-form').reset();
