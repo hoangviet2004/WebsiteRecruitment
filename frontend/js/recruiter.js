@@ -286,7 +286,7 @@ async function openJobModal() {
         if (subData.success && subData.data && subData.data.hasSubscription) {
             var s = subData.data;
             if (s.maxJobPosts !== -1 && s.jobPostsUsed >= s.maxJobPosts) {
-                alert('Bạn đã đạt giới hạn ' + s.maxJobPosts + ' tin đăng của gói "' + s.packageName + '".\nVui lòng nâng cấp gói dịch vụ để đăng thêm tin.');
+                alert('Bạn đã vượt quá giới hạn ' + s.maxJobPosts + ' tin đăng của gói "' + s.packageName + '".\nVui lòng đăng ký gói dịch vụ cao hơn để đăng thêm tin.');
                 return;
             }
         }
@@ -371,7 +371,7 @@ async function submitJobForm() {
             closeJobModal();
             loadMyJobs(currentCompanyId);
         } else {
-            alert("Lỗi: " + JSON.stringify(res.errors || res.message));
+            alert(res.message || JSON.stringify(res.errors) || "Đã xảy ra lỗi, vui lòng thử lại.");
         }
     } catch (e) {
         alert("Lỗi hệ thống khi lưu tin.");
