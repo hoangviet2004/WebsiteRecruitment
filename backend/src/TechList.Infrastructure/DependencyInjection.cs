@@ -6,6 +6,7 @@ using TechList.Application.Auth.Interfaces;
 using TechList.Application.Profiles.Interfaces;
 using TechList.Application.Companies.Interfaces;
 using TechList.Application.Jobs.Interfaces;
+using TechList.Application.Applications.Interfaces;
 using TechList.Infrastructure.Auth;
 using TechList.Infrastructure.Identity;
 using TechList.Infrastructure.Options;
@@ -13,6 +14,7 @@ using TechList.Infrastructure.Persistence;
 using TechList.Infrastructure.Profiles;
 using TechList.Infrastructure.Companies;
 using TechList.Infrastructure.Jobs;
+using TechList.Infrastructure.Applications;
 using TechList.Application.Admin.Interfaces;
 using TechList.Infrastructure.Admin;
 using Microsoft.Extensions.Caching.Memory;
@@ -55,6 +57,7 @@ public static class DependencyInjection
         services.AddScoped<IAdminService, AdminService>();
         services.AddScoped<IStatisticsService, StatisticsService>();
         services.AddScoped<ITransactionManagementService, TransactionManagementService>();
+        services.AddScoped<IJobApplicationService, JobApplicationService>();
         services.AddMemoryCache();
 
         return services;

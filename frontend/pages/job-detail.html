@@ -199,6 +199,45 @@
         </div>
     </main>
 
+    <!-- Modal Ứng tuyển -->
+    <div id="apply-modal" style="display:none; position:fixed; z-index:2000; inset:0; background:rgba(15,23,42,0.6); backdrop-filter:blur(4px); overflow:auto; align-items:center; justify-content:center;">
+        <div style="background:#fff; border-radius:16px; width:100%; max-width:560px; margin:auto; box-shadow:0 25px 50px -12px rgba(0,0,0,0.25); animation:modalPop 0.3s cubic-bezier(0.34,1.56,0.64,1);">
+            <div style="padding:20px 24px; border-bottom:1px solid #e2e8f0; display:flex; justify-content:space-between; align-items:center;">
+                <h3 style="margin:0; font-size:18px; color:#0f172a;"><i class="fa-regular fa-paper-plane" style="color:#3b82f6; margin-right:8px;"></i>Ứng tuyển vị trí</h3>
+                <span onclick="closeApplyModal()" style="font-size:24px; color:#64748b; cursor:pointer; line-height:1;">&times;</span>
+            </div>
+            <div style="padding:24px;">
+                <div style="background:#f8fafc; border-radius:10px; padding:14px 16px; margin-bottom:20px; border-left:3px solid #3b82f6;">
+                    <div style="font-size:13px; color:#64748b; margin-bottom:4px;">Vị trí ứng tuyển</div>
+                    <div id="apply-job-title" style="font-weight:700; color:#0f172a; font-size:16px;"></div>
+                </div>
+                <div style="margin-bottom:20px;">
+                    <label style="display:block; font-size:13px; font-weight:600; color:#334155; margin-bottom:8px;">Thư giới thiệu <span style="color:#94a3b8; font-weight:400;">(tuỳ chọn)</span></label>
+                    <textarea id="apply-cover-letter" rows="5" placeholder="Giới thiệu bản thân, lý do bạn muốn ứng tuyển vào vị trí này..."
+                        style="width:100%; padding:12px 14px; border:1px solid #cbd5e1; border-radius:8px; font-family:inherit; font-size:14px; color:#0f172a; background:#f8fafc; box-sizing:border-box; resize:vertical; transition:all 0.2s;"
+                        onfocus="this.style.borderColor='#3b82f6';this.style.background='#fff';this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)'"
+                        onblur="this.style.borderColor='#cbd5e1';this.style.background='#f8fafc';this.style.boxShadow='none'"></textarea>
+                </div>
+                <div style="background:#eff6ff; border-radius:8px; padding:12px 14px; font-size:13px; color:#3b82f6; display:flex; gap:8px;">
+                    <i class="fa-solid fa-circle-info" style="margin-top:1px; flex-shrink:0;"></i>
+                    <span>CV của bạn sẽ được đính kèm tự động từ hồ sơ. Đảm bảo hồ sơ đã cập nhật đầy đủ.</span>
+                </div>
+            </div>
+            <div style="padding:16px 24px; border-top:1px solid #e2e8f0; display:flex; justify-content:flex-end; gap:12px; background:#f8fafc; border-radius:0 0 16px 16px;">
+                <button onclick="closeApplyModal()" style="background:#f1f5f9; color:#475569; border:1px solid #cbd5e1; padding:10px 24px; border-radius:8px; font-weight:600; cursor:pointer; font-family:inherit; font-size:14px;">Hủy</button>
+                <button id="apply-submit-btn" onclick="submitApply()" style="background:#3b82f6; color:#fff; border:none; padding:10px 24px; border-radius:8px; font-weight:600; cursor:pointer; display:inline-flex; align-items:center; gap:8px; font-family:inherit; font-size:14px; transition:background 0.2s;">
+                    <i class="fa-regular fa-paper-plane"></i> Nộp đơn ứng tuyển
+                </button>
+            </div>
+        </div>
+    </div>
+    <style>
+        @keyframes modalPop {
+            from { opacity: 0; transform: scale(0.95) translateY(20px); }
+            to   { opacity: 1; transform: scale(1) translateY(0); }
+        }
+    </style>
+
     <!-- JS Files -->
     <script src="../js/api.js"></script>
     <script src="../js/home.js"></script>

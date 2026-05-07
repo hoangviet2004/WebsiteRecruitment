@@ -22,7 +22,8 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<Transaction> Transactions => Set<Transaction>();
     public DbSet<Coupon> Coupons => Set<Coupon>();
     public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
-    
+    public DbSet<JobApplication> JobApplications => Set<JobApplication>();
+
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
@@ -230,6 +231,25 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
             e.Property(x => x.PerformedBy).HasMaxLength(450).IsRequired();
             e.Property(x => x.Details).HasMaxLength(4000);
             e.HasIndex(x => x.CreatedAt);
+        });
+
+        // ── JobApplication ───────────────────────────────────
+        builder.Entity<JobApplication>(e =>
+        {
+            e.ToTable("JobApplications");
+            e.HasKey(x => x.Id);
+            e.Property(x => x.CandidateId).HasMaxLength(450).IsRequired();
+            e.Property(x => x.Status).HasMaxLength(50).IsRequired();
+            e.Property(x => x.CoverLetter).HasMaxLength(4000);
+
+            e.HasIndex(x => new { x.JobPostId, x.CandidateId }).IsUnique();
+            e.HasIndex(x => x.CandidateId);
+            e.HasIndex(x => x.AppliedAt);
+
+            e.HasOne(x => x.JobPost)
+             .WithMany()
+             .HasForeignKey(x => x.JobPostId)
+             .OnDelete(DeleteBehavior.Cascade);
         });
     }
 }

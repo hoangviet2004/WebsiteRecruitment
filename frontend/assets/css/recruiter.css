@@ -487,4 +487,399 @@
     font-size: 12px;
 }
 
+/* ── Candidate Management Tab ───────────────────────────── */
+.cand-page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 20px;
+}
+
+.cand-page-title {
+    font-size: 22px;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0 0 4px 0;
+}
+
+.cand-page-sub {
+    color: #64748b;
+    font-size: 14px;
+    margin: 0;
+}
+
+.cand-refresh-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+/* Filters */
+.cand-filters {
+    display: flex;
+    gap: 16px;
+    padding: 20px 24px;
+    flex-wrap: wrap;
+    align-items: flex-end;
+}
+
+.cand-filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex: 1;
+    min-width: 180px;
+}
+
+.cand-filter-group label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #475569;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+}
+
+.cand-filter-group select,
+.cand-filter-group input {
+    padding: 10px 14px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 14px;
+    color: #0f172a;
+    background: #f8fafc;
+    transition: all 0.2s;
+}
+
+.cand-filter-group select:focus,
+.cand-filter-group input:focus {
+    outline: none;
+    border-color: #3b82f6;
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* Table header */
+.cand-table-header {
+    padding: 16px 24px;
+    border-bottom: 1px solid #f1f5f9;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.cand-count-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #475569;
+}
+
+/* Candidate table */
+.cand-table .cand-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.cand-table .cand-initials {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 13px;
+    color: #fff;
+    flex-shrink: 0;
+}
+
+.cand-table .cand-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.cand-table .cand-name {
+    font-weight: 600;
+    color: #0f172a;
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+.cand-table .cand-email {
+    font-size: 12px;
+    color: #64748b;
+}
+
+.cand-loading {
+    text-align: center;
+    color: #64748b;
+    padding: 48px 0 !important;
+    font-size: 14px;
+}
+
+.cand-loading i {
+    font-size: 20px;
+    margin-right: 8px;
+    color: #3b82f6;
+}
+
+/* Status badges */
+.badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.badge-applied   { background: #eff6ff; color: #3b82f6; }
+.badge-screening { background: #fef9c3; color: #ca8a04; }
+.badge-interview { background: #f0fdf4; color: #16a34a; }
+.badge-offered   { background: #ecfdf5; color: #059669; }
+.badge-onhold    { background: #fef3c7; color: #d97706; }
+.badge-rejected  { background: #fef2f2; color: #dc2626; }
+
+/* Action buttons */
+.cand-action-btn {
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 14px;
+    transition: all 0.15s;
+    color: #64748b;
+}
+
+.cand-action-btn:hover {
+    background: #f1f5f9;
+    color: #0f172a;
+}
+
+.cand-action-btn.view  { color: #3b82f6; }
+.cand-action-btn.view:hover { background: #eff6ff; }
+
+/* Pagination */
+.cand-pagination {
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    border-top: 1px solid #f1f5f9;
+}
+
+.cand-page-btn {
+    width: 34px;
+    height: 34px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    background: #fff;
+    color: #475569;
+    font-weight: 600;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.cand-page-btn:hover {
+    background: #f8fafc;
+    border-color: #3b82f6;
+    color: #3b82f6;
+}
+
+.cand-page-btn.active {
+    background: #3b82f6;
+    border-color: #3b82f6;
+    color: #fff;
+}
+
+.cand-page-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+/* Stats row */
+.cand-stats-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-top: 20px;
+}
+
+.cand-stat-card {
+    background: #fff;
+    border-radius: 14px;
+    padding: 20px 24px;
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.cand-stat-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+}
+
+.cand-stat-icon.blue  { background: #eff6ff; color: #3b82f6; }
+.cand-stat-icon.green { background: #f0fdf4; color: #22c55e; }
+.cand-stat-icon.amber { background: #fffbeb; color: #f59e0b; }
+
+.cand-stat-value {
+    font-size: 26px;
+    font-weight: 800;
+    color: #0f172a;
+    line-height: 1.2;
+}
+
+.cand-stat-label {
+    font-size: 13px;
+    color: #64748b;
+    margin-top: 2px;
+}
+
+/* Modal candidate detail */
+.cand-modal-profile {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 4px 0 20px;
+    border-bottom: 1px solid #f1f5f9;
+    margin-bottom: 20px;
+}
+
+.cand-modal-avatar-lg {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+.cand-modal-initials-lg {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    font-weight: 700;
+    color: #fff;
+    flex-shrink: 0;
+}
+
+.cand-modal-name {
+    font-size: 18px;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.cand-modal-email {
+    font-size: 14px;
+    color: #64748b;
+    margin-top: 2px;
+}
+
+.cand-detail-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.cand-detail-item {
+    background: #f8fafc;
+    border-radius: 10px;
+    padding: 14px 16px;
+}
+
+.cand-detail-item-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 6px;
+}
+
+.cand-detail-item-value {
+    font-size: 14px;
+    font-weight: 600;
+    color: #1e293b;
+}
+
+.cand-cover-letter {
+    background: #f8fafc;
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin-bottom: 16px;
+}
+
+.cand-cover-letter-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+}
+
+.cand-cover-letter-text {
+    font-size: 14px;
+    color: #334155;
+    line-height: 1.6;
+    white-space: pre-wrap;
+}
+
+.cand-status-btn {
+    border: none;
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.cand-status-btn.screening  { background:#fef9c3; color:#ca8a04; }
+.cand-status-btn.screening:hover { background:#fef08a; }
+.cand-status-btn.interview  { background:#f0fdf4; color:#16a34a; }
+.cand-status-btn.interview:hover { background:#dcfce7; }
+.cand-status-btn.offered    { background:#ecfdf5; color:#059669; }
+.cand-status-btn.offered:hover { background:#d1fae5; }
+.cand-status-btn.onhold     { background:#fef3c7; color:#d97706; }
+.cand-status-btn.onhold:hover { background:#fde68a; }
+.cand-status-btn.rejected   { background:#fef2f2; color:#dc2626; }
+.cand-status-btn.rejected:hover { background:#fee2e2; }
+
+@media (max-width: 900px) {
+    .cand-stats-row { grid-template-columns: 1fr; }
+    .cand-filters { flex-direction: column; }
+    .cand-detail-grid { grid-template-columns: 1fr; }
+    .cand-page-header { flex-direction: column; gap: 12px; }
+}
 

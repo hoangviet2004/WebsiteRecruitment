@@ -28,6 +28,9 @@
                 <a href="#" class="menu-item" onclick="switchTab('packages', this)">
                     <i class="fa-solid fa-gem"></i> Đăng ký Gói dịch vụ
                 </a>
+                <a href="#" class="menu-item" onclick="switchTab('candidates', this)">
+                    <i class="fa-solid fa-users"></i> Quản lý Ứng viên
+                </a>
             </div>
         </aside>
 
@@ -166,7 +169,91 @@
                     </div>
                 </div>
             </section>
+            <!-- TAB 4: Quản lý Ứng viên -->
+            <section id="tab-candidates" class="tab-pane">
+                <!-- Header -->
+                <div class="cand-page-header">
+                    <div>
+                        <h2 class="cand-page-title">Quản lý Ứng viên</h2>
+                        <p class="cand-page-sub">Xem và theo dõi tất cả đơn ứng tuyển vào các vị trí của công ty bạn.</p>
+                    </div>
+                    <button class="btn-primary cand-refresh-btn" onclick="loadCandidates()">
+                        <i class="fa-solid fa-rotate-right"></i> Làm mới
+                    </button>
+                </div>
+
+                <!-- Bộ lọc -->
+                <div class="cand-filters card">
+                    <div class="cand-filter-group">
+                        <label><i class="fa-solid fa-briefcase"></i> Vị trí tuyển dụng</label>
+                        <select id="filter-job" onchange="applyCandidateFilters()">
+                            <option value="">Tất cả vị trí</option>
+                        </select>
+                    </div>
+                    <div class="cand-filter-group">
+                        <label><i class="fa-solid fa-circle-dot"></i> Trạng thái</label>
+                        <select id="filter-status" onchange="applyCandidateFilters()">
+                            <option value="">Tất cả</option>
+                            <option value="Applied">Mới nộp</option>
+                            <option value="Screening">Sàng lọc</option>
+                            <option value="Interview">Phỏng vấn</option>
+                            <option value="Offered">Đề nghị</option>
+                            <option value="OnHold">Tạm giữ</option>
+                            <option value="Rejected">Từ chối</option>
+                        </select>
+                    </div>
+                    <div class="cand-filter-group">
+                        <label><i class="fa-solid fa-magnifying-glass"></i> Tìm kiếm</label>
+                        <input type="text" id="filter-search" placeholder="Tên hoặc email ứng viên..." oninput="applyCandidateFilters()">
+                    </div>
+                </div>
+
+                <!-- Bảng ứng viên -->
+                <div class="card" style="margin-top: 20px;">
+                    <div class="cand-table-header">
+                        <span id="cand-count-label" class="cand-count-label">Đang tải...</span>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="data-table cand-table">
+                            <thead>
+                                <tr>
+                                    <th>Ứng viên</th>
+                                    <th>Vị trí ứng tuyển</th>
+                                    <th>Ngày nộp</th>
+                                    <th>Trạng thái</th>
+                                    <th>Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody id="cand-table-body">
+                                <tr><td colspan="5" class="cand-loading"><i class="fa-solid fa-spinner fa-spin"></i> Đang tải dữ liệu...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- Phân trang -->
+                    <div class="cand-pagination" id="cand-pagination"></div>
+                </div>
+
+                <!-- Thống kê nhanh -->
+                <div class="cand-stats-row" id="cand-stats-row"></div>
+            </section>
         </main>
+    </div>
+
+    <!-- Modal Chi tiết Ứng viên -->
+    <div id="cand-modal" class="modal">
+        <div class="modal-content" style="max-width: 680px;">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-user-circle" style="color:#3b82f6; margin-right:8px;"></i> Hồ sơ Ứng viên</h3>
+                <span class="close-btn" onclick="closeCandModal()">&times;</span>
+            </div>
+            <div class="modal-body" id="cand-modal-body">
+                <!-- Nội dung được điền bằng JS -->
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeCandModal()">Đóng</button>
+                <div id="cand-modal-status-actions" style="display:flex; gap:8px; flex-wrap:wrap;"></div>
+            </div>
+        </div>
     </div>
 
     <!-- Modal Form Job -->
@@ -267,5 +354,6 @@
     <script src="../js/api.js"></script>
     <script src="../js/home.js"></script>
     <script src="../js/recruiter.js"></script>
+    <script src="../js/candidateManagementRecruiter.js"></script>
 </body>
 </html>

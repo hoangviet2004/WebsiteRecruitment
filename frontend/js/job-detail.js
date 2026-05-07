@@ -159,13 +159,70 @@ async function loadJobDetail(id) {
 function applyThisJob() {
     var token = sessionStorage.getItem('token');
     if (!token) {
-        alert("Vui lòng đăng nhập để tiến hành nộp hồ sơ CV!");
+        alert("Vui lòng đăng nhập để nộp đơn ứng tuyển!");
         window.location.href = 'auth.html#login';
         return;
     }
-    
-    // Giao diện Mockup TopCV thường có modal
-    alert("Cảm ơn bạn! Tính năng upload CV sẽ sớm được tích hợp.");
+
+    var role = sessionStorage.getItem('role');
+    if (role === 'Recruiter') {
+        alert("Tài khoản Nhà tuyển dụng không thể ứng tuyển. Vui lòng dùng tài khoản Ứng viên.");
+        return;
+    }
+    if (role === 'Admin') {
+        alert("Tài khoản Admin không thể ứng tuyển.");
+        return;
+    }
+
+    var jobTitle = document.getElementById('detail-title').innerText;
+    document.getElementById('apply-job-title').innerText = jobTitle;
+    document.getElementById('apply-cover-letter').value = '';
+
+    var modal = document.getElementById('apply-modal');
+    modal.style.display = 'flex';
+}
+
+function closeApplyModal() {
+    document.getElementById('apply-modal').style.display = 'none';
+}
+
+async function submitApply() {
+    var urlParams = new URLSearchParams(window.location.search);
+    var jobId = urlParams.get('id');
+    if (!jobId) return;
+
+    var coverLetter = document.getElementById('apply-cover-letter').value.trim();
+    var btn = document.getElementById('apply-submit-btn');
+
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang gửi...';
+
+    try {
+        var res = await apiFetchAuth('/api/applications', {
+            method: 'POST',
+            body: JSON.stringify({ jobPostId: jobId, coverLetter: coverLetter || null })
+        });
+        var data = await res.json();
+
+        if (res.ok && data.success) {
+            closeApplyModal();
+            // Cập nhật nút ứng tuyển thành "Đã ứng tuyển"
+            document.querySelectorAll('.btn-apply-big').forEach(function(el) {
+                el.textContent = '✓ Đã nộp đơn ứng tuyển';
+                el.style.background = '#22c55e';
+                el.style.cursor = 'default';
+                el.onclick = null;
+            });
+            alert('Nộp đơn ứng tuyển thành công! Chúc bạn may mắn.');
+        } else {
+            alert('Lỗi: ' + (data.message || 'Không thể nộp đơn. Vui lòng thử lại.'));
+        }
+    } catch (e) {
+        alert('Lỗi kết nối: ' + e.message);
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-regular fa-paper-plane"></i> Nộp đơn ứng tuyển';
+    }
 }
 
 function viewCompanyProfile() {
