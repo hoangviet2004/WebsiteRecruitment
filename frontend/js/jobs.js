@@ -36,6 +36,7 @@ function renderNavRight() {
                 <span class="user-name">${name}</span>
                 <div class="user-dropdown">
                     <a href="../pages/profile.html" class="dropdown-item">Hồ sơ của tôi</a>
+                    ${sessionStorage.getItem('role') === 'Candidate' ? `<a href="../pages/savedJobs.html" class="dropdown-item">Việc làm đã lưu</a>` : ''}
                     <a href="#" class="dropdown-item">Cài đặt</a>
                     ${sessionStorage.getItem('role') === 'Recruiter' ? `<div class="dropdown-divider"></div><a href="../pages/recruiter.html" class="dropdown-item" style="color: #4f46e5; font-weight: bold;"><i class="fa-solid fa-briefcase"></i> Kênh Nhà Tuyển Dụng</a>` : ''}
                     <div class="dropdown-divider"></div>
@@ -238,10 +239,14 @@ function renderJobs() {
         const isNew = (new Date() - new Date(job.createdAt)) < 86400000 * 3; // within 3 days
         const newBadge = isNew ? 'is-new' : '';
 
+        const isSaved = window._jobsBookmarkMap?.[job.id];
         const cardHtml = `
-            <div class="job-list-card ${newBadge}" onclick="window.location.href='job-detail.html?id=${job.id}'">
-                <button class="btn-bookmark" onclick="event.stopPropagation(); this.classList.toggle('active'); this.querySelector('i').classList.toggle('fa-solid'); this.querySelector('i').classList.toggle('fa-regular');">
-                    <i class="fa-regular fa-bookmark"></i>
+            <div class="job-list-card ${newBadge}" onclick="window.location.href='job-detail.html?id=${job.id}'"
+                 id="jcard-${job.id}">
+                <button class="btn-bookmark ${isSaved ? 'active' : ''}"
+                        title="${isSaved ? 'Bỏ lưu' : 'Lưu tin'}"
+                        onclick="event.stopPropagation(); jobsToggleBookmark(event,'${job.id}',this)">
+                    <i class="${isSaved ? 'fa-solid' : 'fa-regular'} fa-bookmark"></i>
                 </button>
                 
                 <div class="job-list-logo">
@@ -273,6 +278,7 @@ function renderJobs() {
     });
     
     renderPagination();
+    loadBookmarkMap(); // batch load saved status, không block UI
 }
 
 function renderPagination() {
@@ -337,3 +343,89 @@ document.querySelectorAll('input[name="jobType"], input[name="salaryRange"]').fo
 // Run on init
 renderNavRight();
 fetchJobs();
+
+// ── Bookmark integration (dùng API mới) ─────────────────────
+window._jobsBookmarkMap = {}; // { jobPostId: savedJobId }
+
+// Gọi 1 lần sau khi render xong, load tất cả saved jobs rồi build map
+async function loadBookmarkMap() {
+    const token = sessionStorage.getItem('token');
+    const role  = sessionStorage.getItem('role');
+    if (!token || role !== 'Candidate') return;
+
+    try {
+        const res  = await apiFetchAuth('/api/saved-jobs');
+        if (!res?.ok) return;
+        const data = await res.json();
+        const list = data?.data || [];
+        window._jobsBookmarkMap = {};
+        list.forEach(j => { window._jobsBookmarkMap[j.jobPostId] = j.savedJobId; });
+
+        // Cập nhật UI cho các card đang hiển thị
+        Object.entries(window._jobsBookmarkMap).forEach(([jobPostId, savedJobId]) => {
+            const btn = document.querySelector(`#jcard-${jobPostId} .btn-bookmark`);
+            if (!btn) return;
+            btn.classList.add('active');
+            btn.title = 'Bỏ lưu';
+            const icon = btn.querySelector('i');
+            if (icon) icon.className = 'fa-solid fa-bookmark';
+        });
+    } catch (_) {}
+}
+
+async function jobsToggleBookmark(e, jobPostId, btn) {
+    e.stopPropagation();
+    const token = sessionStorage.getItem('token');
+    if (!token) { window.location.href = 'auth.html#login'; return; }
+    if (sessionStorage.getItem('role') !== 'Candidate') {
+        alert('Chỉ tài khoản Ứng viên mới có thể lưu tin.'); return;
+    }
+
+    const savedJobId = window._jobsBookmarkMap[jobPostId];
+    const isSaved    = !!savedJobId;
+    const icon       = btn.querySelector('i');
+
+    // Optimistic UI
+    btn.classList.toggle('active', !isSaved);
+    btn.title = isSaved ? 'Lưu tin' : 'Bỏ lưu';
+    if (icon) icon.className = isSaved ? 'fa-regular fa-bookmark' : 'fa-solid fa-bookmark';
+
+    try {
+        if (isSaved) {
+            const res = await apiFetchAuth(`/api/saved-jobs/${savedJobId}`, { method: 'DELETE' });
+            if (!res?.ok) throw new Error();
+            delete window._jobsBookmarkMap[jobPostId];
+            jobsShowToast('Đã bỏ lưu tin tuyển dụng', 'info');
+        } else {
+            const res = await apiFetchAuth('/api/saved-jobs', {
+                method: 'POST',
+                body: JSON.stringify({ jobPostId, collection: 'Tất cả' })
+            });
+            if (!res?.ok) throw new Error();
+            const data = await res.json();
+            window._jobsBookmarkMap[jobPostId] = data?.data?.savedJobId;
+            jobsShowToast('Đã lưu vào danh sách yêu thích!', 'success');
+        }
+    } catch {
+        btn.classList.toggle('active', isSaved);
+        btn.title = isSaved ? 'Bỏ lưu' : 'Lưu tin';
+        if (icon) icon.className = isSaved ? 'fa-solid fa-bookmark' : 'fa-regular fa-bookmark';
+        jobsShowToast('Không thể thực hiện!', 'error');
+    }
+}
+
+function jobsShowToast(msg, type = 'success') {
+    let el = document.getElementById('jobs-toast');
+    if (!el) {
+        el = document.createElement('div');
+        el.id = 'jobs-toast';
+        el.style.cssText = 'position:fixed;bottom:22px;right:22px;z-index:9999;padding:10px 16px;border-radius:10px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:7px;box-shadow:0 8px 24px rgba(0,0,0,0.1);font-family:Inter,sans-serif;transition:opacity 0.3s;';
+        document.body.appendChild(el);
+    }
+    const styles = { success:'background:#f0fdf4;color:#16a34a;border:1px solid #bbf7d0;', error:'background:#fef2f2;color:#dc2626;border:1px solid #fecaca;', info:'background:#eff6ff;color:#2563eb;border:1px solid #bfdbfe;' };
+    el.style.cssText += styles[type] || styles.success;
+    el.innerHTML = msg;
+    el.style.opacity = '1';
+    clearTimeout(el._t);
+    el._t = setTimeout(() => { el.style.opacity = '0'; }, 2800);
+}

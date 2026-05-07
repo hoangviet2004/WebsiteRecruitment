@@ -154,6 +154,9 @@ async function loadJobDetail(id) {
     
     // Gọi gợi ý việc làm
     loadSuggestedJobs(id, currentJobCompanyId);
+    
+    // Kiểm tra trạng thái lưu
+    checkAndRenderSaveState(id);
 }
 
 function applyThisJob() {
@@ -308,3 +311,92 @@ function getInitials(fullName) {
     if (words.length === 1) return words[0][0].toUpperCase();
     return (words[0][0] + words[words.length - 1][0]).toUpperCase();
 }
+
+// ─────────────────────────────────────────────────────────────
+// Save / Unsave job từ trang job-detail
+// ─────────────────────────────────────────────────────────────
+let _currentSavedJobId = null;  // lưu savedJobId khi đã save
+let _isSaveLoading = false;
+
+async function checkAndRenderSaveState(jobId) {
+    const role = sessionStorage.getItem('role');
+    if (!sessionStorage.getItem('token') || role === 'Recruiter' || role === 'Admin') return;
+    if (typeof checkJobSaved !== 'function') return;
+    try {
+        const result = await checkJobSaved(jobId);
+        if (result && result.isSaved) {
+            _currentSavedJobId = result.savedJobId || null;
+            setSaveButtonState(true);
+        } else {
+            _currentSavedJobId = null;
+            setSaveButtonState(false);
+        }
+    } catch (_) {}
+}
+
+function setSaveButtonState(saved) {
+    const icon = { top: document.getElementById('save-icon-top'), bot: document.getElementById('save-icon-bot') };
+    const text = { top: document.getElementById('save-text-top'), bot: document.getElementById('save-text-bot') };
+    const btns = [document.getElementById('btn-save-job-top'), document.getElementById('btn-save-job-bot')];
+
+    btns.forEach(btn => {
+        if (!btn) return;
+        if (saved) {
+            btn.style.background = '#fef2f2';
+            btn.style.borderColor = '#fecaca';
+            btn.style.color = '#dc2626';
+        } else {
+            btn.style.background = '';
+            btn.style.borderColor = '';
+            btn.style.color = '';
+        }
+    });
+    ['top', 'bot'].forEach(k => {
+        if (icon[k]) {
+            icon[k].className = saved ? 'fa-solid fa-heart' : 'fa-regular fa-heart';
+        }
+        if (text[k]) text[k].textContent = saved ? 'Đã lưu' : 'Lưu tin';
+    });
+}
+
+async function toggleSaveJob() {
+    const role = sessionStorage.getItem('role');
+    if (!sessionStorage.getItem('token')) {
+        alert('Vui lòng đăng nhập để lưu tin tuyển dụng!');
+        window.location.href = 'auth.html#login';
+        return;
+    }
+    if (role === 'Recruiter' || role === 'Admin') {
+        alert('Chỉ tài khoản ứng viên mới có thể lưu tin.');
+        return;
+    }
+    if (_isSaveLoading) return;
+    if (typeof saveJobFromDetail !== 'function') return;
+
+    _isSaveLoading = true;
+    const urlParams = new URLSearchParams(window.location.search);
+    const jobId = urlParams.get('id');
+    if (!jobId) { _isSaveLoading = false; return; }
+
+    try {
+        if (_currentSavedJobId) {
+            // Bỏ lưu
+            const r = await unsaveJobFromDetail(_currentSavedJobId);
+            if (r.ok) { _currentSavedJobId = null; setSaveButtonState(false); }
+        } else {
+            // Lưu mới
+            const r = await saveJobFromDetail(jobId, 'Tất cả');
+            if (r.ok && r.data?.data) {
+                _currentSavedJobId = r.data.data.savedJobId;
+                setSaveButtonState(true);
+            } else if (!r.ok) {
+                alert(r.message || 'Không thể lưu tin. Vui lòng thử lại.');
+            }
+        }
+    } catch (e) {
+        console.error(e);
+    } finally {
+        _isSaveLoading = false;
+    }
+}
+

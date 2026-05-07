@@ -11,8 +11,13 @@ public class Message
 
     public string Content { get; set; } = string.Empty;
 
-    // "message" | "email"
+    // "message" | "email" | "system_notify" | "interview_invite" | "offer"
     public string Type { get; set; } = "message";
+
+    // Với "message", "email": null
+    // Với "interview_invite": scheduleId as string
+    // Với "offer": offerId as string
+    public string? RefId { get; set; }
 
     public bool IsRead { get; set; } = false;
 

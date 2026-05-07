@@ -19,6 +19,11 @@ public class InterviewSchedule
     // "Scheduled" | "Completed" | "Cancelled"
     public string Status { get; set; } = "Scheduled";
 
+    // Phản hồi ứng viên: "Pending" | "Accepted" | "Declined"
+    public string CandidateResponse { get; set; } = "Pending";
+    public string? DeclineReason { get; set; }
+    public DateTime? RespondedAt { get; set; }
+
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     // Navigation

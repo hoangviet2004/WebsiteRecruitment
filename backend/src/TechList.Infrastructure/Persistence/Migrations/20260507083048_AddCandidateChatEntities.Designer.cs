@@ -12,8 +12,8 @@ using TechList.Infrastructure.Persistence;
 namespace TechList.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260507070957_AddSavedJobs")]
-    partial class AddSavedJobs
+    [Migration("20260507083048_AddCandidateChatEntities")]
+    partial class AddCandidateChatEntities
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -555,6 +555,40 @@ namespace TechList.Infrastructure.Persistence.Migrations
                     b.ToTable("RefreshTokens", (string)null);
                 });
 
+            modelBuilder.Entity("TechList.Domain.Entities.SavedJob", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Collection")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<Guid>("JobPostId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("SavedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("JobPostId");
+
+                    b.HasIndex("UserId", "Collection");
+
+                    b.HasIndex("UserId", "JobPostId")
+                        .IsUnique();
+
+                    b.ToTable("SavedJobs", (string)null);
+                });
+
             modelBuilder.Entity("TechList.Domain.Entities.ServicePackage", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1026,6 +1060,17 @@ namespace TechList.Infrastructure.Persistence.Migrations
                         .IsRequired();
 
                     b.Navigation("Application");
+                });
+
+            modelBuilder.Entity("TechList.Domain.Entities.SavedJob", b =>
+                {
+                    b.HasOne("TechList.Domain.Entities.JobPost", "JobPost")
+                        .WithMany()
+                        .HasForeignKey("JobPostId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("JobPost");
                 });
 
             modelBuilder.Entity("TechList.Domain.Entities.Subscription", b =>

@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tin nhắn — TechList</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/css/candidate-messages.css">
+</head>
+<body>
+
+<div class="cm-layout">
+
+    <!-- ── Sidebar ── -->
+    <aside class="cm-sidebar">
+        <a href="home.html" class="cm-logo">
+            <img src="../assets/logo.svg" alt="Logo" style="height:26px;"> TechList
+        </a>
+        <span class="cm-sidebar-label">Candidate Portal</span>
+
+        <nav class="cm-nav">
+            <a class="cm-nav-item" href="jobs.html">
+                <i class="fa-solid fa-magnifying-glass"></i> Tìm việc
+            </a>
+            <a class="cm-nav-item active" href="candidate-messages.html">
+                <i class="fa-solid fa-comments"></i> Tin nhắn
+                <span class="cm-nav-badge" id="cm-unread-badge" style="display:none;"></span>
+            </a>
+            <a class="cm-nav-item" href="#" id="cm-nav-interviews">
+                <i class="fa-regular fa-calendar-check"></i> Lịch phỏng vấn
+            </a>
+            <a class="cm-nav-item" href="profile.html">
+                <i class="fa-regular fa-user"></i> Hồ sơ của tôi
+            </a>
+        </nav>
+
+        <div class="cm-sidebar-footer">
+            <div class="cm-user-card" id="cm-user-card"></div>
+            <a href="#" class="cm-help-btn">
+                <i class="fa-regular fa-circle-question"></i> Help Center
+            </a>
+        </div>
+    </aside>
+
+    <!-- ── Conversation list ── -->
+    <div class="cm-conv-col">
+        <div class="cm-conv-header">
+            <h2>Tin nhắn</h2>
+            <button class="cm-icon-btn" title="Tin nhắn mới" onclick="showToast('Chọn nhà tuyển dụng từ danh sách ứng tuyển để bắt đầu nhắn tin.','info')">
+                <i class="fa-regular fa-pen-to-square"></i>
+            </button>
+        </div>
+        <div class="cm-search-wrap">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input id="cm-search" type="text" placeholder="Tìm kiếm tin nhắn..." oninput="filterConvs(this.value)">
+        </div>
+        <div class="cm-conv-list" id="cm-conv-list">
+            <div class="cm-list-skeleton">
+                <div class="cm-sk-item"></div><div class="cm-sk-item"></div><div class="cm-sk-item"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Thread ── -->
+    <div class="cm-thread-col" id="cm-thread-col">
+        <div class="cm-thread-empty" id="cm-thread-empty">
+            <i class="fa-regular fa-comments cm-empty-icon"></i>
+            <p>Chọn một cuộc hội thoại để bắt đầu</p>
+        </div>
+
+        <!-- Thread header -->
+        <div class="cm-thread-header" id="cm-thread-header" style="display:none;">
+            <div class="cm-th-left" id="cm-th-left"></div>
+            <div class="cm-th-actions">
+                <button class="cm-icon-btn" title="Tìm kiếm trong cuộc trò chuyện">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                </button>
+                <button class="cm-icon-btn" title="Gọi video">
+                    <i class="fa-solid fa-video"></i>
+                </button>
+                <button class="cm-icon-btn" title="Gọi điện">
+                    <i class="fa-solid fa-phone"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Messages -->
+        <div class="cm-bubbles" id="cm-bubbles"></div>
+
+        <!-- Input -->
+        <div class="cm-input-wrap" id="cm-input-wrap" style="display:none;">
+            <div class="cm-input-toolbar">
+                <button class="cm-tb-btn" title="Đính kèm file">
+                    <i class="fa-solid fa-paperclip"></i>
+                </button>
+                <button class="cm-tb-btn" title="Emoji">
+                    <i class="fa-regular fa-face-smile"></i>
+                </button>
+            </div>
+            <div class="cm-input-row">
+                <textarea id="cm-input" class="cm-textarea"
+                    placeholder="Nhập tin nhắn của bạn..." rows="1"
+                    oninput="autoResize(this)"
+                    onkeydown="handleKey(event)"></textarea>
+                <button class="cm-send-btn" id="cm-send-btn" onclick="sendMsg()">
+                    <i class="fa-solid fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Right panel ── -->
+    <div class="cm-panel-col" id="cm-panel-col" style="display:none;">
+        <!-- Filled by JS -->
+    </div>
+</div>
+
+<!-- ── Toast ── -->
+<div id="cm-toast" class="cm-toast" style="display:none;"></div>
+
+<!-- ── Decline reason modal ── -->
+<div id="cm-decline-modal" class="cm-overlay" onclick="closeDeclineModal(event)">
+    <div class="cm-modal">
+        <div class="cm-modal-header">
+            <h3 id="cm-decline-title">Lý do từ chối</h3>
+            <button class="cm-modal-close" onclick="closeDeclineModal()">&times;</button>
+        </div>
+        <div class="cm-modal-body">
+            <p style="color:#64748b;font-size:14px;margin-bottom:12px;" id="cm-decline-hint">
+                Vui lòng cho biết lý do từ chối (tuỳ chọn):
+            </p>
+            <textarea id="cm-decline-reason" rows="3"
+                style="width:100%;padding:10px 14px;border:1px solid #e2e8f0;border-radius:9px;font-family:inherit;font-size:14px;resize:vertical;"
+                placeholder="Nhập lý do..."></textarea>
+        </div>
+        <div class="cm-modal-footer">
+            <button class="cm-btn-ghost" onclick="closeDeclineModal()">Hủy</button>
+            <button class="cm-btn-danger" id="cm-decline-confirm" onclick="confirmDecline()">
+                Xác nhận từ chối
+            </button>
+        </div>
+    </div>
+</div>
+
+<script src="../js/api.js"></script>
+<script src="../js/candidate-messages.js"></script>
+</body>
+</html>

@@ -44,7 +44,9 @@ function renderNavRight() {
                 ${avatarHtml}
                 <span class="user-name">${name}</span>
                 <div class="user-dropdown">
-                    <a href="../pages/profile.html" class="dropdown-item">Hồ sơ của tôi</a>
+                    <a href="../pages/profile.html" class="dropdown-item"><i class="fa-regular fa-user" style="width:14px;margin-right:6px;"></i>Hồ sơ của tôi</a>
+                    ${sessionStorage.getItem('role') === 'Candidate' ? `<a href="../pages/candidate-messages.html" class="dropdown-item"><i class="fa-regular fa-comments" style="width:14px;margin-right:6px;"></i>Tin nhắn</a>` : ''}
+                    ${sessionStorage.getItem('role') === 'Candidate' ? `<a href="../pages/saved-jobs.html" class="dropdown-item"><i class="fa-regular fa-bookmark" style="width:14px;margin-right:6px;"></i>Việc làm đã lưu</a>` : ''}
                     <a href="#" class="dropdown-item">Cài đặt</a>
                     ${sessionStorage.getItem('role') === 'Recruiter' ? `<div class="dropdown-divider"></div><a href="../pages/recruiter.html" class="dropdown-item" style="color: #4f46e5; font-weight: bold;"><i class="fa-solid fa-briefcase"></i> Kênh Nhà Tuyển Dụng</a>` : ''}
                     <div class="dropdown-divider"></div>

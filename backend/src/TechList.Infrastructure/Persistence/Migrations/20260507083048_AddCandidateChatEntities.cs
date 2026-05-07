@@ -5,7 +5,7 @@
 namespace TechList.Infrastructure.Persistence.Migrations
 {
     /// <inheritdoc />
-    public partial class AddSavedJobs : Migration
+    public partial class AddCandidateChatEntities : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

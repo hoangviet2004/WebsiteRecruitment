@@ -32,6 +32,8 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
     public DbSet<JobApplication> JobApplications => Set<JobApplication>();
     public DbSet<Message> Messages => Set<Message>();
+    public DbSet<SavedJob> SavedJobs => Set<SavedJob>();
+    public DbSet<Offer> Offers => Set<Offer>();
     public DbSet<InterviewSchedule> InterviewSchedules => Set<InterviewSchedule>();
 
     protected override void OnModelCreating(ModelBuilder builder)
@@ -255,7 +257,8 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
             e.HasKey(x => x.Id);
             e.Property(x => x.SenderId).HasMaxLength(450).IsRequired();
             e.Property(x => x.Content).HasMaxLength(4000).IsRequired();
-            e.Property(x => x.Type).HasMaxLength(20).IsRequired();
+            e.Property(x => x.Type).HasMaxLength(30).IsRequired();
+            e.Property(x => x.RefId).HasMaxLength(36);
             e.HasIndex(x => new { x.ApplicationId, x.SentAt });
             e.HasIndex(x => new { x.SenderId, x.IsRead });
 
@@ -274,7 +277,27 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
             e.Property(x => x.Location).HasMaxLength(300);
             e.Property(x => x.Notes).HasMaxLength(2000);
             e.Property(x => x.Status).HasMaxLength(30).IsRequired();
+            e.Property(x => x.CandidateResponse).HasMaxLength(20).IsRequired();
+            e.Property(x => x.DeclineReason).HasMaxLength(500);
             e.HasIndex(x => new { x.ApplicationId, x.ScheduledAt });
+
+            e.HasOne(x => x.Application)
+             .WithMany()
+             .HasForeignKey(x => x.ApplicationId)
+             .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // ── Offer ─────────────────────────────────────────────
+        builder.Entity<Offer>(e =>
+        {
+            e.ToTable("Offers");
+            e.HasKey(x => x.Id);
+            e.Property(x => x.RecruiterId).HasMaxLength(450).IsRequired();
+            e.Property(x => x.Notes).HasMaxLength(2000);
+            e.Property(x => x.Status).HasMaxLength(20).IsRequired();
+            e.Property(x => x.DeclineReason).HasMaxLength(500);
+            e.Property(x => x.Salary).HasColumnType("decimal(18,2)");
+            e.HasIndex(x => x.ApplicationId);
 
             e.HasOne(x => x.Application)
              .WithMany()
@@ -294,6 +317,25 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
             e.HasIndex(x => new { x.JobPostId, x.CandidateId }).IsUnique();
             e.HasIndex(x => x.CandidateId);
             e.HasIndex(x => x.AppliedAt);
+
+            e.HasOne(x => x.JobPost)
+             .WithMany()
+             .HasForeignKey(x => x.JobPostId)
+             .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // ── SavedJob ─────────────────────────────────────────
+        builder.Entity<SavedJob>(e =>
+        {
+            e.ToTable("SavedJobs");
+            e.HasKey(x => x.Id);
+            e.Property(x => x.UserId).HasMaxLength(450).IsRequired();
+            e.Property(x => x.Collection).HasMaxLength(50).IsRequired();
+
+            // Unique: một user chỉ lưu 1 lần mỗi job
+            e.HasIndex(x => new { x.UserId, x.JobPostId }).IsUnique();
+            // Index cho filter theo collection
+            e.HasIndex(x => new { x.UserId, x.Collection });
 
             e.HasOne(x => x.JobPost)
              .WithMany()

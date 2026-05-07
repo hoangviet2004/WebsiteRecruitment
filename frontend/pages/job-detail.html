@@ -94,7 +94,9 @@
                         <div class="action-buttons">
                             <button class="btn-apply-big" onclick="applyThisJob()"><i
                                     class="fa-regular fa-paper-plane"></i> Ứng tuyển ngay</button>
-                            <button class="btn-save-job"><i class="fa-regular fa-heart"></i> Lưu tin</button>
+                            <button class="btn-save-job" id="btn-save-job-top" onclick="toggleSaveJob()">
+                              <i class="fa-regular fa-heart" id="save-icon-top"></i> <span id="save-text-top">Lưu tin</span>
+                            </button>
                         </div>
                     </div>
 
@@ -129,7 +131,9 @@
                         <!-- Sticky Apply Button Bottom -->
                         <div class="bottom-apply">
                             <button class="btn-apply-big" onclick="applyThisJob()">Ứng tuyển ngay</button>
-                            <button class="btn-save-job">Lưu tin</button>
+                            <button class="btn-save-job" id="btn-save-job-bot" onclick="toggleSaveJob()">
+                              <i class="fa-regular fa-heart" id="save-icon-bot"></i> <span id="save-text-bot">Lưu tin</span>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -241,6 +245,7 @@
     <!-- JS Files -->
     <script src="../js/api.js"></script>
     <script src="../js/home.js"></script>
+    <script src="../js/savedJobs.js"></script>
     <script src="../js/job-detail.js"></script>
 </body>
 

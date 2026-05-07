@@ -9,6 +9,7 @@ using TechList.Application.Jobs.Interfaces;
 using TechList.Application.Applications.Interfaces;
 using TechList.Application.Recruiters.Interfaces;
 using TechList.Application.Messaging.Interfaces;
+using TechList.Application.CandidateMessaging.Interfaces;
 using TechList.Infrastructure.Auth;
 using TechList.Infrastructure.Identity;
 using TechList.Infrastructure.Options;
@@ -19,8 +20,11 @@ using TechList.Infrastructure.Jobs;
 using TechList.Infrastructure.Applications;
 using TechList.Infrastructure.Recruiters;
 using TechList.Infrastructure.Messaging;
+using TechList.Infrastructure.CandidateMessaging;
 using TechList.Application.Admin.Interfaces;
 using TechList.Infrastructure.Admin;
+using TechList.Application.SavedJobs.Interfaces;
+using TechList.Infrastructure.SavedJobs;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 
@@ -66,7 +70,9 @@ public static class DependencyInjection
         services.AddScoped<IJobApplicationService, JobApplicationService>();
         services.AddScoped<IRecruiterStatisticsService, RecruiterStatisticsService>();
         services.AddScoped<IMessagingService, MessagingService>();
+        services.AddScoped<ICandidateMessagingService, CandidateMessagingService>();
         services.AddScoped<IInterviewService, InterviewService>();
+        services.AddScoped<ISavedJobService, SavedJobService>();
         services.AddMemoryCache();
 
         return services;
