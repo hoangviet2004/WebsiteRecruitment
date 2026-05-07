@@ -23,6 +23,8 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<Coupon> Coupons => Set<Coupon>();
     public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
     public DbSet<JobApplication> JobApplications => Set<JobApplication>();
+    public DbSet<Message> Messages => Set<Message>();
+    public DbSet<InterviewSchedule> InterviewSchedules => Set<InterviewSchedule>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -231,6 +233,40 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
             e.Property(x => x.PerformedBy).HasMaxLength(450).IsRequired();
             e.Property(x => x.Details).HasMaxLength(4000);
             e.HasIndex(x => x.CreatedAt);
+        });
+
+        // ── Message ─────────────────────────────────────────
+        builder.Entity<Message>(e =>
+        {
+            e.ToTable("Messages");
+            e.HasKey(x => x.Id);
+            e.Property(x => x.SenderId).HasMaxLength(450).IsRequired();
+            e.Property(x => x.Content).HasMaxLength(4000).IsRequired();
+            e.Property(x => x.Type).HasMaxLength(20).IsRequired();
+            e.HasIndex(x => new { x.ApplicationId, x.SentAt });
+            e.HasIndex(x => new { x.SenderId, x.IsRead });
+
+            e.HasOne(x => x.Application)
+             .WithMany()
+             .HasForeignKey(x => x.ApplicationId)
+             .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // ── InterviewSchedule ────────────────────────────────
+        builder.Entity<InterviewSchedule>(e =>
+        {
+            e.ToTable("InterviewSchedules");
+            e.HasKey(x => x.Id);
+            e.Property(x => x.MeetingLink).HasMaxLength(500);
+            e.Property(x => x.Location).HasMaxLength(300);
+            e.Property(x => x.Notes).HasMaxLength(2000);
+            e.Property(x => x.Status).HasMaxLength(30).IsRequired();
+            e.HasIndex(x => new { x.ApplicationId, x.ScheduledAt });
+
+            e.HasOne(x => x.Application)
+             .WithMany()
+             .HasForeignKey(x => x.ApplicationId)
+             .OnDelete(DeleteBehavior.Cascade);
         });
 
         // ── JobApplication ───────────────────────────────────

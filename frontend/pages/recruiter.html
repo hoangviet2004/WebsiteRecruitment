@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="stylesheet" href="../assets/css/home.css">
     <link rel="stylesheet" href="../assets/css/recruiter.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
 </head>
 <body class="recruiter-body">
     <nav class="homebar">
@@ -30,6 +31,13 @@
                 </a>
                 <a href="#" class="menu-item" onclick="switchTab('candidates', this)">
                     <i class="fa-solid fa-users"></i> Quản lý Ứng viên
+                </a>
+                <a href="#" class="menu-item" onclick="switchTab('analytics', this)">
+                    <i class="fa-solid fa-chart-pie"></i> Thống kê & Báo cáo
+                </a>
+                <a href="#" class="menu-item" id="menu-messages" onclick="switchTab('messages', this)">
+                    <i class="fa-solid fa-comments"></i> Tin nhắn
+                    <span class="msg-badge-dot" id="msg-unread-badge" style="display:none;"></span>
                 </a>
             </div>
         </aside>
@@ -236,7 +244,241 @@
                 <!-- Thống kê nhanh -->
                 <div class="cand-stats-row" id="cand-stats-row"></div>
             </section>
+
+            <!-- TAB 5: Thống kê & Báo cáo -->
+            <section id="tab-analytics" class="tab-pane">
+
+                <!-- Header -->
+                <div class="an-header">
+                    <div>
+                        <h2 class="an-title"><i class="fa-solid fa-chart-pie"></i> Thống kê & Báo cáo</h2>
+                        <p class="an-sub">Theo dõi hiệu suất tuyển dụng và xu hướng ứng viên của công ty bạn.</p>
+                    </div>
+                    <div class="an-header-actions">
+                        <div class="an-period-group">
+                            <button class="an-period-btn" data-period="7d"  onclick="setAnalyticsPeriod('7d',this)">7 ngày</button>
+                            <button class="an-period-btn active" data-period="30d" onclick="setAnalyticsPeriod('30d',this)">30 ngày</button>
+                            <button class="an-period-btn" data-period="3m"  onclick="setAnalyticsPeriod('3m',this)">3 tháng</button>
+                        </div>
+                        <button class="btn-primary an-export-btn" onclick="exportAnalyticsCSV()">
+                            <i class="fa-solid fa-file-excel"></i> Xuất Excel
+                        </button>
+                        <button class="btn-secondary an-export-btn" onclick="exportAnalyticsPDF()">
+                            <i class="fa-solid fa-file-pdf"></i> Xuất PDF
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Overview Cards -->
+                <div class="an-overview-grid" id="an-overview-grid">
+                    <div class="an-card-skeleton"></div>
+                    <div class="an-card-skeleton"></div>
+                    <div class="an-card-skeleton"></div>
+                </div>
+
+                <!-- Charts row 1 -->
+                <div class="an-charts-row">
+                    <!-- Donut: Trạng thái ứng viên -->
+                    <div class="card an-chart-card an-chart-donut-wrap">
+                        <div class="an-chart-header">
+                            <span class="an-chart-title">Phân bố Trạng thái Ứng viên</span>
+                        </div>
+                        <div class="an-donut-body">
+                            <div class="an-donut-canvas-wrap">
+                                <canvas id="chart-status-donut"></canvas>
+                                <div class="an-donut-center" id="an-donut-center">—</div>
+                            </div>
+                            <div class="an-donut-legend" id="an-donut-legend"></div>
+                        </div>
+                    </div>
+
+                    <!-- Bar: Kỹ năng hot -->
+                    <div class="card an-chart-card an-chart-skills-wrap">
+                        <div class="an-chart-header">
+                            <span class="an-chart-title">Kỹ năng Ứng viên Phổ biến</span>
+                            <span class="an-chart-sub">Từ hồ sơ ứng viên đã nộp đơn</span>
+                        </div>
+                        <div style="padding: 8px 24px 20px; flex: 1;">
+                            <canvas id="chart-skills-bar" style="max-height:280px;"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Line Chart: Xu hướng ứng tuyển -->
+                <div class="card an-chart-card" style="margin-top:20px;">
+                    <div class="an-chart-header">
+                        <span class="an-chart-title">Xu hướng Ứng tuyển theo thời gian</span>
+                        <span class="an-chart-sub" id="an-trend-sub"></span>
+                    </div>
+                    <div style="padding: 8px 24px 20px;">
+                        <canvas id="chart-trend-line" style="max-height:220px;"></canvas>
+                    </div>
+                </div>
+
+                <!-- Job Performance Table -->
+                <div class="card" style="margin-top:20px;">
+                    <div class="an-chart-header" style="padding: 20px 24px 0;">
+                        <span class="an-chart-title">Hiệu suất từng Tin đăng</span>
+                        <span class="an-chart-sub">Dữ liệu cập nhật theo bộ lọc thời gian</span>
+                    </div>
+                    <div class="table-responsive" style="padding:16px 0 0;">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Vị trí tuyển dụng</th>
+                                    <th style="text-align:center;">Tổng đơn</th>
+                                    <th style="text-align:center;">Sàng lọc</th>
+                                    <th style="text-align:center;">Phỏng vấn</th>
+                                    <th style="text-align:center;">Đề nghị</th>
+                                    <th style="text-align:center;">Tỉ lệ chuyển đổi</th>
+                                    <th>Trạng thái</th>
+                                </tr>
+                            </thead>
+                            <tbody id="an-job-perf-body">
+                                <tr><td colspan="7" style="text-align:center;padding:32px 0;color:#64748b;">
+                                    <i class="fa-solid fa-spinner fa-spin" style="color:#3b82f6;margin-right:8px;"></i>Đang tải...
+                                </td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Cache note -->
+                <p class="an-cache-note"><i class="fa-solid fa-bolt"></i> Dữ liệu được cache 5 phút để tối ưu hiệu năng. <span id="an-last-updated"></span></p>
+
+            </section>
+
+            <!-- TAB 6: Tin nhắn -->
+            <section id="tab-messages" class="tab-pane">
+                <div class="msg-layout" id="msg-layout">
+
+                    <!-- Cột trái: Danh sách hội thoại -->
+                    <div class="msg-conv-col">
+                        <div class="msg-conv-header">
+                            <h3>Tin nhắn</h3>
+                            <div class="msg-search-wrap">
+                                <i class="fa-solid fa-magnifying-glass"></i>
+                                <input type="text" id="msg-search" placeholder="Tìm ứng viên..." oninput="filterConversations(this.value)">
+                            </div>
+                        </div>
+                        <div class="msg-conv-list" id="msg-conv-list">
+                            <div class="msg-empty-state">
+                                <i class="fa-solid fa-spinner fa-spin"></i> Đang tải...
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Cột giữa: Chat thread -->
+                    <div class="msg-thread-col" id="msg-thread-col">
+                        <div class="msg-thread-empty" id="msg-thread-empty">
+                            <i class="fa-regular fa-comments" style="font-size:48px;color:#cbd5e1;margin-bottom:16px;"></i>
+                            <p>Chọn một cuộc hội thoại để bắt đầu</p>
+                        </div>
+                        <!-- Header thread (ẩn ban đầu) -->
+                        <div class="msg-thread-header" id="msg-thread-header" style="display:none;">
+                            <div class="msg-thread-candidate" id="msg-thread-candidate"></div>
+                            <div class="msg-thread-actions">
+                                <button class="msg-icon-btn" title="Lên lịch phỏng vấn" onclick="openScheduleModal()">
+                                    <i class="fa-regular fa-calendar-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <!-- Bubbles -->
+                        <div class="msg-bubbles" id="msg-bubbles"></div>
+                        <!-- Input box -->
+                        <div class="msg-input-wrap" id="msg-input-wrap" style="display:none;">
+                            <div class="msg-input-toolbar">
+                                <button class="msg-toolbar-btn" title="Gửi Email" onclick="setMsgType('email')" id="btn-type-email">
+                                    <i class="fa-regular fa-envelope"></i> Email
+                                </button>
+                                <button class="msg-toolbar-btn active" title="Tin nhắn" onclick="setMsgType('message')" id="btn-type-msg">
+                                    <i class="fa-regular fa-comment"></i> Tin nhắn
+                                </button>
+                                <div class="msg-toolbar-sep"></div>
+                                <select class="msg-template-sel" id="msg-template-sel" onchange="applyTemplate(this.value)">
+                                    <option value="">Chọn mẫu nhanh...</option>
+                                    <option value="invite">📅 Mời phỏng vấn</option>
+                                    <option value="offer">🎉 Gửi Offer</option>
+                                    <option value="reject">❌ Từ chối lịch sự</option>
+                                    <option value="followup">📋 Hỏi thêm thông tin</option>
+                                    <option value="confirm">✅ Xác nhận nhận hồ sơ</option>
+                                </select>
+                            </div>
+                            <div class="msg-input-row">
+                                <textarea id="msg-input" class="msg-textarea" placeholder="Nhập tin nhắn tại đây..." rows="3"
+                                    onkeydown="handleMsgKey(event)"></textarea>
+                                <button class="msg-send-btn" onclick="sendMessage()">
+                                    <i class="fa-solid fa-paper-plane"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Cột phải: Thông tin ứng viên -->
+                    <div class="msg-info-col" id="msg-info-col">
+                        <div class="msg-info-empty" id="msg-info-empty">
+                            <i class="fa-solid fa-user-circle" style="font-size:40px;color:#cbd5e1;margin-bottom:12px;"></i>
+                            <p>Chọn hội thoại để xem hồ sơ</p>
+                        </div>
+                        <div id="msg-info-content" style="display:none;">
+                            <!-- Được fill bởi JS -->
+                        </div>
+                    </div>
+
+                </div>
+            </section>
         </main>
+    </div>
+
+    <!-- Modal Lên lịch Phỏng vấn -->
+    <div id="schedule-modal" class="modal">
+        <div class="modal-content" style="max-width:540px;">
+            <div class="modal-header">
+                <h3><i class="fa-regular fa-calendar-plus" style="color:#3b82f6;margin-right:8px;"></i>Lên lịch Phỏng vấn</h3>
+                <span class="close-btn" onclick="closeScheduleModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div id="schedule-candidate-info" style="background:#f8fafc;border-radius:10px;padding:14px 16px;margin-bottom:20px;border-left:3px solid #3b82f6;"></div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Ngày & Giờ phỏng vấn <span class="required">*</span></label>
+                        <input type="datetime-local" id="sch-datetime">
+                    </div>
+                    <div class="form-group">
+                        <label>Thời lượng (phút)</label>
+                        <select id="sch-duration">
+                            <option value="30">30 phút</option>
+                            <option value="45">45 phút</option>
+                            <option value="60" selected>60 phút</option>
+                            <option value="90">90 phút</option>
+                            <option value="120">120 phút</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label><i class="fa-solid fa-video" style="color:#3b82f6;margin-right:6px;"></i>Link Meeting (Google Meet / Zoom...)</label>
+                    <input type="url" id="sch-link" placeholder="https://meet.google.com/...">
+                </div>
+                <div class="form-group">
+                    <label><i class="fa-solid fa-location-dot" style="color:#64748b;margin-right:6px;"></i>Địa điểm (nếu phỏng vấn trực tiếp)</label>
+                    <input type="text" id="sch-location" placeholder="Tầng 3, Tòa nhà ABC, 123 Nguyễn Huệ...">
+                </div>
+                <div class="form-group">
+                    <label>Ghi chú cho ứng viên</label>
+                    <textarea id="sch-notes" rows="3" placeholder="Mang theo CMND, portfolio..."></textarea>
+                </div>
+                <div style="background:#eff6ff;border-radius:8px;padding:12px 14px;font-size:13px;color:#3b82f6;display:flex;gap:8px;align-items:flex-start;">
+                    <i class="fa-solid fa-circle-info" style="margin-top:1px;flex-shrink:0;"></i>
+                    <span>Sau khi lên lịch, trạng thái ứng viên sẽ tự động chuyển sang <strong>Phỏng vấn</strong> và một tin nhắn thông báo sẽ được tạo.</span>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeScheduleModal()">Hủy</button>
+                <button class="btn-primary" onclick="submitSchedule()">
+                    <i class="fa-regular fa-calendar-check"></i> Xác nhận lịch
+                </button>
+            </div>
+        </div>
     </div>
 
     <!-- Modal Chi tiết Ứng viên -->
@@ -355,5 +597,7 @@
     <script src="../js/home.js"></script>
     <script src="../js/recruiter.js"></script>
     <script src="../js/candidateManagementRecruiter.js"></script>
+    <script src="../js/recruiterAnalytics.js"></script>
+    <script src="../js/recruiterMessaging.js"></script>
 </body>
 </html>
