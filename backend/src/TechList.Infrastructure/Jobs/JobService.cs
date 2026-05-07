@@ -102,8 +102,8 @@ public sealed class JobService : IJobService
         if (subscription.Package.MaxJobPosts != -1 && subscription.JobPostsUsed >= subscription.Package.MaxJobPosts)
         {
             throw new InvalidOperationException(
-                $"Bạn đã đạt giới hạn {subscription.Package.MaxJobPosts} tin đăng của gói \"{subscription.Package.Name}\". " +
-                $"Vui lòng nâng cấp gói dịch vụ để đăng thêm tin.");
+                $"Bạn đã vượt quá giới hạn {subscription.Package.MaxJobPosts} tin đăng của gói \"{subscription.Package.Name}\". " +
+                $"Vui lòng đăng ký gói dịch vụ cao hơn để đăng thêm tin.");
         }
 
         var job = new JobPost
@@ -147,6 +147,29 @@ public sealed class JobService : IJobService
 
         if (job.Company.OwnerId != userId)
             throw new UnauthorizedAccessException("You do not have permission to update this job.");
+
+        // Check subscription limit when reactivating a hidden job
+        if (request.IsActive && !job.IsActive)
+        {
+            var subscription = await _db.Subscriptions
+                .Include(s => s.Package)
+                .Where(s => s.UserId == userId && s.Status == TechList.Domain.Enums.SubscriptionStatus.Active)
+                .OrderByDescending(s => s.CreatedAt)
+                .FirstOrDefaultAsync(ct);
+
+            if (subscription != null && subscription.Package.MaxJobPosts != -1)
+            {
+                var activeJobCount = await _db.JobPosts
+                    .CountAsync(j => j.CompanyId == job.CompanyId && j.IsActive && j.Id != jobId, ct);
+
+                if (activeJobCount >= subscription.Package.MaxJobPosts)
+                {
+                    throw new InvalidOperationException(
+                        $"Bạn đã vượt quá giới hạn {subscription.Package.MaxJobPosts} tin đăng của gói \"{subscription.Package.Name}\". " +
+                        $"Vui lòng đăng ký gói dịch vụ cao hơn để đăng thêm tin.");
+                }
+            }
+        }
 
         job.Title = request.Title;
         job.Description = request.Description;

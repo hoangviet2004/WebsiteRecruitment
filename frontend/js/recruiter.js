@@ -244,12 +244,15 @@ async function loadMyJobs(companyId) {
         res.data.forEach(job => {
             const expDate = new Date(job.expiresAt).toLocaleDateString('vi-VN');
             let statusHtml = '';
-            if (!job.isApproved) {
+            const isExpired = new Date(job.expiresAt) < new Date();
+            if (!job.isActive) {
+                statusHtml = '<span style="background:#fee2e2; color:#dc2626; padding: 4px 8px; border-radius: 4px; font-size:12px; font-weight:600;">Đã ẩn</span>';
+            } else if (isExpired) {
+                statusHtml = '<span style="background:#f1f5f9; color:#64748b; padding: 4px 8px; border-radius: 4px; font-size:12px; font-weight:600;">Hết hạn</span>';
+            } else if (!job.isApproved) {
                 statusHtml = '<span style="background:#fef3c7; color:#d97706; padding: 4px 8px; border-radius: 4px; font-size:12px; font-weight:600;">Chờ duyệt</span>';
             } else {
-                statusHtml = job.isActive 
-                    ? '<span style="background:#dcfce7; color:#16a34a; padding: 4px 8px; border-radius: 4px; font-size:12px; font-weight:600;">Đang mở</span>' 
-                    : '<span style="background:#fee2e2; color:#dc2626; padding: 4px 8px; border-radius: 4px; font-size:12px; font-weight:600;">Đã ẩn</span>';
+                statusHtml = '<span style="background:#dcfce7; color:#16a34a; padding: 4px 8px; border-radius: 4px; font-size:12px; font-weight:600;">Đang mở</span>';
             }
 
             const tr = document.createElement('tr');
@@ -283,7 +286,7 @@ async function openJobModal() {
         if (subData.success && subData.data && subData.data.hasSubscription) {
             var s = subData.data;
             if (s.maxJobPosts !== -1 && s.jobPostsUsed >= s.maxJobPosts) {
-                alert('Bạn đã đạt giới hạn ' + s.maxJobPosts + ' tin đăng của gói "' + s.packageName + '".\nVui lòng nâng cấp gói dịch vụ để đăng thêm tin.');
+                alert('Bạn đã vượt quá giới hạn ' + s.maxJobPosts + ' tin đăng của gói "' + s.packageName + '".\nVui lòng đăng ký gói dịch vụ cao hơn để đăng thêm tin.');
                 return;
             }
         }
@@ -368,7 +371,7 @@ async function submitJobForm() {
             closeJobModal();
             loadMyJobs(currentCompanyId);
         } else {
-            alert("Lỗi: " + JSON.stringify(res.errors || res.message));
+            alert(res.message || JSON.stringify(res.errors) || "Đã xảy ra lỗi, vui lòng thử lại.");
         }
     } catch (e) {
         alert("Lỗi hệ thống khi lưu tin.");

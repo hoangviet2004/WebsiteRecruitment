@@ -152,6 +152,23 @@ public sealed class PackageController : ControllerBase
                 JobPostsUsed = actualJobCount
             };
             _db.Subscriptions.Add(newSub);
+
+            // Auto-hide excess jobs when downgrading
+            if (company != null && package.MaxJobPosts != -1 && actualJobCount > package.MaxJobPosts)
+            {
+                var excessJobs = await _db.JobPosts
+                    .Where(j => j.CompanyId == company.Id && j.IsActive)
+                    .OrderBy(j => j.CreatedAt) // hide oldest first
+                    .Take(actualJobCount - package.MaxJobPosts)
+                    .ToListAsync(ct);
+
+                foreach (var job in excessJobs)
+                {
+                    job.IsActive = false;
+                    job.UpdatedAt = DateTime.UtcNow;
+                }
+            }
+
             await _db.SaveChangesAsync(ct);
 
             return Ok(ApiResponse<object>.Ok(new { subscriptionId = newSub.Id },
@@ -197,6 +214,23 @@ public sealed class PackageController : ControllerBase
             JobPostsUsed = actualJobCount
         };
         _db.Subscriptions.Add(paidSub);
+
+        // Auto-hide excess jobs when downgrading
+        if (company != null && package.MaxJobPosts != -1 && actualJobCount > package.MaxJobPosts)
+        {
+            var excessJobs = await _db.JobPosts
+                .Where(j => j.CompanyId == company.Id && j.IsActive)
+                .OrderBy(j => j.CreatedAt) // hide oldest first
+                .Take(actualJobCount - package.MaxJobPosts)
+                .ToListAsync(ct);
+
+            foreach (var job in excessJobs)
+            {
+                job.IsActive = false;
+                job.UpdatedAt = DateTime.UtcNow;
+            }
+        }
+
         await _db.SaveChangesAsync(ct);
 
         return Ok(ApiResponse<object>.Ok(new { subscriptionId = paidSub.Id, transactionCode },
