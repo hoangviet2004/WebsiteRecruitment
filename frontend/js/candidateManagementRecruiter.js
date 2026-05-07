@@ -54,6 +54,7 @@ async function loadCandidates() {
 
     try {
         const res = await apiFetchAuth(`/api/applications/company/${currentCompanyId}`, { method: 'GET' });
+        if (!res) return; // Token hết hạn → apiFetchAuth đã redirect về login
         const data = await res.json();
 
         if (!res.ok || !data.success) throw new Error(data.message || 'Lỗi tải dữ liệu');

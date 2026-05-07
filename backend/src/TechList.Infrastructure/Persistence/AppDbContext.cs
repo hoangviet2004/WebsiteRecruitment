@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using TechList.Domain.Entities;
 using TechList.Infrastructure.Identity; // ✅ Sửa namespace
 
@@ -9,6 +10,13 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
 {
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
     {
+    }
+
+    // Suppress EF Core 9 PendingModelChangesWarning khi migration đang trong quá trình sync
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    {
+        optionsBuilder.ConfigureWarnings(w =>
+            w.Ignore(RelationalEventId.PendingModelChangesWarning));
     }
 
     public DbSet<UserProfile> UserProfiles => Set<UserProfile>();
@@ -47,6 +55,11 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
             e.Property(x => x.Bio).HasMaxLength(2000);
             e.Property(x => x.AvatarUrl).HasMaxLength(1000);
             e.Property(x => x.AvatarPublicId).HasMaxLength(200);
+            e.Property(x => x.Phone).HasMaxLength(30);
+            e.Property(x => x.Location).HasMaxLength(300);
+            e.Property(x => x.JobStatus).HasMaxLength(20);
+            e.Property(x => x.Education).HasMaxLength(8000);
+            e.Property(x => x.SocialLinks).HasMaxLength(2000);
         });
 
         builder.Entity<RefreshToken>(e =>

@@ -6,7 +6,11 @@ public sealed record ProfileDto(
     string Bio,
     string? AvatarUrl,
     string? CvUrl,
-    string? Skills,
-    string? Experience
+    string? Skills,       // JSON array
+    string? Experience,   // JSON array
+    string? Education,    // JSON array
+    string? SocialLinks,  // JSON object
+    string? Phone,
+    string? Location,
+    string? JobStatus
 );
-

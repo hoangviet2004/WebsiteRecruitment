@@ -22,6 +22,7 @@ using TechList.Infrastructure.Messaging;
 using TechList.Application.Admin.Interfaces;
 using TechList.Infrastructure.Admin;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 
 namespace TechList.Infrastructure;
 
@@ -30,7 +31,8 @@ public static class DependencyInjection
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration config)
     {
         services.AddDbContext<AppDbContext>(options =>
-            options.UseSqlServer(config.GetConnectionString("DefaultConnection")));
+            options.UseSqlServer(config.GetConnectionString("DefaultConnection"))
+                   .ConfigureWarnings(w => w.Ignore(RelationalEventId.PendingModelChangesWarning)));
 
         services.AddIdentityCore<ApplicationUser>(options =>
             {

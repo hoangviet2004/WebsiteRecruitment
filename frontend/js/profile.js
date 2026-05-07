@@ -1,288 +1,614 @@
+'use strict';
 // ============================================================
-// profile.js - Xử lý logic cho trang cấu hình hồ sơ cá nhân
+// profile.js — Candidate Profile Page
 // ============================================================
 
+// ── In-memory state ──────────────────────────────────────────
+let _skills = [];   // [{name, level}]
+let _exp    = [];   // [{id,position,company,from,to,current,desc}]
+let _edu    = [];   // [{id,degree,school,from,to,gpa}]
+
+const LEVEL_CONFIG = {
+    beginner:     { label: 'Mới bắt đầu', pct: 25 },
+    intermediate: { label: 'Trung bình',  pct: 50 },
+    advanced:     { label: 'Thành thạo',  pct: 75 },
+    expert:       { label: 'Chuyên gia',  pct: 100 }
+};
+
+// ── Init ─────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', async () => {
-    const fullNameInput = document.getElementById('fullName');
-    const emailInput    = document.getElementById('email');
-    const phoneInput    = document.getElementById('phone');
-    const bioInput      = document.getElementById('bio');
-    const bioCountEl    = document.getElementById('bio-count');
-    const bioCounter    = bioInput?.closest('.form-group')?.querySelector('.bio-counter');
-    const form    = document.getElementById('profile-form');
-    const btnSave = document.querySelector('.btn-save');
-    
-    // Thuộc tính avatar
-    const avatarInput   = document.getElementById('avatar-input');
-    const avatarPreview = document.getElementById('avatar-preview');
-    const avatarLoading = document.getElementById('avatar-loading');
+    const user = getCurrentUser();
+    if (!user.token) { window.location.href = 'auth.html#login'; return; }
 
-    // Bộ đếm ký tự Bio (định nghĩa sớm để dùng khi load API)
-    function updateBioCounter() {
-        if (!bioInput || !bioCountEl || !bioCounter) return;
-        const len = bioInput.value.length;
-        bioCountEl.textContent = len;
-        bioCounter.classList.remove('warn', 'limit');
-        if (len >= 500) bioCounter.classList.add('limit');
-        else if (len >= 400) bioCounter.classList.add('warn');
+    // Điền email (readonly)
+    const emailEl = document.getElementById('pf-email');
+    if (emailEl) emailEl.value = user.email || '';
+
+    // Bio counter
+    const bioEl = document.getElementById('pf-bio');
+    if (bioEl) {
+        bioEl.addEventListener('input', updateBioCounter);
     }
 
-    if (bioInput) {
-        bioInput.addEventListener('input', updateBioCounter);
-    }
+    // Avatar upload
+    const avatarInput = document.getElementById('pf-avatar-input');
+    if (avatarInput) avatarInput.addEventListener('change', handleAvatarUpload);
 
-    // 1. Lấy thông tin mặc định có sẵn từ hệ thống
-    const currentUser = getCurrentUser(); // từ api.js
-    // Sử dụng thông tin email thực tế từ JWT token (không dùng chung qua localStorage)
-    emailInput.value = currentUser.email || '';
-    emailInput.readOnly = true; // Email không thay đổi qua form này
-    emailInput.style.backgroundColor = '#f8fafc';
-    
-    const phoneStorageKey = 'profile_phone_' + (currentUser.email || 'guest');
-    phoneInput.value = localStorage.getItem(phoneStorageKey) || '';
-
-    // 2. Gọi API để lấy thông tin Profile mới nhất từ backend (Họ và tên, môt tả, avatar...)
-    try {
-        const res = await apiFetchAuth('/api/profile/me', { method: 'GET' });
-        if (res && res.ok) {
-            const dataResponse = await res.json();
-            const profile = dataResponse.data;
-            if (profile) {
-                // Hiển thị tên từ DB nếu có, không thì lấy từ sessionStorage login
-                const nameToShow = profile.displayName || currentUser.fullName || '';
-                fullNameInput.value = nameToShow;
-
-                const displayNameHeader = document.getElementById('display-name-header');
-                const displayEmailHeader = document.getElementById('display-email-header');
-                if (displayNameHeader) displayNameHeader.textContent = nameToShow;
-                if (displayEmailHeader) displayEmailHeader.textContent = currentUser.email || '';
-
-                // Điền bio
-                if (bioInput) {
-                    bioInput.value = profile.bio || '';
-                    updateBioCounter();
-                }
-
-                const skillsInput = document.getElementById('skills');
-                if (skillsInput) skillsInput.value = profile.skills || '';
-                
-                const experienceInput = document.getElementById('experience');
-                if (experienceInput) experienceInput.value = profile.experience || '';
-
-                if (profile.cvUrl) {
-                    const cvEmpty = document.getElementById('cv-empty');
-                    const cvPreview = document.getElementById('cv-preview');
-                    const cvLink = document.getElementById('cv-link');
-                    if (cvEmpty && cvPreview && cvLink) {
-                        cvEmpty.style.display = 'none';
-                        cvPreview.style.display = 'flex';
-                        cvLink.href = profile.cvUrl;
-                    }
-                }
-
-                // Hiển thị avatar
-                const displayNameForAvatar = profile.displayName || currentUser.fullName || 'User';
-                if (profile.avatarUrl) {
-                    avatarPreview.src = profile.avatarUrl;
-                    sessionStorage.setItem('avatarUrl', profile.avatarUrl);
-                    if (typeof renderNavRight === 'function') renderNavRight();
-                } else {
-                    avatarPreview.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(displayNameForAvatar)}&background=3b82f6&color=fff&size=150`;
-                }
-            }
-        }
-    } catch (e) {
-        console.error("Không thể lấy dữ liệu profile từ server:", e);
-        fullNameInput.value = currentUser.fullName || '';
-    }
-
-    // 3. Lắng nghe sự kiện Submit (Lưu thay đổi)
-    form.addEventListener('submit', async (e) => {
-        e.preventDefault(); // Ngăn trình duyệt tải lại trang
-
-        const newName  = fullNameInput.value.trim();
-        const newEmail = emailInput.value.trim();
-        const newPhone = phoneInput.value.trim();
-        const newBio   = bioInput ? bioInput.value.trim() : '';
-        const newSkills = document.getElementById('skills') ? document.getElementById('skills').value.trim() : '';
-        const newExperience = document.getElementById('experience') ? document.getElementById('experience').value.trim() : '';
-
-        if (!newName) {
-            alert('Vui lòng nhập họ và tên!');
-            return;
-        }
-
-        if (newBio.length > 500) {
-            alert('Giới thiệu bản thân không được vượt quá 500 ký tự!');
-            bioInput.focus();
-            return;
-        }
-
-        const originalBtnText = btnSave.textContent;
-        btnSave.textContent = 'Đang lưu...';
-        btnSave.disabled = true;
-
-        try {
-            // Gửi API cập nhật Profile (DisplayName và Bio)
-            const res = await apiFetchAuth('/api/profile/me', {
-                method: 'PUT',
-                body: JSON.stringify({ 
-                    displayName: newName, 
-                    bio: newBio,
-                    skills: newSkills,
-                    experience: newExperience
-                })
-            });
-
-            if (res && res.ok) {
-                // Đồng bộ ngược lại vào Session để các trang khác (như homebar) nhận diện được tên mới
-                sessionStorage.setItem('fullName', newName); // Cập nhật tên trong phiên hiện tại
-                
-                const phoneStorageKey = 'profile_phone_' + (currentUser.email || 'guest');
-                localStorage.setItem(phoneStorageKey, newPhone);
-
-                alert('Cập nhật thông tin thành công!');
-
-                const displayNameHeader = document.getElementById('display-name-header');
-                if (displayNameHeader) displayNameHeader.textContent = newName;
-
-                // Cập nhật lại thanh điều hướng (nếu có sử dụng renderNavRight từ home.js)
-                if (typeof renderNavRight === 'function') {
-                    renderNavRight();
-                }
-            } else {
-                alert('Có lỗi xảy ra khi cập nhật trên server.');
-            }
-        } catch (error) {
-            console.error('Lỗi khi lưu profile:', error);
-            alert('Cập nhật thất bại, vui lòng thử lại.');
-        } finally {
-            btnSave.textContent = originalBtnText;
-            btnSave.disabled = false;
-        }
+    // CV upload — click chỉ trên zone background, không phải button con
+    const cvInput = document.getElementById('pf-cv-input');
+    if (cvInput) cvInput.addEventListener('change', handleCvUpload);
+    const cvZone = document.getElementById('pf-cv-zone');
+    if (cvZone) cvZone.addEventListener('click', (ev) => {
+        // Bỏ qua nếu click vào button bên trong (button tự xử lý)
+        if (ev.target.closest('button, a')) return;
+        cvInput?.click();
     });
 
-    // 4. Logic thay đổi ảnh đại diện (Tự động tải lên ngay khi chọn ảnh)
-    if (avatarInput) {
-        avatarInput.addEventListener('change', async (e) => {
-            const file = e.target.files[0];
-            if (!file) return;
+    // Skill level picker
+    initLevelPicker();
 
-            // 1) Tạo luồng hiển thị trước avatar cho người dùng thấy nhanh
-            const reader = new FileReader();
-            reader.onload = (ev) => {
-                avatarPreview.src = ev.target.result;
-            };
-            reader.readAsDataURL(file);
-
-            // 2) Bắt đầu gọi API Upload Image
-            avatarLoading.style.display = 'block';
-
-            const formData = new FormData();
-            formData.append('file', file);
-
-            try {
-                // Chúng ta tự tạo fetch vì apiFetchAuth hiện bị gán ứng với json không gửi được FormData dễ dàng
-                const baseToken = sessionStorage.getItem('token');
-                if (!baseToken) {
-                    alert('Bạn chưa đăng nhập!');
-                    return;
-                }
-
-                const response = await fetch(`${API_URL}/api/profile/avatar`, {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${baseToken}`
-                    },
-                    body: formData // Form data tự sinh Boundary
-                });
-
-                if (response.ok) {
-                    const result = await response.json();
-                    if (result.data && result.data.avatarUrl) {
-                        // Nhận lại link cloud từ api trả về
-                        avatarPreview.src = result.data.avatarUrl;
-                        sessionStorage.setItem('avatarUrl', result.data.avatarUrl);
-                        if (typeof renderNavRight === 'function') renderNavRight();
-                        
-                        alert('Cập nhật ảnh đại diện thành công!');
-                    }
-                } else {
-                    const errText = await response.text();
-                    console.error('Server response:', response.status, errText);
-                    alert(`Đã xảy ra lỗi khi tải ảnh lên (Mã lỗi ${response.status}).\n\nChi tiết: ${errText}`);
-                }
-            } catch (error) {
-                console.error('Lỗi upload avatar:', error);
-                alert('Tải ảnh thất bại, vui lòng thử lại.');
-            } finally {
-                avatarLoading.style.display = 'none';
-                avatarInput.value = ''; // Reset file input để có thể chọn lại đúng file đó lần nữa
-            }
-        });
-    }
-
-    // 5. Logic thay đổi CV (Upload PDF)
-    const cvInput = document.getElementById('cv-input');
-    const cvLoading = document.getElementById('cv-loading');
-    const cvEmpty = document.getElementById('cv-empty');
-    const cvPreview = document.getElementById('cv-preview');
-    const cvLink = document.getElementById('cv-link');
-
-    if (cvInput) {
-        cvInput.addEventListener('change', async (e) => {
-            const file = e.target.files[0];
-            if (!file) return;
-
-            if (file.type !== 'application/pdf') {
-                alert('Vui lòng chọn file định dạng PDF!');
-                cvInput.value = '';
-                return;
-            }
-
-            if (cvLoading) cvLoading.style.display = 'block';
-            if (cvEmpty) cvEmpty.style.display = 'none';
-            if (cvPreview) cvPreview.style.display = 'none';
-
-            const formData = new FormData();
-            formData.append('file', file);
-
-            try {
-                const baseToken = sessionStorage.getItem('token');
-                if (!baseToken) {
-                    alert('Bạn chưa đăng nhập!');
-                    return;
-                }
-
-                const response = await fetch(`${API_URL}/api/profile/cv`, {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${baseToken}`
-                    },
-                    body: formData
-                });
-
-                if (response.ok) {
-                    const result = await response.json();
-                    if (result.data && result.data.cvUrl) {
-                        if (cvLink) cvLink.href = result.data.cvUrl;
-                        if (cvPreview) cvPreview.style.display = 'flex';
-                        alert('Tải lên CV thành công!');
-                    }
-                } else {
-                    const errText = await response.text();
-                    console.error('Server response:', response.status, errText);
-                    alert(`Đã xảy ra lỗi khi tải CV lên.\n\nChi tiết: ${errText}`);
-                    if (cvEmpty) cvEmpty.style.display = 'block';
-                }
-            } catch (error) {
-                console.error('Lỗi upload CV:', error);
-                alert('Tải CV thất bại, vui lòng thử lại.');
-                if (cvEmpty) cvEmpty.style.display = 'block';
-            } finally {
-                if (cvLoading) cvLoading.style.display = 'none';
-                cvInput.value = '';
-            }
-        });
-    }
+    await loadProfile();
 });
+
+// ── Load profile from API ────────────────────────────────────
+async function loadProfile() {
+    try {
+        const res  = await apiFetchAuth('/api/profile/me');
+        if (!res?.ok) return;
+        const data = await res.json();
+        const p    = data?.data;
+        if (!p) return;
+
+        // Basic info
+        setVal('pf-fullname', p.displayName || '');
+        setVal('pf-phone',    p.phone || '');
+        setVal('pf-location', p.location || '');
+        setVal('pf-bio',      p.bio || '');
+        updateBioCounter();
+
+        const statusEl = document.getElementById('pf-jobstatus');
+        if (statusEl) statusEl.value = p.jobStatus || 'Seeking';
+
+        // Header + banner
+        const name  = p.displayName || getCurrentUser().fullName || 'Ứng viên';
+        const title = buildSubtitle(p);
+        setText('pf-header-name', name);
+        setText('pf-sidebar-title', title);
+        setText('pf-banner-name', name);
+        setText('pf-banner-title', title);
+
+        // Avatar
+        if (p.avatarUrl) {
+            document.getElementById('pf-avatar-img').src = p.avatarUrl;
+        } else {
+            document.getElementById('pf-avatar-img').src =
+                `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=3b82f6&color=fff&size=150`;
+        }
+
+        // Social links
+        const social = safeParseJSON(p.socialLinks, {});
+        setVal('pf-linkedin',  social.linkedin  || '');
+        setVal('pf-github',    social.github    || '');
+        setVal('pf-portfolio', social.portfolio || '');
+
+        // Skills
+        _skills = safeParseJSON(p.skills, []);
+        renderSkills();
+
+        // Experience
+        _exp = safeParseJSON(p.experience, []);
+        renderExp();
+
+        // Education
+        _edu = safeParseJSON(p.education, []);
+        renderEdu();
+
+        // CV
+        if (p.cvUrl) showCurrentCv(p.cvUrl);
+
+    } catch (e) {
+        console.error('Lỗi load profile:', e);
+    }
+}
+
+function buildSubtitle(p) {
+    const parts = [];
+    if (p.experience) {
+        try {
+            const exps = JSON.parse(p.experience);
+            if (exps?.length) parts.push(exps[0].position || '');
+        } catch (_) {}
+    }
+    if (p.location) parts.push(p.location);
+    return parts.filter(Boolean).join(' • ') || 'Cập nhật thông tin của bạn';
+}
+
+// ── Save profile ─────────────────────────────────────────────
+async function saveProfile() {
+    const btn = document.getElementById('pf-save-btn');
+    const name = (document.getElementById('pf-fullname')?.value || '').trim();
+    if (!name) { showToast('Vui lòng nhập họ và tên!', 'error'); return; }
+
+    const bio = document.getElementById('pf-bio')?.value || '';
+    if (bio.length > 500) { showToast('Giới thiệu tối đa 500 ký tự!', 'error'); return; }
+
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang lưu...';
+
+    const social = {
+        linkedin:  (document.getElementById('pf-linkedin')?.value  || '').trim(),
+        github:    (document.getElementById('pf-github')?.value    || '').trim(),
+        portfolio: (document.getElementById('pf-portfolio')?.value || '').trim(),
+    };
+
+    const payload = {
+        displayName: name,
+        bio,
+        phone:       (document.getElementById('pf-phone')?.value    || '').trim(),
+        location:    (document.getElementById('pf-location')?.value || '').trim(),
+        jobStatus:   document.getElementById('pf-jobstatus')?.value || 'Seeking',
+        skills:      JSON.stringify(_skills),
+        experience:  JSON.stringify(_exp),
+        education:   JSON.stringify(_edu),
+        socialLinks: JSON.stringify(social),
+    };
+
+    try {
+        const res  = await apiFetchAuth('/api/profile/me', { method: 'PUT', body: JSON.stringify(payload) });
+        const data = await res?.json();
+
+        if (res?.ok) {
+            sessionStorage.setItem('fullName', name);
+            showToast('Lưu hồ sơ thành công!', 'success');
+
+            // Cập nhật header & sidebar
+            const title = buildSubtitle({ experience: payload.experience, location: payload.location });
+            setText('pf-header-name', name);
+            setText('pf-banner-name', name);
+            setText('pf-banner-title', title);
+            setText('pf-sidebar-title', title);
+
+            if (typeof renderNavRight === 'function') renderNavRight();
+        } else {
+            showToast('Lỗi: ' + (data?.message || 'Không thể lưu hồ sơ'), 'error');
+        }
+    } catch (e) {
+        showToast('Lỗi kết nối!', 'error');
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-check"></i> Lưu thay đổi';
+    }
+}
+
+// ── Bio counter ───────────────────────────────────────────────
+function updateBioCounter() {
+    const el  = document.getElementById('pf-bio');
+    const cnt = document.getElementById('pf-bio-count');
+    const ctr = el?.parentElement?.querySelector('.pf-counter');
+    if (!el || !cnt) return;
+    const len = el.value.length;
+    cnt.textContent = len;
+    if (ctr) {
+        ctr.className = 'pf-counter' + (len > 500 ? ' over' : len > 420 ? ' warn' : '');
+    }
+}
+
+// ── Skills ────────────────────────────────────────────────────
+function renderSkills() {
+    const el = document.getElementById('pf-skills-list');
+    if (!el) return;
+    if (!_skills.length) {
+        el.innerHTML = '<p class="pf-empty-hint">Chưa có kỹ năng nào. Nhấn "+ Thêm kỹ năng" để bắt đầu.</p>';
+        return;
+    }
+    el.innerHTML = _skills.map((s, i) => {
+        const cfg = LEVEL_CONFIG[s.level] || LEVEL_CONFIG.intermediate;
+        return `<div class="pf-skill-row">
+            <span class="pf-skill-name">${esc(s.name)}</span>
+            <span class="pf-skill-level-label">${cfg.label}</span>
+            <div class="pf-skill-bar-wrap">
+                <div class="pf-skill-bar" style="width:${cfg.pct}%;"></div>
+            </div>
+            <div class="pf-skill-actions">
+                <button class="pf-icon-btn" onclick="openSkillModal(${i})" title="Sửa">
+                    <i class="fa-solid fa-pen"></i>
+                </button>
+                <button class="pf-icon-btn del" onclick="deleteSkill(${i})" title="Xóa">
+                    <i class="fa-solid fa-trash"></i>
+                </button>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+function openSkillModal(editIndex) {
+    const isEdit = editIndex !== undefined;
+    document.getElementById('skill-modal-title').textContent = isEdit ? 'Chỉnh sửa kỹ năng' : 'Thêm kỹ năng';
+    document.getElementById('skill-edit-index').value = isEdit ? editIndex : '';
+
+    const s = isEdit ? _skills[editIndex] : null;
+    setVal('skill-name', s?.name || '');
+    setLevelPicker(s?.level || 'beginner');
+
+    document.getElementById('modal-skill').classList.add('show');
+    document.getElementById('skill-name').focus();
+}
+
+function saveSkill() {
+    const name  = (document.getElementById('skill-name')?.value || '').trim();
+    if (!name) { showToast('Vui lòng nhập tên kỹ năng!', 'error'); return; }
+
+    const level = document.querySelector('#skill-level-picker .pf-level-btn.active')?.dataset.value || 'intermediate';
+    const idx   = document.getElementById('skill-edit-index').value;
+
+    if (idx !== '') {
+        _skills[parseInt(idx)] = { name, level };
+    } else {
+        if (_skills.some(s => s.name.toLowerCase() === name.toLowerCase())) {
+            showToast('Kỹ năng này đã tồn tại!', 'error'); return;
+        }
+        _skills.push({ name, level });
+    }
+
+    renderSkills();
+    closeModal('modal-skill');
+}
+
+function deleteSkill(i) {
+    _skills.splice(i, 1);
+    renderSkills();
+}
+
+// Level picker
+function initLevelPicker() {
+    document.querySelectorAll('#skill-level-picker .pf-level-btn').forEach(btn => {
+        btn.addEventListener('click', () => setLevelPicker(btn.dataset.value));
+    });
+}
+
+function setLevelPicker(level) {
+    document.querySelectorAll('#skill-level-picker .pf-level-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.value === level);
+    });
+    const cfg = LEVEL_CONFIG[level] || LEVEL_CONFIG.intermediate;
+    const preview = document.getElementById('skill-level-preview');
+    if (preview) preview.innerHTML = `<div class="pf-level-preview-fill" style="width:${cfg.pct}%;"></div>`;
+}
+
+// ── Work Experience ───────────────────────────────────────────
+function renderExp() {
+    const el = document.getElementById('pf-exp-list');
+    if (!el) return;
+    if (!_exp.length) {
+        el.innerHTML = '<p class="pf-empty-hint">Chưa có kinh nghiệm làm việc.</p>';
+        return;
+    }
+    el.innerHTML = _exp.map((e, i) => {
+        const period = formatPeriod(e.from, e.current ? null : e.to, e.current);
+        return `<div class="pf-timeline-item">
+            <div class="pf-timeline-icon"><i class="fa-solid fa-briefcase"></i></div>
+            <div class="pf-timeline-body">
+                <div class="pf-timeline-title">${esc(e.position)}</div>
+                <div class="pf-timeline-subtitle">${esc(e.company)}</div>
+                <div class="pf-timeline-period">${period}</div>
+                ${e.desc ? `<div class="pf-timeline-desc">${esc(e.desc).replace(/\n/g,'<br>')}</div>` : ''}
+            </div>
+            <div class="pf-timeline-actions">
+                <button class="pf-icon-btn" onclick="openExpModal(${i})"><i class="fa-solid fa-pen"></i></button>
+                <button class="pf-icon-btn del" onclick="deleteExp(${i})"><i class="fa-solid fa-trash"></i></button>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+function openExpModal(editIndex) {
+    const isEdit = editIndex !== undefined;
+    document.getElementById('exp-modal-title').textContent = isEdit ? 'Chỉnh sửa kinh nghiệm' : 'Thêm kinh nghiệm';
+    document.getElementById('exp-edit-index').value = isEdit ? editIndex : '';
+
+    const e = isEdit ? _exp[editIndex] : null;
+    setVal('exp-position', e?.position || '');
+    setVal('exp-company',  e?.company  || '');
+    setVal('exp-from',     e?.from     || '');
+    setVal('exp-to',       e?.to       || '');
+    setVal('exp-desc',     e?.desc     || '');
+    const cur = document.getElementById('exp-current');
+    if (cur) { cur.checked = !!e?.current; toggleExpCurrent(cur); }
+
+    document.getElementById('modal-exp').classList.add('show');
+    document.getElementById('exp-position').focus();
+}
+
+function toggleExpCurrent(cb) {
+    const toEl = document.getElementById('exp-to');
+    if (toEl) { toEl.disabled = cb.checked; if (cb.checked) toEl.value = ''; }
+}
+
+function saveExp() {
+    const position = (document.getElementById('exp-position')?.value || '').trim();
+    const company  = (document.getElementById('exp-company')?.value  || '').trim();
+    if (!position || !company) { showToast('Vui lòng nhập Chức vụ và Công ty!', 'error'); return; }
+
+    const current  = !!document.getElementById('exp-current')?.checked;
+    const entry = {
+        id:       Date.now().toString(),
+        position,
+        company,
+        from:     document.getElementById('exp-from')?.value || '',
+        to:       current ? null : (document.getElementById('exp-to')?.value || ''),
+        current,
+        desc:     (document.getElementById('exp-desc')?.value || '').trim(),
+    };
+
+    const idx = document.getElementById('exp-edit-index').value;
+    if (idx !== '') { entry.id = _exp[parseInt(idx)].id; _exp[parseInt(idx)] = entry; }
+    else _exp.unshift(entry);
+
+    renderExp();
+    closeModal('modal-exp');
+}
+
+function deleteExp(i) {
+    if (!confirm('Xóa kinh nghiệm này?')) return;
+    _exp.splice(i, 1);
+    renderExp();
+}
+
+// ── Education ─────────────────────────────────────────────────
+function renderEdu() {
+    const el = document.getElementById('pf-edu-list');
+    if (!el) return;
+    if (!_edu.length) {
+        el.innerHTML = '<p class="pf-empty-hint">Chưa có thông tin học vấn.</p>';
+        return;
+    }
+    el.innerHTML = _edu.map((e, i) => {
+        const period = e.from && e.to ? `${e.from} – ${e.to}` : (e.from || '');
+        const gpa    = e.gpa ? ` • GPA ${esc(e.gpa)}` : '';
+        return `<div class="pf-timeline-item">
+            <div class="pf-timeline-icon"><i class="fa-solid fa-graduation-cap"></i></div>
+            <div class="pf-timeline-body">
+                <div class="pf-timeline-title">${esc(e.degree)}</div>
+                <div class="pf-timeline-subtitle">${esc(e.school)}</div>
+                <div class="pf-timeline-period">${period}${gpa}</div>
+            </div>
+            <div class="pf-timeline-actions">
+                <button class="pf-icon-btn" onclick="openEduModal(${i})"><i class="fa-solid fa-pen"></i></button>
+                <button class="pf-icon-btn del" onclick="deleteEdu(${i})"><i class="fa-solid fa-trash"></i></button>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+function openEduModal(editIndex) {
+    const isEdit = editIndex !== undefined;
+    document.getElementById('edu-modal-title').textContent = isEdit ? 'Chỉnh sửa học vấn' : 'Thêm học vấn';
+    document.getElementById('edu-edit-index').value = isEdit ? editIndex : '';
+
+    const e = isEdit ? _edu[editIndex] : null;
+    setVal('edu-degree', e?.degree || '');
+    setVal('edu-school', e?.school || '');
+    setVal('edu-from',   e?.from   || '');
+    setVal('edu-to',     e?.to     || '');
+    setVal('edu-gpa',    e?.gpa    || '');
+
+    document.getElementById('modal-edu').classList.add('show');
+    document.getElementById('edu-degree').focus();
+}
+
+function saveEdu() {
+    const degree = (document.getElementById('edu-degree')?.value || '').trim();
+    const school = (document.getElementById('edu-school')?.value || '').trim();
+    if (!degree || !school) { showToast('Vui lòng nhập Bằng cấp và Trường học!', 'error'); return; }
+
+    const entry = {
+        id:     Date.now().toString(),
+        degree,
+        school,
+        from:   document.getElementById('edu-from')?.value || '',
+        to:     document.getElementById('edu-to')?.value   || '',
+        gpa:    (document.getElementById('edu-gpa')?.value || '').trim(),
+    };
+
+    const idx = document.getElementById('edu-edit-index').value;
+    if (idx !== '') { entry.id = _edu[parseInt(idx)].id; _edu[parseInt(idx)] = entry; }
+    else _edu.unshift(entry);
+
+    renderEdu();
+    closeModal('modal-edu');
+}
+
+function deleteEdu(i) {
+    if (!confirm('Xóa thông tin học vấn này?')) return;
+    _edu.splice(i, 1);
+    renderEdu();
+}
+
+// ── Avatar upload ─────────────────────────────────────────────
+async function handleAvatarUpload(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // Preview ngay lập tức
+    const reader = new FileReader();
+    reader.onload = ev => { document.getElementById('pf-avatar-img').src = ev.target.result; };
+    reader.readAsDataURL(file);
+
+    const loading = document.getElementById('pf-avatar-loading');
+    loading.style.display = 'block';
+
+    const fd = new FormData();
+    fd.append('file', file);
+
+    try {
+        const token = sessionStorage.getItem('token');
+        const res   = await fetch(`${API_URL}/api/profile/avatar`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}` },
+            body: fd
+        });
+        const data = await res.json();
+        if (res.ok && data.data?.avatarUrl) {
+            sessionStorage.setItem('avatarUrl', data.data.avatarUrl);
+            if (typeof renderNavRight === 'function') renderNavRight();
+            showToast('Cập nhật ảnh đại diện thành công!', 'success');
+        } else {
+            showToast('Lỗi tải ảnh: ' + (data.message || ''), 'error');
+        }
+    } catch (_) {
+        showToast('Lỗi kết nối khi tải ảnh!', 'error');
+    } finally {
+        loading.style.display = 'none';
+        e.target.value = '';
+    }
+}
+
+// ── CV upload ─────────────────────────────────────────────────
+async function handleCvUpload(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    if (file.type !== 'application/pdf') { showToast('Chỉ hỗ trợ file PDF!', 'error'); return; }
+    if (file.size > 5 * 1024 * 1024)    { showToast('File tối đa 5MB!', 'error'); return; }
+
+    showCvLoading(true);
+    const fd = new FormData();
+    fd.append('file', file);
+
+    let success = false;
+    try {
+        const token = sessionStorage.getItem('token');
+        const res   = await fetch(`${API_URL}/api/profile/cv`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}` },
+            body: fd
+        });
+        const data = await res.json();
+        if (res.ok && data.data?.cvUrl) {
+            showCurrentCv(data.data.cvUrl, file.name);
+            showToast('Tải lên CV thành công!', 'success');
+            success = true;
+        } else {
+            showToast('Lỗi tải CV: ' + (data.message || ''), 'error');
+        }
+    } catch (_) {
+        showToast('Lỗi kết nối khi tải CV!', 'error');
+    } finally {
+        // Chỉ hiện lại empty state khi upload thất bại
+        if (!success) showCvLoading(false);
+        else document.getElementById('pf-cv-loading').style.display = 'none';
+        e.target.value = '';
+    }
+}
+
+function handleCvDrop(e) {
+    e.preventDefault();
+    document.getElementById('pf-cv-zone').classList.remove('drag-over');
+    const file = e.dataTransfer.files[0];
+    if (!file) return;
+    const dt = new DataTransfer();
+    dt.items.add(file);
+    const inp = document.getElementById('pf-cv-input');
+    inp.files = dt.files;
+    inp.dispatchEvent(new Event('change'));
+}
+
+function showCvLoading(on) {
+    const zone = document.getElementById('pf-cv-zone');
+    document.getElementById('pf-cv-empty').style.display    = on ? 'none' : 'block';
+    document.getElementById('pf-cv-loading').style.display  = on ? 'block' : 'none';
+    if (zone) zone.style.pointerEvents = on ? 'none' : 'auto';
+}
+
+function showCurrentCv(url, filename) {
+    document.getElementById('pf-cv-empty').style.display   = 'none';
+    document.getElementById('pf-cv-loading').style.display = 'none';
+    const cur = document.getElementById('pf-cv-current');
+    if (cur) {
+        cur.style.display = 'block';
+        const link = document.getElementById('pf-cv-link');
+        if (link) link.href = url;
+        const fn = document.getElementById('pf-cv-filename');
+        if (fn) fn.textContent = filename || 'CV.pdf';
+        const meta = document.getElementById('pf-cv-updated');
+        if (meta) meta.textContent = 'Cập nhật ' + new Date().toLocaleDateString('vi-VN');
+    }
+}
+
+// ── Navigation scroll ─────────────────────────────────────────
+function scrollToSection(id, linkEl) {
+    document.querySelectorAll('.pf-nav-link').forEach(l => l.classList.remove('active'));
+    linkEl?.classList.add('active');
+    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    return false;
+}
+
+function openPublicProfile() {
+    const userId = sessionStorage.getItem('userId');
+    if (!userId) { showToast('Không tìm thấy thông tin người dùng!', 'error'); return; }
+    window.open(`profile-public.html?id=${encodeURIComponent(userId)}`, '_blank');
+}
+
+function copyPublicLink() {
+    const userId = sessionStorage.getItem('userId');
+    const base   = window.location.origin + '/pages/profile-public.html';
+    const url    = userId ? `${base}?id=${encodeURIComponent(userId)}` : base;
+    navigator.clipboard?.writeText(url)
+        .then(() => showToast('Đã sao chép liên kết hồ sơ công khai!', 'success'))
+        .catch(() => showToast('Không thể sao chép!', 'error'));
+}
+
+// ── Modal helpers ─────────────────────────────────────────────
+function closeModal(id, e) {
+    if (e && e.target !== document.getElementById(id)) return;
+    document.getElementById(id)?.classList.remove('show');
+}
+
+// ── Toast ─────────────────────────────────────────────────────
+let _toastTimer;
+function showToast(msg, type = 'success') {
+    const el = document.getElementById('pf-toast');
+    if (!el) return;
+    clearTimeout(_toastTimer);
+    el.className = `pf-toast ${type}`;
+    el.innerHTML = `<i class="fa-solid ${type === 'success' ? 'fa-circle-check' : 'fa-circle-exclamation'}"></i> ${msg}`;
+    el.style.display = 'flex';
+    _toastTimer = setTimeout(() => { el.style.display = 'none'; }, 3500);
+}
+
+// ── Utilities ─────────────────────────────────────────────────
+function setVal(id, val) { const el = document.getElementById(id); if (el) el.value = val; }
+function setText(id, txt) { const el = document.getElementById(id); if (el) el.textContent = txt; }
+function esc(s) { if (!s) return ''; return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function safeParseJSON(str, fallback) {
+    if (!str || !str.trim()) return fallback;
+    try { return JSON.parse(str); } catch { return fallback; }
+}
+
+function formatPeriod(from, to, current) {
+    const fmt = d => {
+        if (!d) return '';
+        const [y, m] = d.split('-');
+        const months = ['','Th01','Th02','Th03','Th04','Th05','Th06','Th07','Th08','Th09','Th10','Th11','Th12'];
+        return m ? `${months[parseInt(m)] || m}/${y}` : y;
+    };
+    const start = fmt(from) || 'N/A';
+    const end   = current ? 'Hiện tại' : (fmt(to) || '');
+
+    if (!end) return start;
+
+    // Tính thời lượng
+    let dur = '';
+    if (from) {
+        const [fy, fm = '1'] = from.split('-').map(Number);
+        const toDate = current ? new Date() : (to ? new Date(to + '-01') : null);
+        if (toDate) {
+            const months = (toDate.getFullYear() - fy) * 12 + (toDate.getMonth() + 1) - fm;
+            const y = Math.floor(months / 12), m = months % 12;
+            dur = ` (${y > 0 ? y + ' năm ' : ''}${m > 0 ? m + ' tháng' : ''})`;
+        }
+    }
+
+    return `${start} – ${end}${dur}`;
+}

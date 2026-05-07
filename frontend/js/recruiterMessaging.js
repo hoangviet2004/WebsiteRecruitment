@@ -213,7 +213,7 @@ function renderThread(msgs){
 
     let lastDate = '';
     bubbles.innerHTML = msgs.map(m => {
-        const isMine  = m.senderId === myId || m.senderName === 'Bạn' || m.senderName.includes('Nhà tuyển dụng');
+        const isMine  = m.senderId === myId;
         const dateStr = new Date(m.sentAt).toLocaleDateString('vi-VN',{day:'2-digit',month:'2-digit',year:'numeric'});
         const timeStr = new Date(m.sentAt).toLocaleTimeString('vi-VN',{hour:'2-digit',minute:'2-digit'});
         const isEmail = m.type === 'email';
@@ -297,30 +297,28 @@ function renderCandidateInfo(d){
            </a>` : '';
 
     content.innerHTML = `
-        <div class="msg-info-content">
-            <div class="msg-info-profile">
-                ${avatarHtml}
-                <div class="msg-info-name">${_esc(d.candidateName)}</div>
-                <div class="msg-info-email">${_esc(d.candidateEmail)}</div>
-                <div style="margin-top:8px;">${_statusTag(d.applicationStatus)}</div>
-            </div>
+        <div class="msg-info-profile">
+            ${avatarHtml}
+            <div class="msg-info-name">${_esc(d.candidateName)}</div>
+            <div class="msg-info-email">${_esc(d.candidateEmail)}</div>
+            <div style="margin-top:8px;">${_statusTag(d.applicationStatus)}</div>
+        </div>
 
-            <div class="msg-info-actions">
-                <button class="msg-info-btn primary" onclick="openScheduleModal()">
-                    <i class="fa-regular fa-calendar-plus"></i> Lên lịch phỏng vấn
-                </button>
-                <button class="msg-info-btn success" onclick="quickAction('offer')">
-                    <i class="fa-solid fa-handshake"></i> Gửi Offer
-                </button>
-                <button class="msg-info-btn danger" onclick="quickAction('reject')">
-                    <i class="fa-solid fa-xmark"></i> Từ chối
-                </button>
-            </div>
+        <div class="msg-info-actions">
+            <button class="msg-info-btn primary" onclick="openScheduleModal()">
+                <i class="fa-regular fa-calendar-plus"></i> Lên lịch phỏng vấn
+            </button>
+            <button class="msg-info-btn success" onclick="quickAction('offer')">
+                <i class="fa-solid fa-handshake"></i> Gửi Offer
+            </button>
+            <button class="msg-info-btn danger" onclick="quickAction('reject')">
+                <i class="fa-solid fa-xmark"></i> Từ chối
+            </button>
+        </div>
 
-            ${interviewHtml}
-            ${cvHtml}
-            ${skillsHtml}
-        </div>`;
+        ${interviewHtml}
+        ${cvHtml}
+        ${skillsHtml}`;
 }
 
 function renderInterviewCard(iv){
