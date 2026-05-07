@@ -13,7 +13,7 @@ public sealed class AppDbContextFactory : IDesignTimeDbContextFactory<AppDbConte
     public AppDbContext CreateDbContext(string[] args)
     {
         var opts = new DbContextOptionsBuilder<AppDbContext>()
-            .UseSqlServer("Server=LONGVUX;Database=TechList;Trusted_Connection=True;TrustServerCertificate=True")
+            .UseSqlServer("Server=localhost\\SQLEXPRESS;Database=TechList;Trusted_Connection=True;TrustServerCertificate=True")
             .ConfigureWarnings(w => w.Ignore(RelationalEventId.PendingModelChangesWarning))
             .Options;
 
