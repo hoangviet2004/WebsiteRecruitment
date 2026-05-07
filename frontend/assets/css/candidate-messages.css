@@ -211,11 +211,22 @@ body { font-family: 'Inter', sans-serif; background: #f8fafc; color: #0f172a; he
 .cm-bav { width: 26px; height: 26px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
 .cm-bav-init { width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 9px; color: #fff; flex-shrink: 0; }
 
+/* Wrapper for bubble + meta */
+.cm-bw > div {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    max-width: 85%;
+}
+.cm-bw.me > div { align-items: flex-end; }
+
 /* Text bubble */
 .cm-bubble {
-    max-width: 60%; padding: 10px 14px;
+    width: fit-content;
+    max-width: 100%; padding: 10px 14px;
     border-radius: 16px; font-size: 14px; line-height: 1.55;
-    word-break: break-word;
+    word-break: normal;
+    overflow-wrap: break-word;
 }
 .cm-bubble.them { background: #fff; color: #1e293b; border-radius: 4px 16px 16px 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
 .cm-bubble.me   { background: #1d4ed8; color: #fff; border-radius: 16px 16px 4px 16px; }

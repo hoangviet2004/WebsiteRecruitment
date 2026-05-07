@@ -1442,13 +1442,24 @@
     font-weight: 700; font-size: 10px; color: #fff; flex-shrink: 0;
 }
 
+/* Wrapper for bubble + meta */
+.msg-bubble-wrap > div {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    max-width: 85%;
+}
+.msg-bubble-wrap.me > div { align-items: flex-end; }
+
 .msg-bubble {
-    max-width: 68%;
+    width: fit-content;
+    max-width: 100%;
     padding: 10px 14px;
     border-radius: 16px;
     font-size: 14px;
     line-height: 1.55;
-    word-break: break-word;
+    word-break: normal;
+    overflow-wrap: break-word;
     position: relative;
 }
 
