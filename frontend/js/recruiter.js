@@ -431,7 +431,7 @@ async function deleteJob(jobId) {
 }
 
 // ── Khởi tạo ───────────────────────────────────────────────
-window.onload = function() {
+document.addEventListener('DOMContentLoaded', function() {
     requireRecruiter();
     loadMyCompany();
-};
+});

@@ -7,10 +7,10 @@
 .dashboard-layout {
     display: flex;
     min-height: calc(100vh - 76px);
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 30px;
-    gap: 30px;
+    max-width: 100%;
+    margin: 0;
+    padding: 24px;
+    gap: 24px;
 }
 
 /* Sidebar */
