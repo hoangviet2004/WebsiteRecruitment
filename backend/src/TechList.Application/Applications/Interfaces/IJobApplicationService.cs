@@ -21,4 +21,7 @@ public interface IJobApplicationService
 
     // Recruiter/Candidate: xem chi tiết đơn
     Task<JobApplicationDto> GetByIdAsync(string userId, Guid applicationId, CancellationToken ct);
+
+    // Candidate: kiểm tra xem đã nộp đơn cho job này chưa
+    Task<bool> CheckAppliedAsync(string candidateId, Guid jobPostId, CancellationToken ct);
 }

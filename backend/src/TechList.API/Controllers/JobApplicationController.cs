@@ -76,4 +76,12 @@ public sealed class JobApplicationController : ControllerBase
         var result = await _service.GetByIdAsync(GetUserId(), id, ct);
         return Ok(ApiResponse<JobApplicationDto>.Ok(result));
     }
+
+    [HttpGet("check/{jobPostId:guid}")]
+    [Authorize(Roles = "Candidate")]
+    public async Task<ActionResult<ApiResponse<bool>>> CheckApplied(Guid jobPostId, CancellationToken ct)
+    {
+        var result = await _service.CheckAppliedAsync(GetUserId(), jobPostId, ct);
+        return Ok(ApiResponse<bool>.Ok(result));
+    }
 }

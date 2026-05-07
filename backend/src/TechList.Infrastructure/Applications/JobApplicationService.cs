@@ -154,6 +154,12 @@ public sealed class JobApplicationService : IJobApplicationService
         return await BuildDto(applicationId, ct);
     }
 
+    public async Task<bool> CheckAppliedAsync(string candidateId, Guid jobPostId, CancellationToken ct)
+    {
+        return await _db.JobApplications
+            .AnyAsync(a => a.JobPostId == jobPostId && a.CandidateId == candidateId, ct);
+    }
+
     private async Task<JobApplicationDto> BuildDto(Guid applicationId, CancellationToken ct)
     {
         var app = await _db.JobApplications

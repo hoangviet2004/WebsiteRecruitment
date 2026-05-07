@@ -157,6 +157,33 @@ async function loadJobDetail(id) {
     
     // Kiểm tra trạng thái lưu
     checkAndRenderSaveState(id);
+    
+    // Kiểm tra trạng thái ứng tuyển
+    checkAndRenderApplyState(id);
+}
+
+async function checkAndRenderApplyState(jobId) {
+    const token = sessionStorage.getItem('token');
+    const role = sessionStorage.getItem('role');
+    
+    if (!token || !role || role.toLowerCase() !== 'candidate') return;
+    
+    try {
+        const res = await apiFetchAuth(`/api/applications/check/${jobId}`, { method: 'GET' });
+        if (!res || !res.ok) return;
+
+        const data = await res.json();
+        if (data.success && data.data === true) {
+            document.querySelectorAll('.btn-apply-big').forEach(function(el) {
+                el.innerHTML = '<i class="fa-solid fa-check"></i> Đã nộp đơn ứng tuyển';
+                el.style.background = '#22c55e';
+                el.style.cursor = 'default';
+                el.onclick = null;
+            });
+        }
+    } catch (e) {
+        console.error("Lỗi kiểm tra trạng thái ứng tuyển:", e);
+    }
 }
 
 function applyThisJob() {
