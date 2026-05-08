@@ -237,13 +237,13 @@ using (var scope = app.Services.CreateScope())
                     profile.UpdatedAt = DateTime.UtcNow;
                 }
 
-                // 2. Đồng bộ Company (nếu là Recruiter)
+                // 2. Đồng bộ Company, Subscription và JobPosts (nếu là Recruiter)
                 if (role == AppRole.Recruiter)
                 {
                     var company = await db.Companies.FirstOrDefaultAsync(c => c.OwnerId == user.Id);
                     if (company == null)
                     {
-                        db.Companies.Add(new Company
+                        company = new Company
                         {
                             OwnerId = user.Id,
                             Name = compName,
@@ -256,7 +256,8 @@ using (var scope = app.Services.CreateScope())
                             TaxCode = compTax,
                             CreatedAt = DateTime.UtcNow,
                             UpdatedAt = DateTime.UtcNow
-                        });
+                        };
+                        db.Companies.Add(company);
                     }
                     else 
                     {
@@ -269,6 +270,60 @@ using (var scope = app.Services.CreateScope())
                         company.ContactPhone = compPhone;
                         company.TaxCode = compTax;
                         company.UpdatedAt = DateTime.UtcNow;
+                    }
+
+                    // Tự động gán gói Free nếu chưa có (Mặc định ID từ DbContext seed)
+                    var freePackageId = Guid.Parse("11111111-1111-1111-1111-111111111111");
+                    var hasSub = await db.Subscriptions.AnyAsync(s => s.UserId == user.Id);
+                    if (!hasSub)
+                    {
+                        db.Subscriptions.Add(new Subscription
+                        {
+                            UserId = user.Id,
+                            PackageId = freePackageId,
+                            StartDate = DateTime.UtcNow,
+                            EndDate = DateTime.UtcNow.AddYears(1),
+                            Status = SubscriptionStatus.Active,
+                            IsSelected = true
+                        });
+                    }
+
+                    // Tự động đăng 2 tin tuyển dụng mẫu nếu chưa có việc làm nào
+                    await db.SaveChangesAsync(); // Lưu Company trước để lấy ID
+                    var jobCount = await db.JobPosts.CountAsync(j => j.CompanyId == company.Id);
+                    if (jobCount < 2)
+                    {
+                        db.JobPosts.Add(new JobPost
+                        {
+                            CompanyId = company.Id,
+                            Title = $"Kỹ sư {displayName} (Senior Level)",
+                            Description = $"Cơ hội gia nhập đội ngũ chuyên gia tại {compName} để tham gia vào các dự án chiến lược. {compDesc}",
+                            Requirements = "• Ít nhất 3-5 năm kinh nghiệm thực chiến.\n• Tư duy hệ thống và khả năng giải quyết vấn đề phức tạp.\n• Tiếng Anh giao tiếp tốt là một lợi thế.",
+                            Benefits = "• Lương tháng 13 + Thưởng hiệu quả công việc hàng năm.\n• Bảo hiểm sức khỏe cao cấp cho nhân viên và người thân.\n• Review lương 2 lần/năm.",
+                            MinSalary = 2000,
+                            MaxSalary = 4500,
+                            Location = compAddr,
+                            JobType = "Full-time",
+                            Experience = "3-5 năm",
+                            Education = "Cử nhân CNTT",
+                            ExpiresAt = DateTime.UtcNow.AddDays(30)
+                        });
+
+                        db.JobPosts.Add(new JobPost
+                        {
+                            CompanyId = company.Id,
+                            Title = $"Chuyên viên {displayName} (Middle/Junior)",
+                            Description = $"Chúng tôi tìm kiếm những cộng sự trẻ trung, nhiệt huyết để cùng bứt phá tại môi trường năng động của {compName}.",
+                            Requirements = "• Có kiến thức nền tảng vững chắc về quy trình phát triển phần mềm.\n• Ham học hỏi, sẵn sàng tiếp cận các công nghệ mới.\n• Kỹ năng làm việc nhóm tốt.",
+                            Benefits = "• Lộ trình thăng tiến rõ ràng (Career Path).\n• Tài trợ các khóa học chứng chỉ quốc tế.\n• Company trip, teambuilding hàng quý.",
+                            MinSalary = 1000,
+                            MaxSalary = 1800,
+                            Location = compAddr,
+                            JobType = "Hybrid",
+                            Experience = "1-2 năm",
+                            Education = "Đại học",
+                            ExpiresAt = DateTime.UtcNow.AddDays(45)
+                        });
                     }
                 }
             }

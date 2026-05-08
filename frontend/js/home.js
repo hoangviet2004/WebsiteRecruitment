@@ -78,7 +78,8 @@ async function loadJobs() {
             return;
         }
 
-        const jobs = res.data;
+        // Lấy tối đa 12 tin tuyển dụng cho trang chủ
+        const jobs = res.data.slice(0, 12);
         
         jobs.forEach(job => {
             // Logo: wrapper div luôn có class, bên trong là <img> hoặc chữ cái
