@@ -65,7 +65,13 @@ async function loadPackages() {
             const jobsText = s.maxJobPosts === -1
                 ? '<span style="color:#22c55e;font-weight:700;">Không giới hạn</span>'
                 : '<strong>' + s.jobPostsUsed + '</strong> / ' + s.maxJobPosts + ' tin đã dùng';
-            const endDateStr = new Date(s.endDate).toLocaleDateString('vi-VN', { day:'2-digit', month:'2-digit', year:'numeric' });
+            
+            const endDate = new Date(s.endDate);
+            const endDateStr = endDate.getFullYear() > 2070 
+                ? '<span style="color:#22c55e;font-weight:700;">Vô thời hạn</span>' 
+                : endDate.toLocaleDateString('vi-VN', { day:'2-digit', month:'2-digit', year:'numeric' });
+            
+            const remainingText = endDate.getFullYear() > 2070 ? '' : ` (còn ${s.daysRemaining} ngày)`;
 
             let subFeaturesHtml = '';
             try {
@@ -75,7 +81,7 @@ async function loadPackages() {
                 }
             } catch(e) {}
 
-            subInfoHtml = '<div class="sub-info-card"><div class="sub-info-header"><i class="fa-solid fa-crown" style="color:#f59e0b;margin-right:8px;"></i>Gói hiện tại: <strong>' + escapeHtmlPkg(s.packageName) + '</strong></div><div class="sub-info-details"><div class="sub-info-item"><i class="fa-solid fa-newspaper"></i><span>Tin đăng: ' + jobsText + '</span></div><div class="sub-info-item"><i class="fa-solid fa-calendar-check"></i><span>Hết hạn: ' + endDateStr + ' (còn ' + s.daysRemaining + ' ngày)</span></div></div>' + subFeaturesHtml + '</div>';
+            subInfoHtml = '<div class="sub-info-card"><div class="sub-info-header"><i class="fa-solid fa-crown" style="color:#f59e0b;margin-right:8px;"></i>Gói hiện tại: <strong>' + escapeHtmlPkg(s.packageName) + '</strong></div><div class="sub-info-details"><div class="sub-info-item"><i class="fa-solid fa-newspaper"></i><span>Tin đăng: ' + jobsText + '</span></div><div class="sub-info-item"><i class="fa-solid fa-calendar-check"></i><span>Hạn dùng: ' + endDateStr + remainingText + '</span></div></div>' + subFeaturesHtml + '</div>';
         }
 
         let cardsHtml = '';
@@ -118,7 +124,7 @@ async function loadPackages() {
             if (isCurrentPkg) {
                 badgeHtml = '<div class="pkg-badge" style="background:linear-gradient(135deg,#22c55e,#16a34a);">Gói hiện tại</div>';
             } else if (pkg.isHighlighted) {
-                badgeHtml = '<div class="pkg-badge">Phổ biến nhất</div>';
+                badgeHtml = '<div class="pkg-badge">Gói phổ biến</div>';
             }
 
             cardsHtml += '<div class="pkg-card' + highlightClass + currentClass + '">' + badgeHtml + '<div class="pkg-name">' + escapeHtmlPkg(pkg.name) + '</div><div class="pkg-price">' + priceStr + '</div><div class="pkg-jobs"><i class="fa-solid fa-briefcase" style="margin-right:6px;"></i>' + maxJobText + '</div><ul class="pkg-features">' + featuresHtml + '</ul>' + btnHtml + '</div>';

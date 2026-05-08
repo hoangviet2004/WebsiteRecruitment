@@ -284,7 +284,7 @@ using (var scope = app.Services.CreateScope())
                             UserId = user.Id,
                             PackageId = freePackageId,
                             StartDate = DateTime.UtcNow,
-                            EndDate = DateTime.UtcNow.AddYears(1),
+                            EndDate = DateTime.UtcNow.AddYears(100),
                             Status = SubscriptionStatus.Active,
                             IsSelected = true
                         });
@@ -328,6 +328,15 @@ using (var scope = app.Services.CreateScope())
                             ApplicationLimit = 100,
                             ExpiresAt = DateTime.UtcNow.AddDays(45)
                         });
+                    }
+
+                    // Cập nhật lại số lượng tin đã dùng (JobPostsUsed) để hiển thị đúng trên giao diện
+                    var currentSub = await db.Subscriptions.FirstOrDefaultAsync(s => s.UserId == user.Id && s.Status == SubscriptionStatus.Active);
+                    if (currentSub != null)
+                    {
+                        var actualJobCount = await db.JobPosts.CountAsync(j => j.CompanyId == company.Id);
+                        currentSub.JobPostsUsed = actualJobCount;
+                        currentSub.UpdatedAt = DateTime.UtcNow;
                     }
                 }
             }
