@@ -8,5 +8,10 @@ public sealed record CompanyDto(
     string Website,
     string Address,
     string? CompanySize,
-    string? LogoUrl
+    string? LogoUrl,
+    bool IsBlocked,
+    DateTime CreatedAt,
+    string TaxCode,
+    string? ContactEmail,
+    string? ContactPhone
 );

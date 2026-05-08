@@ -28,6 +28,24 @@ public sealed class ProfileService : IProfileService
         return ToDto(profile);
     }
 
+    public async Task<ProfileDto> GetPublicProfileAsync(string userId, CancellationToken ct)
+    {
+        var profile = await _db.UserProfiles.AsNoTracking()
+            .SingleOrDefaultAsync(x => x.UserId == userId && x.IsApproved, ct)
+            ?? throw new InvalidOperationException("Không tìm thấy hồ sơ.");
+
+        // Trả về ProfileDto nhưng ẩn Phone (thông tin nhạy cảm)
+        return new ProfileDto(
+            profile.UserId, profile.DisplayName, profile.Bio,
+            profile.AvatarUrl, profile.CvUrl,
+            profile.Skills, profile.Experience, profile.Education,
+            profile.SocialLinks,
+            null,              // Phone — ẩn trên trang công khai
+            profile.Location,
+            profile.JobStatus
+        );
+    }
+
     public async Task<ProfileDto> UpdateMyProfileAsync(string userId, UpdateProfileRequest request, CancellationToken ct)
     {
         var profile = await _db.UserProfiles.AsTracking().SingleOrDefaultAsync(x => x.UserId == userId, ct);
@@ -35,10 +53,15 @@ public sealed class ProfileService : IProfileService
             throw new InvalidOperationException("Profile not found");
 
         profile.DisplayName = request.DisplayName;
-        profile.Bio = request.Bio ?? string.Empty;
-        profile.Skills = request.Skills;
-        profile.Experience = request.Experience;
-        profile.UpdatedAt = DateTime.UtcNow;
+        profile.Bio         = request.Bio ?? string.Empty;
+        profile.Skills      = request.Skills;
+        profile.Experience  = request.Experience;
+        profile.Education   = request.Education;
+        profile.SocialLinks = request.SocialLinks;
+        profile.Phone       = request.Phone;
+        profile.Location    = request.Location;
+        profile.JobStatus   = request.JobStatus;
+        profile.UpdatedAt   = DateTime.UtcNow;
 
         await _db.SaveChangesAsync(ct);
         return ToDto(profile);
@@ -87,6 +110,8 @@ public sealed class ProfileService : IProfileService
     }
 
     private static ProfileDto ToDto(UserProfile profile) =>
-        new(profile.UserId, profile.DisplayName, profile.Bio, profile.AvatarUrl, profile.CvUrl, profile.Skills, profile.Experience);
+        new(profile.UserId, profile.DisplayName, profile.Bio, profile.AvatarUrl, profile.CvUrl,
+            profile.Skills, profile.Experience, profile.Education, profile.SocialLinks,
+            profile.Phone, profile.Location, profile.JobStatus);
 }
 

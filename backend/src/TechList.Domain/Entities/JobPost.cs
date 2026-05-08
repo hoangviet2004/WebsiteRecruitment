@@ -20,6 +20,9 @@ public class JobPost
     // e.g. Full-time, Part-time, Remote, Hybrid
     public string JobType { get; set; } = default!;
 
+    public string? Experience { get; set; }
+    public string? Education { get; set; }
+
     public DateTime ExpiresAt { get; set; } 
     public bool IsActive { get; set; } = true;
     public bool IsApproved { get; set; } = true;

@@ -53,8 +53,15 @@ public sealed class JobController : ControllerBase
     public async Task<ActionResult<ApiResponse<JobDto>>> Update(Guid id, [FromBody] UpdateJobRequest request, CancellationToken ct)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirstValue("sub");
-        var result = await _jobService.UpdateJobAsync(userId!, id, request, ct);
-        return Ok(ApiResponse<JobDto>.Ok(result, "Job updated successfully"));
+        try
+        {
+            var result = await _jobService.UpdateJobAsync(userId!, id, request, ct);
+            return Ok(ApiResponse<JobDto>.Ok(result, "Job updated successfully"));
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(ApiResponse<JobDto>.Fail(ex.Message));
+        }
     }
 
     [HttpDelete("{id:guid}")]

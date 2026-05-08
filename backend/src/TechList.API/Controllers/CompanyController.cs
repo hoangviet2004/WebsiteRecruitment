@@ -58,4 +58,11 @@ public sealed class CompanyController : ControllerBase
         var result = await _companyService.UpdateCompanyAsync(userId!, id, request, ct);
         return Ok(ApiResponse<CompanyDto>.Ok(result, "Company updated successfully"));
     }
+
+    [HttpGet("featured")]
+    public async Task<ActionResult<ApiResponse<List<CompanyDto>>>> GetFeatured(CancellationToken ct)
+    {
+        var result = await _companyService.GetFeaturedCompaniesAsync(ct);
+        return Ok(ApiResponse<List<CompanyDto>>.Ok(result));
+    }
 }

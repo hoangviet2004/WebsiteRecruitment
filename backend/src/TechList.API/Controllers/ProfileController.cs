@@ -19,6 +19,18 @@ public sealed class ProfileController : ControllerBase
         _profiles = profiles;
     }
 
+    // ── Public profile (không cần đăng nhập) ────────────────────
+    [HttpGet("public/{userId}")]
+    [AllowAnonymous]
+    public async Task<ActionResult<ApiResponse<ProfileDto>>> GetPublic(string userId, CancellationToken ct)
+    {
+        if (string.IsNullOrWhiteSpace(userId))
+            return BadRequest(ApiResponse<object>.Fail("userId không hợp lệ"));
+
+        var profile = await _profiles.GetPublicProfileAsync(userId, ct);
+        return Ok(ApiResponse<ProfileDto>.Ok(profile));
+    }
+
     [HttpGet("me")]
     public async Task<ActionResult<ApiResponse<ProfileDto>>> Me(CancellationToken ct)
     {

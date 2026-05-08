@@ -26,6 +26,12 @@ public sealed class UpdateJobRequest
     [MaxLength(50)]
     public string JobType { get; set; } = "Full-time";
 
+    [MaxLength(100)]
+    public string? Experience { get; set; }
+
+    [MaxLength(100)]
+    public string? Education { get; set; }
+
     public DateTime ExpiresAt { get; set; }
     
     public bool IsActive { get; set; } = true;

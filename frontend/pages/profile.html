@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hồ sơ của tôi</title>
-    <link rel="stylesheet" href="../assets/css/home.css">
+    <title>Hồ sơ cá nhân — TechList</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="../assets/css/home.css">
     <link rel="stylesheet" href="../assets/css/profile.css">
 </head>
 <body>
@@ -13,118 +13,376 @@
         <div class="left">
             <a href="home.html" class="logo-svg"><img src="../assets/logo.svg" alt="Logo">TechList</a>
             <ul>
-                <li><a href="#">Tìm việc</a></li>
+                <li><a href="jobs.html">Tìm việc</a></li>
                 <li><a href="#">Công ty</a></li>
-                <li><a href="#">Blog</a></li>
+                <li><a href="blog.html">Blog</a></li>
             </ul>
         </div>
         <div class="right" id="nav-right"></div>
     </nav>
 
-    <div class="content profile-container">
-        <form id="profile-form" class="profile-form-wrapper">
-            <!-- Header -->
-            <div class="profile-header">
-                <div class="header-titles">
-                    <h2>Hồ sơ ứng viên</h2>
-                    <p class="subtitle">Quản lý định danh nghề nghiệp và các tài liệu ứng tuyển của bạn.</p>
+    <div class="pf-page">
+
+        <!-- ── Sidebar trái ── -->
+        <aside class="pf-sidebar">
+            <!-- Avatar -->
+            <div class="pf-avatar-wrap">
+                <div class="pf-avatar-ring">
+                    <img id="pf-avatar-img" src="https://ui-avatars.com/api/?name=U&background=3b82f6&color=fff&size=150" alt="Avatar">
+                    <label for="pf-avatar-input" class="pf-avatar-cam" title="Đổi ảnh đại diện">
+                        <i class="fa-solid fa-camera"></i>
+                    </label>
+                    <input type="file" id="pf-avatar-input" accept="image/*" hidden>
                 </div>
-                <div class="header-actions">
-                    <button type="button" class="btn-discard" onclick="window.location.reload()">Hủy bỏ</button>
-                    <button type="submit" class="btn-save">Lưu thay đổi</button>
+                <div id="pf-avatar-loading" class="pf-avatar-loading" style="display:none;">
+                    <i class="fa-solid fa-spinner fa-spin"></i> Đang tải...
+                </div>
+                <h3 id="pf-header-name" class="pf-sidebar-name">Tên ứng viên</h3>
+                <p id="pf-header-title" class="pf-sidebar-title">Thêm chức danh...</p>
+            </div>
+
+            <!-- Nav links -->
+            <nav class="pf-nav">
+                <span class="pf-nav-group-label">HỒ SƠ CÁ NHÂN</span>
+                <a class="pf-nav-link active" href="#sec-info" onclick="scrollToSection('sec-info',this)">
+                    <i class="fa-regular fa-user"></i> Thông tin cá nhân
+                </a>
+                <a class="pf-nav-link" href="#sec-skills" onclick="scrollToSection('sec-skills',this)">
+                    <i class="fa-solid fa-star-half-stroke"></i> Kỹ năng chuyên môn
+                </a>
+                <a class="pf-nav-link" href="#sec-exp" onclick="scrollToSection('sec-exp',this)">
+                    <i class="fa-solid fa-briefcase"></i> Kinh nghiệm làm việc
+                </a>
+                <a class="pf-nav-link" href="#sec-edu" onclick="scrollToSection('sec-edu',this)">
+                    <i class="fa-solid fa-graduation-cap"></i> Học vấn & Bằng cấp
+                </a>
+                <a class="pf-nav-link" href="#sec-social" onclick="scrollToSection('sec-social',this)">
+                    <i class="fa-solid fa-link"></i> Portfolio & Liên kết
+                </a>
+                <a class="pf-nav-link" href="#sec-cv" onclick="scrollToSection('sec-cv',this)">
+                    <i class="fa-regular fa-file-lines"></i> CV & Tài liệu
+                </a>
+            </nav>
+
+            <!-- Share button -->
+            <button class="pf-share-btn" onclick="copyPublicLink()">
+                <i class="fa-solid fa-share-nodes"></i> Chia sẻ hồ sơ
+            </button>
+        </aside>
+
+        <!-- ── Main content ── -->
+        <main class="pf-main">
+
+            <!-- Header banner -->
+            <div class="pf-banner">
+                <div class="pf-banner-left">
+                    <div>
+                        <h1 id="pf-banner-name">Tên ứng viên</h1>
+                        <p id="pf-banner-title" class="pf-banner-subtitle">Chức danh • Địa điểm</p>
+                    </div>
+                </div>
+                <div class="pf-banner-right">
+                    <button class="pf-btn-secondary" onclick="openPublicProfile()">
+                        <i class="fa-regular fa-eye"></i> Xem trang công khai
+                    </button>
+                    <button class="pf-btn-primary" id="pf-save-btn" onclick="saveProfile()">
+                        <i class="fa-solid fa-check"></i> Lưu thay đổi
+                    </button>
                 </div>
             </div>
 
-            <!-- Row 1: Info & CV -->
-            <div class="profile-row row-1">
-                <div class="profile-card card-info">
-                    <div class="avatar-upload-container row-layout">
-                        <div class="avatar-preview-wrap">
-                            <img id="avatar-preview" src="https://ui-avatars.com/api/?name=User&background=3b82f6&color=fff&size=150" alt="Avatar">
-                            <label for="avatar-input" class="avatar-edit-overlay" title="Thay đổi ảnh đại diện">
-                                <i class="fa-solid fa-camera"></i>
-                            </label>
-                        </div>
-                        <input type="file" id="avatar-input" accept="image/*" hidden>
-                        <div class="avatar-info">
-                            <h4 id="display-name-header">Tên ứng viên</h4>
-                            <p id="display-email-header" style="color: #64748b; margin-top: 4px; font-size: 14px;">email@example.com</p>
-                            <div class="avatar-loading" id="avatar-loading" style="display: none;">Đang tải lên...</div>
-                        </div>
-                    </div>
-
-                    <div class="info-grid">
-                        <div class="form-group">
-                            <label for="fullName">Họ và tên</label>
-                            <input type="text" id="fullName" name="fullName" placeholder="Nhập họ và tên của bạn">
-                        </div>
-                        <div class="form-group">
-                            <label for="email">Email</label>
-                            <input type="email" id="email" name="email" placeholder="Nhập địa chỉ email của bạn">
-                        </div>
-                        <div class="form-group phone-group">
-                            <label for="phone">Số điện thoại</label>
-                            <input type="text" id="phone" name="phone" placeholder="Nhập số điện thoại">
-                        </div>
-                    </div>
+            <!-- ── Section 1: Thông tin cá nhân ── -->
+            <section class="pf-card" id="sec-info">
+                <div class="pf-card-header">
+                    <i class="fa-regular fa-user"></i> Thông tin cá nhân
                 </div>
-
-                <div class="profile-card card-cv">
-                    <h3><i class="fa-solid fa-file-lines"></i> CV đính kèm</h3>
-                    <div class="form-group cv-upload-group">
-                        <div class="cv-upload-box">
-                            <input type="file" id="cv-input" accept="application/pdf" hidden>
-                            <div class="cv-preview" id="cv-preview" style="display: none;">
-                                <i class="fa-solid fa-cloud-arrow-up" style="color: #64748b; font-size: 32px; margin-bottom: 12px; display: block;"></i>
-                                <p style="font-weight: 500; color: #1e293b; margin-bottom: 4px;">PDF lên đến 10MB</p>
-                                <a href="#" id="cv-link" target="_blank">Xem file hiện tại</a>
-                                <button type="button" class="btn-change-cv" style="margin-top: 12px;" onclick="document.getElementById('cv-input').click()">Thay đổi File</button>
+                <div class="pf-card-body">
+                    <div class="pf-grid-2">
+                        <div class="pf-field">
+                            <label>HỌ VÀ TÊN</label>
+                            <input type="text" id="pf-fullname" placeholder="Nguyễn Văn A">
+                        </div>
+                        <div class="pf-field">
+                            <label>TRẠNG THÁI TÌM VIỆC</label>
+                            <div class="pf-status-select-wrap">
+                                <select id="pf-jobstatus" class="pf-status-select">
+                                    <option value="Seeking">🟢 Đang tìm kiếm (Active)</option>
+                                    <option value="Open">🟡 Sẵn sàng nghe cơ hội</option>
+                                    <option value="NotSeeking">⚫ Không tìm kiếm</option>
+                                </select>
                             </div>
-                            <div class="cv-empty" id="cv-empty">
-                                <i class="fa-solid fa-cloud-arrow-up" style="color: #64748b; font-size: 32px; margin-bottom: 12px; display: block;"></i>
-                                <p style="font-weight: 500; color: #1e293b; margin-bottom: 4px;">PDF lên đến 10MB</p>
-                                <button type="button" class="btn-upload-cv" style="margin-top: 12px; border: none; background: transparent; color: #3b82f6; font-weight: 600;" onclick="document.getElementById('cv-input').click()">Chọn file</button>
+                        </div>
+                        <div class="pf-field">
+                            <label>EMAIL</label>
+                            <input type="email" id="pf-email" readonly class="pf-readonly">
+                        </div>
+                        <div class="pf-field">
+                            <label>SỐ ĐIỆN THOẠI</label>
+                            <input type="tel" id="pf-phone" placeholder="+84 901 234 567">
+                        </div>
+                        <div class="pf-field pf-field-full">
+                            <label>ĐỊA CHỈ / THÀNH PHỐ</label>
+                            <input type="text" id="pf-location" placeholder="Quận 1, TP. Hồ Chí Minh, Việt Nam">
+                        </div>
+                        <div class="pf-field pf-field-full">
+                            <label>GIỚI THIỆU BẢN THÂN</label>
+                            <textarea id="pf-bio" rows="4" placeholder="Tôi là Frontend Developer với 2 năm kinh nghiệm..."></textarea>
+                            <span class="pf-counter"><span id="pf-bio-count">0</span> / 500</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ── Section 2: Kỹ năng ── -->
+            <section class="pf-card" id="sec-skills">
+                <div class="pf-card-header">
+                    <i class="fa-solid fa-star-half-stroke"></i> Kỹ năng chuyên môn
+                    <button class="pf-add-btn" onclick="openSkillModal()">
+                        <i class="fa-solid fa-plus"></i> Thêm kỹ năng
+                    </button>
+                </div>
+                <div class="pf-card-body">
+                    <div id="pf-skills-list" class="pf-skills-list">
+                        <p class="pf-empty-hint">Chưa có kỹ năng nào. Nhấn "+ Thêm kỹ năng" để bắt đầu.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ── Section 3: Kinh nghiệm ── -->
+            <section class="pf-card" id="sec-exp">
+                <div class="pf-card-header">
+                    <i class="fa-solid fa-briefcase"></i> Kinh nghiệm làm việc
+                    <button class="pf-add-btn" onclick="openExpModal()">
+                        <i class="fa-solid fa-plus"></i> Thêm mới
+                    </button>
+                </div>
+                <div class="pf-card-body">
+                    <div id="pf-exp-list" class="pf-timeline-list">
+                        <p class="pf-empty-hint">Chưa có kinh nghiệm làm việc.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ── Section 4: Học vấn ── -->
+            <section class="pf-card" id="sec-edu">
+                <div class="pf-card-header">
+                    <i class="fa-solid fa-graduation-cap"></i> Học vấn & Bằng cấp
+                    <button class="pf-add-btn" onclick="openEduModal()">
+                        <i class="fa-solid fa-plus"></i> Thêm mới
+                    </button>
+                </div>
+                <div class="pf-card-body">
+                    <div id="pf-edu-list" class="pf-timeline-list">
+                        <p class="pf-empty-hint">Chưa có thông tin học vấn.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ── Section 5: Social links ── -->
+            <section class="pf-card" id="sec-social">
+                <div class="pf-card-header">
+                    <i class="fa-solid fa-link"></i> Portfolio & Liên kết mạng xã hội
+                </div>
+                <div class="pf-card-body">
+                    <div class="pf-social-grid">
+                        <div class="pf-social-item">
+                            <span class="pf-social-icon linkedin"><i class="fa-brands fa-linkedin-in"></i></span>
+                            <div class="pf-field" style="flex:1;margin:0;">
+                                <label>LINKEDIN</label>
+                                <input type="url" id="pf-linkedin" placeholder="linkedin.com/in/username">
                             </div>
-                            <div class="cv-loading" id="cv-loading" style="display: none; color: #3b82f6; font-weight: 500;">
-                                <i class="fa-solid fa-spinner fa-spin"></i> Đang tải lên...
+                        </div>
+                        <div class="pf-social-item">
+                            <span class="pf-social-icon github"><i class="fa-brands fa-github"></i></span>
+                            <div class="pf-field" style="flex:1;margin:0;">
+                                <label>GITHUB</label>
+                                <input type="url" id="pf-github" placeholder="github.com/username">
+                            </div>
+                        </div>
+                        <div class="pf-social-item">
+                            <span class="pf-social-icon portfolio"><i class="fa-solid fa-globe"></i></span>
+                            <div class="pf-field" style="flex:1;margin:0;">
+                                <label>PORTFOLIO / WEBSITE</label>
+                                <input type="url" id="pf-portfolio" placeholder="portfolio.example.com">
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
+            </section>
 
-            <!-- Row 2: About Me -->
-            <div class="profile-row row-2">
-                <div class="profile-card card-about">
-                    <h3>Giới thiệu bản thân</h3>
-                    <p class="section-subtitle">Mô tả ngắn gọn về quá trình làm việc và định hướng phát triển của bạn.</p>
-                    <div class="form-group" style="margin-bottom: 0;">
-                        <textarea id="bio" name="bio" placeholder="VD: Tôi là Frontend Developer với 2 năm kinh nghiệm..." rows="4"></textarea>
-                        <span class="bio-counter"><span id="bio-count">0</span> / 500 ký tự</span>
+            <!-- ── Section 6: CV ── -->
+            <section class="pf-card" id="sec-cv">
+                <div class="pf-card-header">
+                    <i class="fa-regular fa-file-lines"></i> Quản lý CV & Tài liệu
+                </div>
+                <div class="pf-card-body">
+                    <div class="pf-cv-area">
+                        <!-- Upload zone -->
+                        <div class="pf-cv-upload-zone" id="pf-cv-zone"
+                             ondragover="event.preventDefault();this.classList.add('drag-over')"
+                             ondragleave="this.classList.remove('drag-over')"
+                             ondrop="handleCvDrop(event)">
+                            <input type="file" id="pf-cv-input" accept="application/pdf" hidden>
+                            <div id="pf-cv-empty">
+                                <i class="fa-solid fa-cloud-arrow-up pf-cv-icon"></i>
+                                <p class="pf-cv-hint">Kéo thả file CV của bạn vào đây<br>hoặc nhấn để chọn <span style="color:#94a3b8;">(PDF, tối đa 5MB)</span></p>
+                                <div class="pf-cv-btns">
+                                    <button type="button" class="pf-btn-secondary pf-cv-btn" onclick="document.getElementById('pf-cv-input').click()">
+                                        <i class="fa-solid fa-upload"></i> Tải lên CV
+                                    </button>
+                                </div>
+                            </div>
+                            <div id="pf-cv-loading" style="display:none;text-align:center;">
+                                <i class="fa-solid fa-spinner fa-spin" style="font-size:28px;color:#3b82f6;"></i>
+                                <p style="margin-top:8px;color:#3b82f6;font-weight:600;">Đang tải lên...</p>
+                            </div>
+                        </div>
+
+                        <!-- Existing CV -->
+                        <div id="pf-cv-current" class="pf-cv-current" style="display:none;">
+                            <div class="pf-cv-file">
+                                <i class="fa-solid fa-file-pdf pf-cv-file-icon"></i>
+                                <div>
+                                    <div id="pf-cv-filename" class="pf-cv-filename">CV.pdf</div>
+                                    <div id="pf-cv-updated" class="pf-cv-meta">Cập nhật gần đây</div>
+                                </div>
+                                <div class="pf-cv-file-actions">
+                                    <a id="pf-cv-link" href="#" target="_blank" class="pf-btn-secondary pf-cv-action-btn">
+                                        <i class="fa-regular fa-eye"></i> Xem
+                                    </a>
+                                    <button class="pf-cv-action-btn pf-btn-danger-ghost" onclick="document.getElementById('pf-cv-input').click()">
+                                        <i class="fa-solid fa-arrows-rotate"></i> Thay thế
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
+            </section>
 
-            <!-- Row 3: Experience & Skills -->
-            <div class="profile-row row-3">
-                <div class="profile-card card-experience">
-                    <h3>Kinh nghiệm làm việc</h3>
-                    <div class="form-group" style="margin-bottom: 0;">
-                        <textarea id="experience" name="experience" placeholder="Mô tả quá trình làm việc của bạn (công ty, chức vụ, thời gian, mô tả công việc)..." rows="6"></textarea>
-                    </div>
-                </div>
-
-                <div class="profile-card card-skills">
-                    <h3>Kỹ năng chuyên môn</h3>
-                    <div class="form-group" style="margin-bottom: 0;">
-                        <textarea id="skills" name="skills" placeholder="VD: ReactJS, .NET Core, Tiếng Anh giao tiếp..." rows="6"></textarea>
-                    </div>
-                </div>
-            </div>
-        </form>
+        </main>
     </div>
 
+    <!-- ── Modal: Kỹ năng ── -->
+    <div id="modal-skill" class="pf-modal-overlay" onclick="closeModal('modal-skill',event)">
+        <div class="pf-modal">
+            <div class="pf-modal-header">
+                <h3 id="skill-modal-title">Thêm kỹ năng</h3>
+                <button class="pf-modal-close" onclick="closeModal('modal-skill')">&times;</button>
+            </div>
+            <div class="pf-modal-body">
+                <input type="hidden" id="skill-edit-index">
+                <div class="pf-field">
+                    <label>TÊN KỸ NĂNG <span style="color:#ef4444;">*</span></label>
+                    <input type="text" id="skill-name" placeholder="VD: React, Python, Photoshop...">
+                </div>
+                <div class="pf-field">
+                    <label>MỨC ĐỘ THÀNH THẠO</label>
+                    <div class="pf-level-picker" id="skill-level-picker">
+                        <button type="button" class="pf-level-btn active" data-value="beginner">Mới bắt đầu</button>
+                        <button type="button" class="pf-level-btn" data-value="intermediate">Trung bình</button>
+                        <button type="button" class="pf-level-btn" data-value="advanced">Thành thạo</button>
+                        <button type="button" class="pf-level-btn" data-value="expert">Chuyên gia</button>
+                    </div>
+                    <div class="pf-level-preview" id="skill-level-preview"></div>
+                </div>
+            </div>
+            <div class="pf-modal-footer">
+                <button class="pf-btn-secondary" onclick="closeModal('modal-skill')">Hủy</button>
+                <button class="pf-btn-primary" onclick="saveSkill()">Lưu kỹ năng</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Modal: Kinh nghiệm ── -->
+    <div id="modal-exp" class="pf-modal-overlay" onclick="closeModal('modal-exp',event)">
+        <div class="pf-modal" style="max-width:580px;">
+            <div class="pf-modal-header">
+                <h3 id="exp-modal-title">Thêm kinh nghiệm</h3>
+                <button class="pf-modal-close" onclick="closeModal('modal-exp')">&times;</button>
+            </div>
+            <div class="pf-modal-body">
+                <input type="hidden" id="exp-edit-index">
+                <div class="pf-grid-2">
+                    <div class="pf-field">
+                        <label>CHỨC VỤ / VỊ TRÍ <span style="color:#ef4444;">*</span></label>
+                        <input type="text" id="exp-position" placeholder="VD: Senior Frontend Developer">
+                    </div>
+                    <div class="pf-field">
+                        <label>CÔNG TY <span style="color:#ef4444;">*</span></label>
+                        <input type="text" id="exp-company" placeholder="VD: TechNova Solutions">
+                    </div>
+                    <div class="pf-field">
+                        <label>THỜI GIAN BẮT ĐẦU</label>
+                        <input type="month" id="exp-from">
+                    </div>
+                    <div class="pf-field">
+                        <label>THỜI GIAN KẾT THÚC</label>
+                        <input type="month" id="exp-to" placeholder="Để trống nếu đang làm việc">
+                    </div>
+                </div>
+                <div class="pf-field">
+                    <label class="pf-checkbox-label">
+                        <input type="checkbox" id="exp-current" onchange="toggleExpCurrent(this)">
+                        <span>Tôi hiện đang làm việc tại đây</span>
+                    </label>
+                </div>
+                <div class="pf-field">
+                    <label>MÔ TẢ CÔNG VIỆC</label>
+                    <textarea id="exp-desc" rows="4" placeholder="Mô tả trách nhiệm, thành tích... VD: Dẫn dắt team 5 người xây dựng hệ thống SaaS..."></textarea>
+                </div>
+            </div>
+            <div class="pf-modal-footer">
+                <button class="pf-btn-secondary" onclick="closeModal('modal-exp')">Hủy</button>
+                <button class="pf-btn-primary" onclick="saveExp()">Lưu kinh nghiệm</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Modal: Học vấn ── -->
+    <div id="modal-edu" class="pf-modal-overlay" onclick="closeModal('modal-edu',event)">
+        <div class="pf-modal" style="max-width:560px;">
+            <div class="pf-modal-header">
+                <h3 id="edu-modal-title">Thêm học vấn</h3>
+                <button class="pf-modal-close" onclick="closeModal('modal-edu')">&times;</button>
+            </div>
+            <div class="pf-modal-body">
+                <input type="hidden" id="edu-edit-index">
+                <div class="pf-field">
+                    <label>BẰNG CẤP / CHUYÊN NGÀNH <span style="color:#ef4444;">*</span></label>
+                    <input type="text" id="edu-degree" placeholder="VD: Cử nhân Khoa học Máy tính">
+                </div>
+                <div class="pf-field">
+                    <label>TRƯỜNG / TỔ CHỨC <span style="color:#ef4444;">*</span></label>
+                    <input type="text" id="edu-school" placeholder="VD: Đại học Bách Khoa TP.HCM">
+                </div>
+                <div class="pf-grid-2">
+                    <div class="pf-field">
+                        <label>NĂM BẮT ĐẦU</label>
+                        <input type="number" id="edu-from" min="1980" max="2030" placeholder="2018">
+                    </div>
+                    <div class="pf-field">
+                        <label>NĂM KẾT THÚC</label>
+                        <input type="number" id="edu-to" min="1980" max="2030" placeholder="2022">
+                    </div>
+                </div>
+                <div class="pf-field">
+                    <label>GPA / XẾP LOẠI <span style="color:#94a3b8;font-weight:400;">(tuỳ chọn)</span></label>
+                    <input type="text" id="edu-gpa" placeholder="VD: 3.6/4.0 hoặc Xuất sắc">
+                </div>
+            </div>
+            <div class="pf-modal-footer">
+                <button class="pf-btn-secondary" onclick="closeModal('modal-edu')">Hủy</button>
+                <button class="pf-btn-primary" onclick="saveEdu()">Lưu học vấn</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast notification -->
+    <div id="pf-toast" class="pf-toast" style="display:none;"></div>
+
     <script src="../js/api.js"></script>
+    <script src="../js/navbar.js"></script>
     <script src="../js/home.js"></script>
     <script src="../js/profile.js"></script>
 </body>

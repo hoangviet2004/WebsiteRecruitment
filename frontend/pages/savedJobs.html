@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Việc làm đã lưu — TechList</title>
+  <meta name="description" content="Quản lý danh sách việc làm yêu thích, tạo bộ sưu tập và so sánh vị trí tuyển dụng.">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/home.css">
+  <link rel="stylesheet" href="../assets/css/profile.css">
+  <link rel="stylesheet" href="../assets/css/savedJobs.css">
+</head>
+<body>
+    <nav class="homebar">
+        <div class="left">
+            <a href="home.html" class="logo-svg"><img src="../assets/logo.svg" alt="Logo">TechList</a>
+            <ul>
+                <li><a href="jobs.html">Tìm việc</a></li>
+                <li><a href="#">Công ty</a></li>
+                <li><a href="blog.html">Blog</a></li>
+            </ul>
+        </div>
+        <div class="right" id="nav-right"></div>
+    </nav>
+
+    <div class="pf-page">
+        <!-- ── Sidebar trái ── -->
+        <aside class="pf-sidebar">
+            <div class="pf-avatar-wrap">
+                <div class="pf-avatar-ring">
+                    <img id="pf-avatar-img" src="https://ui-avatars.com/api/?name=U&background=3b82f6&color=fff&size=150" alt="Avatar">
+                </div>
+                <div id="pf-avatar-loading" class="pf-avatar-loading" style="display:none;">
+                    <i class="fa-solid fa-spinner fa-spin"></i> Đang tải...
+                </div>
+                <h3 id="pf-header-name" class="pf-sidebar-name">Ứng viên</h3>
+                <p id="pf-header-title" class="pf-sidebar-title">Đang cập nhật...</p>
+            </div>
+
+            <!-- Nav links -->
+            <nav class="pf-nav">
+                <span class="pf-nav-group-label">ĐIỀU HƯỚNG</span>
+                <a class="pf-nav-link" href="profile.html">
+                    <i class="fa-regular fa-user"></i> Hồ sơ của tôi
+                </a>
+                <a class="pf-nav-link active" href="savedJobs.html">
+                    <i class="fa-solid fa-bookmark"></i> Việc làm đã lưu
+                </a>
+            </nav>
+        </aside>
+
+        <!-- ── Main Content ─────────────────────────────────────────── -->
+        <main class="pf-main">
+
+  <!-- Header -->
+  <div class="sj-header">
+    <h1><i class="fa-solid fa-bookmark" style="color:#3b82f6;margin-right:10px;font-size:22px;"></i>Việc làm đã lưu</h1>
+    <div class="sj-header-actions">
+      <div class="sj-search">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="text" id="sj-search-input" placeholder="Tìm trong danh sách...">
+      </div>
+      <button class="sj-icon-btn" id="sj-bell-btn" title="Nhắc nhở hết hạn">
+        <i class="fa-solid fa-bell"></i>
+        <span class="badge" id="sj-bell-badge" style="display:none;">0</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Alert Banner (expiring soon) -->
+  <div class="sj-alert" id="sj-expiry-alert" style="display:none;">
+    <div class="sj-alert-left">
+      <div class="sj-alert-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+      <div class="sj-alert-text">
+        <strong id="sj-alert-title">Cảnh báo: tin sắp hết hạn!</strong>
+        <span id="sj-alert-desc"></span>
+      </div>
+    </div>
+    <button class="sj-alert-btn" onclick="scrollToExpiring()">
+      <i class="fa-solid fa-bolt"></i> Ứng tuyển ngay
+    </button>
+  </div>
+
+  <!-- Tab Bar -->
+  <div class="sj-tabs-row">
+    <div class="sj-tabs">
+      <button class="sj-tab active" id="tab-all" onclick="switchTab('all', this)">Tất cả <span id="count-all">(0)</span></button>
+      <button class="sj-tab" id="tab-muon-apply" onclick="switchTab('Muốn apply', this)">Muốn apply <span id="count-muon-apply">(0)</span></button>
+      <button class="sj-tab" id="tab-dang-can-nhac" onclick="switchTab('Đang cân nhắc', this)">Đang cân nhắc <span id="count-dang-can-nhac">(0)</span></button>
+    </div>
+    <button class="sj-filter-btn" onclick="toggleSort()">
+      <i class="fa-solid fa-sliders"></i> Bộ lọc
+    </button>
+  </div>
+
+  <!-- Job Cards -->
+  <div class="sj-grid" id="sj-grid">
+    <!-- Skeleton placeholders -->
+    <div class="sj-skeleton"></div>
+    <div class="sj-skeleton"></div>
+    <div class="sj-skeleton"></div>
+  </div>
+
+  <!-- Empty state -->
+  <div class="sj-empty" id="sj-empty" style="display:none;">
+    <i class="fa-regular fa-heart"></i>
+    <h3>Chưa có việc làm yêu thích</h3>
+    <p>Khám phá và lưu các tin tuyển dụng phù hợp với bạn</p>
+  </div>
+
+        </main>
+    </div>
+
+<!-- ── Compare Bar (fixed bottom) ─────────────────────────── -->
+<div class="sj-compare-bar" id="sj-compare-bar">
+  <div class="sj-compare-bar-left">
+    <i class="fa-solid fa-code-compare"></i>
+    <span id="sj-compare-count">0 vị trí được chọn</span>
+  </div>
+  <div class="sj-compare-actions">
+    <button class="sj-btn-compare-clear" onclick="clearCompare()">Bỏ chọn tất cả</button>
+    <button class="sj-btn-compare-go" onclick="openCompareModal()">
+      <i class="fa-solid fa-chart-column"></i> So sánh ngay
+    </button>
+  </div>
+</div>
+
+<!-- ── Compare Modal ──────────────────────────────────────── -->
+<div class="sj-modal-overlay" id="sj-compare-modal" style="display:none;" onclick="handleModalBackdrop(event)">
+  <div class="sj-compare-modal">
+    <div class="sj-compare-modal-header">
+      <h2><i class="fa-solid fa-code-compare"></i> So sánh vị trí công việc</h2>
+      <button class="sj-compare-close" onclick="closeCompareModal()"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <table class="sj-compare-table" id="sj-compare-table">
+      <!-- rendered by JS -->
+    </table>
+    <div class="sj-compare-modal-footer">
+      <button class="sj-btn-modal-clear" onclick="clearCompare(); closeCompareModal()">
+        <i class="fa-solid fa-rotate-left"></i> Bỏ chọn tất cả
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Toast ──────────────────────────────────────────────── -->
+<div class="sj-toast" id="sj-toast" style="display:none;"></div>
+
+<script src="../js/api.js"></script>
+<script src="../js/navbar.js"></script>
+<script src="../js/home.js"></script>
+<script src="../js/savedJobs.js"></script>
+<script>
+  // Guard: chỉ Candidate mới vào được
+  const _role = sessionStorage.getItem('role');
+  const _token = sessionStorage.getItem('token');
+  if (!_token || (_role !== 'Candidate')) {
+    window.location.href = 'auth.html#login';
+  } else {
+    initSavedJobs();
+  }
+</script>
+</body>
+</html>

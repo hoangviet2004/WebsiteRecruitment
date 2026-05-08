@@ -1,448 +1,653 @@
-/* profile.css - Modern, Premium & Dynamic Design */
+/* profile.css — Candidate Profile Page */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
-.profile-container {
+/* ── Layout ─────────────────────────────────────────────── */
+.pf-page {
     display: flex;
-    justify-content: center;
-    padding-top: 60px;
-    padding-bottom: 60px;
-    min-height: calc(100vh - 70px); /* Assuming homebar is 70px */
+    gap: 0;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 32px 24px 60px;
+    min-height: calc(100vh - 76px);
+    align-items: flex-start;
 }
 
-.profile-form-wrapper {
+/* ── Sidebar ─────────────────────────────────────────────── */
+.pf-sidebar {
+    width: 220px;
+    flex-shrink: 0;
+    position: sticky;
+    top: 96px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    width: 100%;
-    max-width: 1100px;
+    gap: 0;
 }
 
-/* Header */
-.profile-header {
+.pf-avatar-wrap {
     display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 32px;
-    width: 100%;
-}
-
-.header-titles h2 {
-    font-size: 32px;
-    font-weight: 700;
-    color: #0f172a;
-    margin-bottom: 8px;
-    letter-spacing: -0.02em;
-}
-
-.header-titles .subtitle {
-    color: #64748b;
-    font-size: 15px;
-}
-
-.header-actions {
-    display: flex;
-    gap: 16px;
+    flex-direction: column;
     align-items: center;
-}
-
-.header-actions .btn-save {
-    width: auto;
-    margin-top: 0;
-}
-
-.btn-discard {
-    padding: 14px 28px;
-    background-color: #fff;
-    border: 1px solid #cbd5e1;
-    border-radius: 12px;
-    font-size: 16px;
-    font-weight: 600;
-    color: #334155;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    white-space: nowrap;
-}
-
-.btn-discard:hover {
-    background-color: #f1f5f9;
-}
-
-/* Rows & Grid */
-.profile-row {
-    display: flex;
-    gap: 24px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #f1f5f9;
     width: 100%;
-    margin-bottom: 24px;
-}
-
-.row-1 .card-info { flex: 2; }
-.row-1 .card-cv { flex: 1; display: flex; flex-direction: column; }
-.row-2 .card-about { flex: 1; }
-.row-3 .card-experience { flex: 2; }
-.row-3 .card-skills { flex: 1; }
-
-@media (max-width: 900px) {
-    .profile-row {
-        flex-direction: column;
-    }
-}
-
-/* ── Card Styling ────────────────────────────────────────── */
-.profile-card {
-    background: #ffffff;
-    width: 100%;
-    padding: 32px;
-    border-radius: 12px;
-    border: 1px solid #e2e8f0;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-    /* Entrance Animation */
-    animation: fadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-@keyframes fadeUp {
-    0% { opacity: 0; transform: translateY(24px); }
-    100% { opacity: 1; transform: translateY(0); }
-}
-
-/* ── Card Typography ────────────────────────────────────── */
-.profile-card h3 {
-    font-size: 20px;
-    font-weight: 600;
-    color: #0f172a;
-    margin-bottom: 24px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.profile-card h3 i {
-    color: #3b82f6;
-}
-
-.section-subtitle {
-    font-size: 14px;
-    color: #64748b;
-    margin-bottom: 24px;
-    margin-top: -16px;
-    line-height: 1.5;
-}
-
-/* Info Grid inside row 1 */
-.info-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 0 24px;
-}
-.phone-group {
-    grid-column: 1 / -1;
-}
-
-@media (max-width: 600px) {
-    .info-grid {
-        grid-template-columns: 1fr;
-    }
-}
-
-/* ── Form Elements ────────────────────────────────────────── */
-.form-group {
-    margin-bottom: 24px;
-    position: relative;
-}
-
-.form-group label {
-    display: inline-block;
-    font-size: 14px;
-    font-weight: 600;
-    color: #475569;
-    margin-bottom: 8px;
-    transition: color 0.3s ease;
-}
-
-.form-group input {
-    width: 100%;
-    padding: 14px 18px;
-    font-size: 15px;
-    color: #1e293b;
-    background-color: #f8fafc;
-    border: 1.5px solid #e2e8f0;
-    border-radius: 12px;
-    /* Smooth transition for hover and focus */
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.form-group input::placeholder {
-    color: #94a3b8;
-    font-weight: 400;
-}
-
-/* Input Hover */
-.form-group input:hover {
-    background-color: #ffffff;
-    border-color: #cbd5e1;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
-}
-
-/* Input Focus */
-.form-group input:focus {
-    outline: none;
-    background-color: #ffffff;
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
-}
-
-/* Change label color when input is focused */
-.form-group input:focus + label,
-.form-group:focus-within label {
-    color: #3b82f6;
-}
-
-/* ── Textarea (Bio) ───────────────────────────────────────── */
-.form-group textarea {
-    width: 100%;
-    padding: 14px 18px;
-    font-size: 15px;
-    font-family: 'Inter', sans-serif;
-    color: #1e293b;
-    background-color: #f8fafc;
-    border: 1.5px solid #e2e8f0;
-    border-radius: 12px;
-    resize: vertical;
-    min-height: 120px;
-    line-height: 1.7;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    box-sizing: border-box;
-}
-
-.form-group textarea::placeholder {
-    color: #94a3b8;
-    font-weight: 400;
-}
-
-.form-group textarea:hover {
-    background-color: #ffffff;
-    border-color: #cbd5e1;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
-}
-
-.form-group textarea:focus {
-    outline: none;
-    background-color: #ffffff;
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
-}
-
-/* Bio character counter */
-.bio-counter {
-    display: block;
-    text-align: right;
-    font-size: 12px;
-    color: #94a3b8;
-    margin-top: 6px;
-    font-weight: 500;
-    transition: color 0.2s;
-}
-
-.bio-counter.warn {
-    color: #f59e0b;
-}
-
-.bio-counter.limit {
-    color: #ef4444;
-    font-weight: 600;
-}
-
-/* ── Buton Save ───────────────────────────────────────────── */
-.btn-save {
-    margin-top: 16px;
-    padding: 14px 28px;
-    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-    color: white;
-    font-size: 16px;
-    font-weight: 600;
-    letter-spacing: 0.02em;
-    border: none;
-    border-radius: 12px;
-    cursor: pointer;
-    display: block;
-    width: 100%;
-    white-space: nowrap;
-    
-    /* Dynamic Shadow */
-    box-shadow: 0 8px 20px -6px rgba(59, 130, 246, 0.5);
-    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); /* Bouncy transition */
-    position: relative;
-    overflow: hidden;
-}
-
-/* Glow effect pseudo-element */
-.btn-save::before {
-    content: '';
-    position: absolute;
-    top: 0; left: -100%; width: 100%; height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-    transition: left 0.7s ease;
-}
-
-.btn-save:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 12px 25px -6px rgba(59, 130, 246, 0.65);
-    background: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%);
-}
-
-.btn-save:hover::before {
-    left: 100%;
-}
-
-.btn-save:active {
-    transform: scale(0.97) translateY(0);
-    box-shadow: 0 4px 10px -4px rgba(59, 130, 246, 0.4);
-}
-
-.btn-save:disabled {
-    background: #94a3b8;
-    box-shadow: none;
-    transform: none;
-    cursor: not-allowed;
-}
-
-/* ── Avatar Upload Section ────────────────────────────────── */
-.avatar-upload-container {
-    display: flex;
-    align-items: center;
-    gap: 24px;
-    margin-bottom: 32px;
-    flex-direction: row;
-}
-
-.avatar-preview-wrap {
-    position: relative;
-    width: 80px;
-    height: 80px;
-    border-radius: 50%;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
-    border: 4px solid #ffffff;
-    transition: transform 0.3s ease;
-}
-
-.avatar-preview-wrap:hover {
-    transform: scale(1.02);
-}
-
-.avatar-preview-wrap img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    border-radius: 50%;
-    background-color: #f8fafc;
-}
-
-.avatar-edit-overlay {
-    position: absolute;
-    bottom: 0;
-    right: 0;
-    background: #3b82f6;
-    color: white;
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    cursor: pointer;
-    box-shadow: 0 4px 10px rgba(59, 130, 246, 0.4);
-    border: 3px solid #ffffff;
-    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-.avatar-edit-overlay:hover {
-    background: #2563eb;
-    transform: scale(1.15) rotate(5deg);
-}
-
-.avatar-loading {
-    margin-top: 12px;
-    font-size: 13px;
-    color: #3b82f6;
-    font-weight: 600;
-    animation: pulse 1.5s infinite;
-}
-
-@keyframes pulse {
-    0% { opacity: 0.6; }
-    50% { opacity: 1; }
-    100% { opacity: 0.6; }
-}
-
-/* ── CV Upload ────────────────────────────────────────────── */
-.cv-upload-box {
-    border: 2px dashed #cbd5e1;
-    border-radius: 16px;
-    padding: 32px 24px;
     text-align: center;
-    background-color: #f8fafc;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 160px;
 }
 
-.cv-upload-box:hover {
-    border-color: #3b82f6;
-    background-color: #eff6ff;
-}
-
-.cv-empty p {
-    color: #64748b;
-    font-size: 14px;
+.pf-avatar-ring {
+    position: relative;
+    width: 88px;
+    height: 88px;
     margin-bottom: 12px;
 }
 
-.btn-upload-cv, .btn-change-cv {
-    padding: 8px 16px;
-    background-color: #fff;
-    border: 1px solid #cbd5e1;
-    border-radius: 8px;
-    font-size: 14px;
-    font-weight: 500;
-    color: #334155;
+.pf-avatar-ring img {
+    width: 88px;
+    height: 88px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #fff;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.pf-avatar-cam {
+    position: absolute;
+    bottom: 0; right: 0;
+    width: 28px; height: 28px;
+    background: #3b82f6;
+    color: #fff;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px;
     cursor: pointer;
-    transition: all 0.2s ease;
+    border: 2px solid #fff;
+    transition: background 0.2s;
+}
+.pf-avatar-cam:hover { background: #2563eb; }
+
+.pf-avatar-loading {
+    font-size: 12px; color: #3b82f6;
+    font-weight: 600; margin-bottom: 4px;
 }
 
-.btn-upload-cv:hover, .btn-change-cv:hover {
-    background-color: #f1f5f9;
-    border-color: #94a3b8;
+.pf-sidebar-name {
+    font-size: 15px; font-weight: 700;
+    color: #0f172a; margin: 0 0 2px;
 }
 
-.cv-preview {
+.pf-sidebar-title {
+    font-size: 12px; color: #64748b;
+    margin: 0; line-height: 1.4;
+}
+
+/* Nav */
+.pf-nav {
+    width: 100%;
+    padding-top: 16px;
     display: flex;
     flex-direction: column;
+    gap: 2px;
+}
+
+.pf-nav-group-label {
+    font-size: 10px; font-weight: 700;
+    color: #94a3b8; letter-spacing: 0.8px;
+    text-transform: uppercase;
+    padding: 0 10px 8px;
+    display: block;
+}
+
+.pf-nav-link {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 12px;
+    border-radius: 8px;
+    font-size: 13px; font-weight: 500;
+    color: #475569;
+    text-decoration: none;
+    transition: all 0.15s;
+}
+.pf-nav-link i { width: 16px; text-align: center; font-size: 13px; }
+.pf-nav-link:hover  { background: #f8fafc; color: #0f172a; }
+.pf-nav-link.active { background: #eff6ff; color: #3b82f6; font-weight: 600; }
+
+.pf-share-btn {
+    margin-top: 20px;
+    width: 100%;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    padding: 10px 16px;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    background: #fff;
+    color: #475569;
+    font-size: 13px; font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: inherit;
+}
+.pf-share-btn:hover { background: #f8fafc; border-color: #3b82f6; color: #3b82f6; }
+
+/* ── Main ────────────────────────────────────────────────── */
+.pf-main {
+    flex: 1;
+    min-width: 0;
+    margin-left: 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* ── Banner ──────────────────────────────────────────────── */
+.pf-banner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #fff;
+    border-radius: 14px;
+    padding: 20px 24px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    border: 1px solid #e2e8f0;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.pf-banner h1 {
+    font-size: 22px; font-weight: 800;
+    color: #0f172a; margin: 0 0 4px;
+}
+
+.pf-banner-subtitle {
+    font-size: 14px; color: #64748b; margin: 0;
+}
+
+.pf-banner-right {
+    display: flex; gap: 10px; flex-shrink: 0;
+}
+
+/* ── Cards ───────────────────────────────────────────────── */
+.pf-card {
+    background: #fff;
+    border-radius: 14px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    overflow: hidden;
+}
+
+.pf-card-header {
+    display: flex; align-items: center; gap: 10px;
+    padding: 18px 24px;
+    font-size: 16px; font-weight: 700;
+    color: #0f172a;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.pf-card-header i { color: #3b82f6; width: 18px; text-align: center; }
+
+.pf-add-btn {
+    margin-left: auto;
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 6px 14px;
+    border: 1px solid #3b82f6;
+    border-radius: 8px;
+    background: transparent;
+    color: #3b82f6;
+    font-size: 13px; font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: inherit;
+}
+.pf-add-btn:hover { background: #eff6ff; }
+
+.pf-card-body { padding: 20px 24px; }
+
+/* ── Form elements ───────────────────────────────────────── */
+.pf-grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.pf-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 4px;
+}
+
+.pf-field-full { grid-column: 1 / -1; }
+
+.pf-field label {
+    font-size: 11px; font-weight: 700;
+    color: #94a3b8; letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+.pf-field input,
+.pf-field textarea,
+.pf-field select {
+    padding: 11px 14px;
+    border: 1px solid #e2e8f0;
+    border-radius: 9px;
+    font-size: 14px;
+    font-family: inherit;
+    color: #0f172a;
+    background: #f8fafc;
+    transition: all 0.2s;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.pf-field input:focus,
+.pf-field textarea:focus,
+.pf-field select:focus {
+    outline: none;
+    border-color: #3b82f6;
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
+}
+
+.pf-readonly { background: #f1f5f9 !important; color: #64748b !important; cursor: not-allowed; }
+
+.pf-field textarea { resize: vertical; min-height: 100px; line-height: 1.6; }
+
+.pf-counter {
+    text-align: right;
+    font-size: 11px; color: #94a3b8;
+    font-weight: 500;
+}
+.pf-counter.warn { color: #f59e0b; }
+.pf-counter.over { color: #ef4444; }
+
+/* Job status select */
+.pf-status-select-wrap { position: relative; }
+.pf-status-select { appearance: none; padding-right: 32px; cursor: pointer; }
+
+/* ── Buttons ─────────────────────────────────────────────── */
+.pf-btn-primary {
+    display: inline-flex; align-items: center; gap: 7px;
+    padding: 10px 20px;
+    background: #3b82f6;
+    color: #fff;
+    border: none; border-radius: 10px;
+    font-size: 14px; font-weight: 600;
+    cursor: pointer; font-family: inherit;
+    transition: all 0.2s;
+}
+.pf-btn-primary:hover { background: #2563eb; box-shadow: 0 4px 12px rgba(59,130,246,0.25); }
+.pf-btn-primary:disabled { background: #94a3b8; cursor: not-allowed; box-shadow: none; }
+
+.pf-btn-secondary {
+    display: inline-flex; align-items: center; gap: 7px;
+    padding: 10px 20px;
+    background: #fff;
+    color: #475569;
+    border: 1px solid #e2e8f0; border-radius: 10px;
+    font-size: 14px; font-weight: 600;
+    cursor: pointer; font-family: inherit;
+    transition: all 0.15s;
+    text-decoration: none;
+}
+.pf-btn-secondary:hover { background: #f8fafc; border-color: #cbd5e1; }
+
+.pf-btn-danger-ghost {
+    display: inline-flex; align-items: center; gap: 7px;
+    padding: 8px 14px;
+    background: transparent; color: #dc2626;
+    border: 1px solid #fecaca; border-radius: 8px;
+    font-size: 13px; font-weight: 600;
+    cursor: pointer; font-family: inherit;
+    transition: all 0.15s;
+}
+.pf-btn-danger-ghost:hover { background: #fef2f2; }
+
+/* ── Skills list ─────────────────────────────────────────── */
+.pf-skills-list {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.pf-skill-row {
+    display: flex;
     align-items: center;
     gap: 12px;
 }
 
-.cv-preview a {
-    color: #3b82f6;
-    text-decoration: none;
-    font-weight: 500;
+.pf-skill-name {
+    min-width: 160px;
+    font-size: 14px; font-weight: 600;
+    color: #1e293b;
 }
 
-.cv-preview a:hover {
-    text-decoration: underline;
+.pf-skill-level-label {
+    min-width: 80px;
+    font-size: 12px; font-weight: 600;
+    color: #64748b;
 }
 
-/* ── Form Actions ─────────────────────────────────────────── */
-.profile-actions {
+.pf-skill-bar-wrap {
+    flex: 1;
+    height: 7px;
+    background: #e2e8f0;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.pf-skill-bar {
+    height: 100%;
+    border-radius: 4px;
+    background: linear-gradient(90deg, #3b82f6, #6366f1);
+    transition: width 0.6s ease;
+}
+
+.pf-skill-actions {
+    display: flex; gap: 4px; opacity: 0; transition: opacity 0.15s;
+}
+.pf-skill-row:hover .pf-skill-actions { opacity: 1; }
+
+.pf-icon-btn {
+    width: 28px; height: 28px;
+    border: none; border-radius: 6px;
+    background: transparent; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; color: #64748b;
+    transition: all 0.15s;
+}
+.pf-icon-btn:hover { background: #f1f5f9; color: #0f172a; }
+.pf-icon-btn.del:hover { background: #fef2f2; color: #dc2626; }
+
+/* ── Timeline (exp & edu) ────────────────────────────────── */
+.pf-timeline-list {
     display: flex;
-    justify-content: flex-end;
-    width: 100%;
-    max-width: 1100px;
-    margin-top: 24px;
+    flex-direction: column;
+    gap: 0;
 }
 
-.profile-actions .btn-save {
-    width: auto;
-    min-width: 200px;
-    margin-top: 0;
+.pf-timeline-item {
+    display: flex;
+    gap: 16px;
+    padding: 16px 0;
+    border-bottom: 1px solid #f1f5f9;
+    position: relative;
+}
+.pf-timeline-item:last-child { border-bottom: none; padding-bottom: 0; }
+.pf-timeline-item:first-child { padding-top: 0; }
+
+.pf-timeline-icon {
+    width: 40px; height: 40px;
+    border-radius: 10px;
+    background: #eff6ff;
+    color: #3b82f6;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.pf-timeline-body { flex: 1; min-width: 0; }
+
+.pf-timeline-title {
+    font-size: 15px; font-weight: 700;
+    color: #0f172a; margin-bottom: 2px;
+}
+
+.pf-timeline-subtitle {
+    font-size: 13px; font-weight: 600;
+    color: #3b82f6; margin-bottom: 4px;
+}
+
+.pf-timeline-period {
+    font-size: 12px; color: #64748b;
+    margin-bottom: 8px;
+}
+
+.pf-timeline-desc {
+    font-size: 13px; color: #475569;
+    line-height: 1.6;
+}
+
+.pf-timeline-actions {
+    display: flex; gap: 4px;
+    opacity: 0; transition: opacity 0.15s;
+    align-self: flex-start;
+    margin-top: 2px;
+}
+.pf-timeline-item:hover .pf-timeline-actions { opacity: 1; }
+
+/* ── Social links ────────────────────────────────────────── */
+.pf-social-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.pf-social-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.pf-social-icon {
+    width: 40px; height: 40px;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+    color: #fff;
+}
+.pf-social-icon.linkedin  { background: #0077b5; }
+.pf-social-icon.github    { background: #0f172a; }
+.pf-social-icon.portfolio { background: #8b5cf6; }
+
+/* ── CV Area ─────────────────────────────────────────────── */
+.pf-cv-area { display: flex; flex-direction: column; gap: 16px; }
+
+.pf-cv-upload-zone {
+    border: 2px dashed #cbd5e1;
+    border-radius: 14px;
+    padding: 32px 24px;
+    text-align: center;
+    background: #f8fafc;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.pf-cv-upload-zone:hover,
+.pf-cv-upload-zone.drag-over {
+    border-color: #3b82f6;
+    background: #eff6ff;
+}
+
+.pf-cv-icon {
+    font-size: 36px; color: #94a3b8;
+    margin-bottom: 12px; display: block;
+}
+
+.pf-cv-hint {
+    font-size: 14px; color: #64748b;
+    margin-bottom: 16px; line-height: 1.6;
+}
+
+.pf-cv-btns { display: flex; gap: 10px; justify-content: center; }
+
+.pf-cv-btn { font-size: 13px; padding: 8px 16px; }
+
+.pf-cv-current {
+    background: #f8fafc;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    padding: 16px 20px;
+}
+
+.pf-cv-file {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.pf-cv-file-icon {
+    font-size: 28px; color: #ef4444;
+    flex-shrink: 0;
+}
+
+.pf-cv-filename {
+    font-size: 14px; font-weight: 700; color: #0f172a;
+    margin-bottom: 2px;
+}
+
+.pf-cv-meta { font-size: 12px; color: #64748b; }
+
+.pf-cv-file-actions {
+    display: flex; gap: 8px; margin-left: auto;
+}
+
+.pf-cv-action-btn {
+    font-size: 12px; padding: 7px 12px;
+}
+
+/* ── Skill modal ─────────────────────────────────────────── */
+.pf-level-picker {
+    display: flex; gap: 8px; flex-wrap: wrap;
+    margin-bottom: 12px;
+}
+
+.pf-level-btn {
+    padding: 6px 14px;
+    border: 1px solid #e2e8f0;
+    border-radius: 20px;
+    background: #f8fafc;
+    color: #475569;
+    font-size: 13px; font-weight: 600;
+    cursor: pointer; font-family: inherit;
+    transition: all 0.15s;
+}
+.pf-level-btn:hover { border-color: #3b82f6; color: #3b82f6; }
+.pf-level-btn.active {
+    background: #eff6ff;
+    border-color: #3b82f6;
+    color: #3b82f6;
+}
+
+.pf-level-preview {
+    height: 8px;
+    background: #e2e8f0;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.pf-level-preview-fill {
+    height: 100%;
+    border-radius: 4px;
+    background: linear-gradient(90deg, #3b82f6, #6366f1);
+    transition: width 0.3s ease;
+}
+
+/* Checkbox */
+.pf-checkbox-label {
+    display: flex !important;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    color: #475569;
+    cursor: pointer;
+    font-weight: 500 !important;
+    text-transform: none !important;
+    letter-spacing: 0 !important;
+}
+.pf-checkbox-label input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; }
+
+/* ── Modals ──────────────────────────────────────────────── */
+.pf-modal-overlay {
+    display: none;
+    position: fixed; inset: 0; z-index: 2000;
+    background: rgba(15,23,42,0.55);
+    backdrop-filter: blur(4px);
+    align-items: center; justify-content: center;
+}
+.pf-modal-overlay.show { display: flex; }
+
+.pf-modal {
+    background: #fff;
+    border-radius: 16px;
+    width: 100%; max-width: 500px;
+    margin: auto;
+    box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
+    animation: pfModalPop 0.3s cubic-bezier(0.34,1.56,0.64,1);
+}
+
+@keyframes pfModalPop {
+    from { opacity:0; transform: scale(0.95) translateY(16px); }
+    to   { opacity:1; transform: scale(1) translateY(0); }
+}
+
+.pf-modal-header {
+    padding: 18px 22px;
+    border-bottom: 1px solid #f1f5f9;
+    display: flex; align-items: center; justify-content: space-between;
+}
+
+.pf-modal-header h3 { margin: 0; font-size: 17px; font-weight: 700; color: #0f172a; }
+
+.pf-modal-close {
+    background: none; border: none;
+    font-size: 22px; color: #94a3b8;
+    cursor: pointer; line-height: 1;
+    transition: color 0.15s;
+}
+.pf-modal-close:hover { color: #0f172a; }
+
+.pf-modal-body {
+    padding: 20px 22px;
+    max-height: 70vh;
+    overflow-y: auto;
+}
+
+.pf-modal-footer {
+    padding: 14px 22px;
+    border-top: 1px solid #f1f5f9;
+    display: flex; justify-content: flex-end; gap: 10px;
+    background: #f8fafc;
+    border-radius: 0 0 16px 16px;
+}
+
+/* ── Toast ───────────────────────────────────────────────── */
+.pf-toast {
+    position: fixed;
+    bottom: 28px; right: 28px; z-index: 9999;
+    padding: 14px 20px;
+    border-radius: 12px;
+    font-size: 14px; font-weight: 600;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+    animation: pfToastIn 0.3s ease;
+    display: flex; align-items: center; gap: 10px;
+    max-width: 340px;
+}
+.pf-toast.success { background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; }
+.pf-toast.error   { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
+
+@keyframes pfToastIn {
+    from { opacity:0; transform: translateY(16px); }
+    to   { opacity:1; transform: translateY(0); }
+}
+
+/* ── Empty hint ──────────────────────────────────────────── */
+.pf-empty-hint {
+    color: #94a3b8; font-size: 13px;
+    font-style: italic; text-align: center;
+    padding: 16px 0;
+}
+
+/* ── Responsive ──────────────────────────────────────────── */
+@media (max-width: 900px) {
+    .pf-page { flex-direction: column; padding: 20px 16px 48px; }
+    .pf-sidebar { width: 100%; position: static; flex-direction: row; flex-wrap: wrap; gap: 16px; align-items: flex-start; }
+    .pf-avatar-wrap { width: auto; border-bottom: none; padding-bottom: 0; }
+    .pf-nav { flex-direction: row; flex-wrap: wrap; padding-top: 0; }
+    .pf-nav-group-label { display: none; }
+    .pf-main { margin-left: 0; }
+    .pf-share-btn { width: auto; }
+}
+
+@media (max-width: 600px) {
+    .pf-grid-2 { grid-template-columns: 1fr; }
+    .pf-banner { flex-direction: column; align-items: flex-start; }
+    .pf-banner-right { width: 100%; justify-content: flex-end; }
 }

@@ -6,6 +6,10 @@ using TechList.Application.Auth.Interfaces;
 using TechList.Application.Profiles.Interfaces;
 using TechList.Application.Companies.Interfaces;
 using TechList.Application.Jobs.Interfaces;
+using TechList.Application.Applications.Interfaces;
+using TechList.Application.Recruiters.Interfaces;
+using TechList.Application.Messaging.Interfaces;
+using TechList.Application.CandidateMessaging.Interfaces;
 using TechList.Infrastructure.Auth;
 using TechList.Infrastructure.Identity;
 using TechList.Infrastructure.Options;
@@ -13,9 +17,16 @@ using TechList.Infrastructure.Persistence;
 using TechList.Infrastructure.Profiles;
 using TechList.Infrastructure.Companies;
 using TechList.Infrastructure.Jobs;
+using TechList.Infrastructure.Applications;
+using TechList.Infrastructure.Recruiters;
+using TechList.Infrastructure.Messaging;
+using TechList.Infrastructure.CandidateMessaging;
 using TechList.Application.Admin.Interfaces;
 using TechList.Infrastructure.Admin;
+using TechList.Application.SavedJobs.Interfaces;
+using TechList.Infrastructure.SavedJobs;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 
 namespace TechList.Infrastructure;
 
@@ -24,7 +35,8 @@ public static class DependencyInjection
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration config)
     {
         services.AddDbContext<AppDbContext>(options =>
-            options.UseSqlServer(config.GetConnectionString("DefaultConnection")));
+            options.UseSqlServer(config.GetConnectionString("DefaultConnection"))
+                   .ConfigureWarnings(w => w.Ignore(RelationalEventId.PendingModelChangesWarning)));
 
         services.AddIdentityCore<ApplicationUser>(options =>
             {
@@ -55,6 +67,12 @@ public static class DependencyInjection
         services.AddScoped<IAdminService, AdminService>();
         services.AddScoped<IStatisticsService, StatisticsService>();
         services.AddScoped<ITransactionManagementService, TransactionManagementService>();
+        services.AddScoped<IJobApplicationService, JobApplicationService>();
+        services.AddScoped<IRecruiterStatisticsService, RecruiterStatisticsService>();
+        services.AddScoped<IMessagingService, MessagingService>();
+        services.AddScoped<ICandidateMessagingService, CandidateMessagingService>();
+        services.AddScoped<IInterviewService, InterviewService>();
+        services.AddScoped<ISavedJobService, SavedJobService>();
         services.AddMemoryCache();
 
         return services;
