@@ -489,6 +489,21 @@ async function openJobModal() {
     document.getElementById('job-id').value = '';
     document.getElementById('job-modal-title').innerText = 'Đăng tin tuyển dụng mới';
     
+    // Kiểm tra gói dịch vụ: Cho phép đăng tin nổi bật nếu gói có quyền
+    const featuredCheckbox = document.getElementById('job-featured');
+    const featuredHint = document.getElementById('featured-hint');
+    const canPostFeatured = _currentSubscription && _currentSubscription.hasSubscription && 
+                           (_currentSubscription.allowFeaturedJob === true);
+    
+    if (!canPostFeatured) {
+        featuredCheckbox.disabled = true;
+        featuredCheckbox.checked = false;
+        featuredHint.textContent = '(Gói dịch vụ hiện tại không hỗ trợ tính năng này)';
+    } else {
+        featuredCheckbox.disabled = false;
+        featuredHint.textContent = 'Tin sẽ hiển thị nổi bật với màu vàng và huy hiệu đặc biệt';
+    }
+    
     // Set mặc định ngày hết hạn là 30 ngày sau
     const date = new Date();
     date.setDate(date.getDate() + 30);
@@ -538,6 +553,7 @@ async function submitJobForm() {
         requirements: document.getElementById('job-req').value,
         benefits: document.getElementById('job-ben').value,
         applicationLimit: parseInt(document.getElementById('job-app-limit').value) || null,
+        isFeatured: document.getElementById('job-featured').checked,
         expiresAt: new Date(document.getElementById('job-expires').value).toISOString(),
         isActive: document.getElementById('job-active').value === 'true'
     };
@@ -597,6 +613,20 @@ async function editJob(jobId) {
             
             document.getElementById('job-active').value = job.isActive.toString();
             document.getElementById('job-app-limit').value = job.applicationLimit || '';
+            
+            // Điền lại trạng thái nổi bật + kiểm tra quyền
+            const featuredCheckbox = document.getElementById('job-featured');
+            const featuredHint = document.getElementById('featured-hint');
+            const isFreePackage = !_currentSubscription || !_currentSubscription.hasSubscription ||
+                                   (_currentSubscription.packagePrice === 0);
+            featuredCheckbox.checked = job.isFeatured || false;
+            if (isFreePackage) {
+                featuredCheckbox.disabled = true;
+                featuredHint.textContent = '(Nâng cấp lên gói trả phí để sử dụng tính năng này)';
+            } else {
+                featuredCheckbox.disabled = false;
+                featuredHint.textContent = 'Tin sẽ hiển thị nổi bật với màu vàng và huy hiệu đặc biệt';
+            }
 
             document.getElementById('job-modal-title').innerText = 'Chỉnh sửa tin tuyển dụng';
             document.getElementById('job-modal').classList.add('show');

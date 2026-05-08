@@ -160,11 +160,16 @@ function renderJobs() {
 
         const isNew = (new Date() - new Date(job.createdAt)) < 86400000 * 3; // within 3 days
         const newBadge = isNew ? 'is-new' : '';
+        const featuredClass = job.isFeatured ? ' job-featured' : '';
+        const featuredBadge = job.isFeatured
+            ? `<span class="badge-featured" style="position:absolute;top:16px;right:52px;z-index:2;"><i class="fa-solid fa-star"></i> Nổi bật</span>`
+            : '';
 
         const isSaved = window._jobsBookmarkMap?.[job.id];
         const cardHtml = `
-            <div class="job-list-card ${newBadge}" onclick="window.location.href='job-detail.html?id=${job.id}'"
-                 id="jcard-${job.id}">
+            <div class="job-list-card ${newBadge}${featuredClass}" onclick="window.location.href='job-detail.html?id=${job.id}'"
+                 id="jcard-${job.id}" style="${job.isFeatured ? 'background:linear-gradient(135deg,#fffbeb 0%,#fef3c7 100%);border-color:#f59e0b;box-shadow:0 4px 16px rgba(245,158,11,0.15);' : ''}">
+                ${featuredBadge}
                 <button class="btn-bookmark ${isSaved ? 'active' : ''}"
                         title="${isSaved ? 'Bỏ lưu' : 'Lưu tin'}"
                         onclick="event.stopPropagation(); jobsToggleBookmark(event,'${job.id}',this)">

@@ -312,6 +312,42 @@ body { padding-top: 76px; background-color: #f8fafc; color: #1e293b; }
     transform: translateY(-3px);
 }
 
+/* ── Featured Job Card ── */
+.job-card.featured {
+    background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+    border: 1.5px solid #f59e0b;
+    box-shadow: 0 4px 16px rgba(245, 158, 11, 0.15);
+}
+
+.job-card.featured:hover {
+    border-color: #d97706;
+    box-shadow: 0 10px 28px rgba(245, 158, 11, 0.25);
+    transform: translateY(-3px);
+}
+
+.job-card.featured .job-info h3 { color: #92400e; }
+.job-card.featured:hover .job-info h3 { color: #b45309; }
+.job-card.featured .job-card-footer { border-top-color: rgba(245,158,11,0.2); }
+
+/* Badge nổi bật dùng chung */
+.badge-featured {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 100px;
+    letter-spacing: 0.02em;
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    box-shadow: 0 2px 8px rgba(245,158,11,0.35);
+    text-transform: uppercase;
+}
+
 /* ── Card Header: Logo + Title ── */
 .job-card-header {
     display: flex;

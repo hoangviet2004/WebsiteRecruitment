@@ -98,9 +98,14 @@ async function loadJobs() {
             }
 
             const timeAgo = getTimeAgo(new Date(job.createdAt));
+            const featuredClass = job.isFeatured ? ' featured' : '';
+            const featuredBadge = job.isFeatured
+                ? `<span class="badge-featured"><i class="fa-solid fa-star"></i> Nổi bật</span>`
+                : '';
 
             const cardHtml = `
-                <div class="job-card" onclick="window.location.href='job-detail.html?id=${job.id}'">
+                <div class="job-card${featuredClass}" onclick="window.location.href='job-detail.html?id=${job.id}'">
+                    ${featuredBadge}
                     <div class="job-card-header">
                         ${logoHtml}
                         <div class="job-info">
