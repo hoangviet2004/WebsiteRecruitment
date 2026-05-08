@@ -253,65 +253,117 @@ async function loadMyCompany() {
     }
 }
 
-async function uploadLogo(input) {
+let cropper = null;
+let currentCropType = null; // 'logo' or 'cover'
+
+function handleImageSelect(input, type) {
     if (!input.files || input.files.length === 0) return;
     if (!currentCompanyId) {
         alert("Vui lòng tạo hồ sơ công ty trước khi tải ảnh lên.");
         input.value = '';
         return;
     }
+    
+    currentCropType = type;
     const file = input.files[0];
-    const formData = new FormData();
-    formData.append('file', file);
-
-    try {
-        const response = await fetch(`${API_URL}/api/companies/${currentCompanyId}/logo`, {
-            method: 'POST',
-            headers: { 'Authorization': 'Bearer ' + sessionStorage.getItem('token') },
-            body: formData
-        });
-        const res = await response.json();
-        if (response.ok && res.success) {
-            document.getElementById('logo-image').src = res.data;
-            document.getElementById('logo-image').style.display = 'block';
-            document.getElementById('logo-placeholder').style.display = 'none';
-        } else {
-            alert(res.message || 'Lỗi tải ảnh logo');
+    const reader = new FileReader();
+    
+    reader.onload = function(e) {
+        const cropImage = document.getElementById('crop-image');
+        cropImage.src = e.target.result;
+        
+        // Cập nhật tiêu đề modal
+        const modalTitle = document.querySelector('#crop-modal .modal-header h3');
+        if (modalTitle) {
+            modalTitle.textContent = type === 'logo' ? 'Cắt ảnh đại diện' : 'Cắt ảnh bìa';
         }
-    } catch (e) {
-        alert("Lỗi kết nối khi tải ảnh");
-    }
-    input.value = '';
+        
+        document.getElementById('crop-modal').style.display = 'flex';
+        
+        if (cropper) {
+            cropper.destroy();
+        }
+        
+        cropper = new Cropper(cropImage, {
+            aspectRatio: type === 'logo' ? 1 : NaN, // Logo 1:1, Cover tự do
+            viewMode: 2,
+            autoCropArea: 1,
+            responsive: true,
+        });
+    };
+    
+    reader.readAsDataURL(file);
 }
 
-async function uploadCover(input) {
-    if (!input.files || input.files.length === 0) return;
-    if (!currentCompanyId) {
-        alert("Vui lòng tạo hồ sơ công ty trước khi tải ảnh lên.");
-        input.value = '';
-        return;
-    }
-    const file = input.files[0];
-    const formData = new FormData();
-    formData.append('file', file);
+function uploadLogo(input) {
+    handleImageSelect(input, 'logo');
+}
 
-    try {
-        const response = await fetch(`${API_URL}/api/companies/${currentCompanyId}/cover`, {
-            method: 'POST',
-            headers: { 'Authorization': 'Bearer ' + sessionStorage.getItem('token') },
-            body: formData
-        });
-        const res = await response.json();
-        if (response.ok && res.success) {
-            document.getElementById('cover-image').src = res.data;
-            document.getElementById('cover-image').style.display = 'block';
-        } else {
-            alert(res.message || 'Lỗi tải ảnh bìa');
-        }
-    } catch (e) {
-        alert("Lỗi kết nối khi tải ảnh");
+function uploadCover(input) {
+    handleImageSelect(input, 'cover');
+}
+
+function closeCropModal() {
+    document.getElementById('crop-modal').style.display = 'none';
+    if (cropper) {
+        cropper.destroy();
+        cropper = null;
     }
-    input.value = '';
+    currentCropType = null;
+    document.getElementById('logo-input').value = '';
+    document.getElementById('cover-input').value = '';
+}
+
+async function confirmCrop() {
+    if (!cropper || !currentCompanyId || !currentCropType) return;
+    
+    const btn = document.getElementById('crop-save-btn');
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang lưu...';
+    btn.disabled = true;
+    
+    // Tùy chỉnh độ phân giải khi xuất ảnh
+    const cropOptions = currentCropType === 'logo' 
+        ? { width: 400, height: 400 } 
+        : { maxWidth: 1200 }; // Cover không cố định kích thước nhưng giới hạn chiều rộng
+        
+    cropper.getCroppedCanvas(cropOptions).toBlob(async (blob) => {
+        const formData = new FormData();
+        const fileName = currentCropType === 'logo' ? 'logo.png' : 'cover.png';
+        formData.append('file', blob, fileName);
+
+        const endpoint = currentCropType === 'logo' 
+            ? `/api/companies/${currentCompanyId}/logo` 
+            : `/api/companies/${currentCompanyId}/cover`;
+
+        try {
+            const response = await fetch(`${API_URL}${endpoint}`, {
+                method: 'POST',
+                headers: { 'Authorization': 'Bearer ' + sessionStorage.getItem('token') },
+                body: formData
+            });
+            const res = await response.json();
+            
+            if (response.ok && res.success) {
+                if (currentCropType === 'logo') {
+                    document.getElementById('logo-image').src = res.data;
+                    document.getElementById('logo-image').style.display = 'block';
+                    document.getElementById('logo-placeholder').style.display = 'none';
+                } else {
+                    document.getElementById('cover-image').src = res.data;
+                    document.getElementById('cover-image').style.display = 'block';
+                }
+                closeCropModal();
+            } else {
+                alert(res.message || `Lỗi tải ảnh ${currentCropType === 'logo' ? 'logo' : 'bìa'}`);
+            }
+        } catch (e) {
+            alert("Lỗi kết nối khi tải ảnh");
+        } finally {
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        }
+    }, 'image/png');
 }
 
 document.getElementById('company-form').addEventListener('submit', async function(e) {
