@@ -65,4 +65,32 @@ public sealed class CompanyController : ControllerBase
         var result = await _companyService.GetFeaturedCompaniesAsync(ct);
         return Ok(ApiResponse<List<CompanyDto>>.Ok(result));
     }
+
+    [HttpPost("{id:guid}/logo")]
+    [Authorize(Roles = "Recruiter")]
+    public async Task<ActionResult<ApiResponse<string>>> UploadLogo(Guid id, IFormFile file, CancellationToken ct)
+    {
+        if (file == null || file.Length == 0)
+            return BadRequest(ApiResponse<string>.Fail("No file uploaded"));
+
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirstValue("sub");
+        using var stream = file.OpenReadStream();
+        var url = await _companyService.UploadLogoAsync(userId!, id, stream, file.FileName, ct);
+        
+        return Ok(ApiResponse<string>.Ok(url, "Logo uploaded successfully"));
+    }
+
+    [HttpPost("{id:guid}/cover")]
+    [Authorize(Roles = "Recruiter")]
+    public async Task<ActionResult<ApiResponse<string>>> UploadCover(Guid id, IFormFile file, CancellationToken ct)
+    {
+        if (file == null || file.Length == 0)
+            return BadRequest(ApiResponse<string>.Fail("No file uploaded"));
+
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirstValue("sub");
+        using var stream = file.OpenReadStream();
+        var url = await _companyService.UploadCoverImageAsync(userId!, id, stream, file.FileName, ct);
+        
+        return Ok(ApiResponse<string>.Ok(url, "Cover image uploaded successfully"));
+    }
 }

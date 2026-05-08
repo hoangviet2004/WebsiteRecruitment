@@ -88,11 +88,12 @@
 /* ── Two-column Layout ──────────────────────────────────── */
 .jobs-layout {
     display: flex;
-    max-width: 1300px;
-    margin: 0 auto;
+    width: 100%;
+    margin: 0;
     padding: 40px;
     gap: 30px;
     align-items: flex-start;
+    box-sizing: border-box;
 }
 
 /* ── Sidebar Filters ────────────────────────────────────── */

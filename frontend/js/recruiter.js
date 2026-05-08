@@ -236,11 +236,82 @@ async function loadMyCompany() {
             // Quy mô công ty
             const sizeEl = document.getElementById('company-size');
             if (sizeEl && res.data.companySize) sizeEl.value = res.data.companySize;
+
+            if (res.data.logoUrl) {
+                document.getElementById('logo-image').src = res.data.logoUrl;
+                document.getElementById('logo-image').style.display = 'block';
+                document.getElementById('logo-placeholder').style.display = 'none';
+            }
+            if (res.data.coverImageUrl) {
+                document.getElementById('cover-image').src = res.data.coverImageUrl;
+                document.getElementById('cover-image').style.display = 'block';
+            }
         }
     } catch (e) {
         // Backend throw 500 or 400 if not found, we ignore or log.
         console.log("Sẽ tạo mới công ty.");
     }
+}
+
+async function uploadLogo(input) {
+    if (!input.files || input.files.length === 0) return;
+    if (!currentCompanyId) {
+        alert("Vui lòng tạo hồ sơ công ty trước khi tải ảnh lên.");
+        input.value = '';
+        return;
+    }
+    const file = input.files[0];
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+        const response = await fetch(`${API_URL}/api/companies/${currentCompanyId}/logo`, {
+            method: 'POST',
+            headers: { 'Authorization': 'Bearer ' + sessionStorage.getItem('token') },
+            body: formData
+        });
+        const res = await response.json();
+        if (response.ok && res.success) {
+            document.getElementById('logo-image').src = res.data;
+            document.getElementById('logo-image').style.display = 'block';
+            document.getElementById('logo-placeholder').style.display = 'none';
+        } else {
+            alert(res.message || 'Lỗi tải ảnh logo');
+        }
+    } catch (e) {
+        alert("Lỗi kết nối khi tải ảnh");
+    }
+    input.value = '';
+}
+
+async function uploadCover(input) {
+    if (!input.files || input.files.length === 0) return;
+    if (!currentCompanyId) {
+        alert("Vui lòng tạo hồ sơ công ty trước khi tải ảnh lên.");
+        input.value = '';
+        return;
+    }
+    const file = input.files[0];
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+        const response = await fetch(`${API_URL}/api/companies/${currentCompanyId}/cover`, {
+            method: 'POST',
+            headers: { 'Authorization': 'Bearer ' + sessionStorage.getItem('token') },
+            body: formData
+        });
+        const res = await response.json();
+        if (response.ok && res.success) {
+            document.getElementById('cover-image').src = res.data;
+            document.getElementById('cover-image').style.display = 'block';
+        } else {
+            alert(res.message || 'Lỗi tải ảnh bìa');
+        }
+    } catch (e) {
+        alert("Lỗi kết nối khi tải ảnh");
+    }
+    input.value = '';
 }
 
 document.getElementById('company-form').addEventListener('submit', async function(e) {

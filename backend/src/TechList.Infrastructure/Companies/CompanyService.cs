@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using TechList.Application.Companies.Interfaces;
 using TechList.Application.Companies.Models;
+using TechList.Application.Profiles.Interfaces;
 using TechList.Domain.Entities;
 using TechList.Infrastructure.Persistence;
 
@@ -9,10 +10,12 @@ namespace TechList.Infrastructure.Companies;
 public sealed class CompanyService : ICompanyService
 {
     private readonly AppDbContext _db;
+    private readonly IAvatarStorageService _imageStorage;
 
-    public CompanyService(AppDbContext db)
+    public CompanyService(AppDbContext db, IAvatarStorageService imageStorage)
     {
         _db = db;
+        _imageStorage = imageStorage;
     }
 
     public async Task<List<CompanyDto>> GetAllCompaniesAsync(CancellationToken ct)
@@ -22,7 +25,7 @@ public sealed class CompanyService : ICompanyService
             .ToListAsync(ct);
 
         return companies.Select(c => new CompanyDto(
-            c.Id, c.OwnerId, c.Name, c.Description, c.Website, c.Address, c.CompanySize, c.LogoUrl, c.IsBlocked, c.CreatedAt, c.TaxCode, c.ContactEmail, c.ContactPhone)).ToList();
+            c.Id, c.OwnerId, c.Name, c.Description, c.Website, c.Address, c.CompanySize, c.LogoUrl, c.CoverImageUrl, c.IsBlocked, c.CreatedAt, c.TaxCode, c.ContactEmail, c.ContactPhone)).ToList();
     }
 
     public async Task<CompanyDto> GetCompanyByIdAsync(Guid id, CancellationToken ct)
@@ -34,7 +37,7 @@ public sealed class CompanyService : ICompanyService
         if (c is null)
             throw new InvalidOperationException("Company not found");
 
-        return new CompanyDto(c.Id, c.OwnerId, c.Name, c.Description, c.Website, c.Address, c.CompanySize, c.LogoUrl, c.IsBlocked, c.CreatedAt, c.TaxCode, c.ContactEmail, c.ContactPhone);
+        return new CompanyDto(c.Id, c.OwnerId, c.Name, c.Description, c.Website, c.Address, c.CompanySize, c.LogoUrl, c.CoverImageUrl, c.IsBlocked, c.CreatedAt, c.TaxCode, c.ContactEmail, c.ContactPhone);
     }
 
     public async Task<CompanyDto> GetMyCompanyAsync(string userId, CancellationToken ct)
@@ -46,7 +49,7 @@ public sealed class CompanyService : ICompanyService
         if (c is null)
             throw new InvalidOperationException("You do not have a company profile yet.");
 
-        return new CompanyDto(c.Id, c.OwnerId, c.Name, c.Description, c.Website, c.Address, c.CompanySize, c.LogoUrl, c.IsBlocked, c.CreatedAt, c.TaxCode, c.ContactEmail, c.ContactPhone);
+        return new CompanyDto(c.Id, c.OwnerId, c.Name, c.Description, c.Website, c.Address, c.CompanySize, c.LogoUrl, c.CoverImageUrl, c.IsBlocked, c.CreatedAt, c.TaxCode, c.ContactEmail, c.ContactPhone);
     }
 
     public async Task<CompanyDto> CreateCompanyAsync(string userId, CreateCompanyRequest request, CancellationToken ct)
@@ -96,7 +99,7 @@ public sealed class CompanyService : ICompanyService
             }
         }
 
-        return new CompanyDto(company.Id, company.OwnerId, company.Name, company.Description, company.Website, company.Address, company.CompanySize, company.LogoUrl, company.IsBlocked, company.CreatedAt, company.TaxCode, company.ContactEmail, company.ContactPhone);
+        return new CompanyDto(company.Id, company.OwnerId, company.Name, company.Description, company.Website, company.Address, company.CompanySize, company.LogoUrl, company.CoverImageUrl, company.IsBlocked, company.CreatedAt, company.TaxCode, company.ContactEmail, company.ContactPhone);
     }
 
     public async Task<CompanyDto> UpdateCompanyAsync(string userId, Guid companyId, UpdateCompanyRequest request, CancellationToken ct)
@@ -120,7 +123,7 @@ public sealed class CompanyService : ICompanyService
 
         await _db.SaveChangesAsync(ct);
 
-        return new CompanyDto(company.Id, company.OwnerId, company.Name, company.Description, company.Website, company.Address, company.CompanySize, company.LogoUrl, company.IsBlocked, company.CreatedAt, company.TaxCode, company.ContactEmail, company.ContactPhone);
+        return new CompanyDto(company.Id, company.OwnerId, company.Name, company.Description, company.Website, company.Address, company.CompanySize, company.LogoUrl, company.CoverImageUrl, company.IsBlocked, company.CreatedAt, company.TaxCode, company.ContactEmail, company.ContactPhone);
     }
 
     public async Task<List<CompanyDto>> GetFeaturedCompaniesAsync(CancellationToken ct)
@@ -138,9 +141,49 @@ public sealed class CompanyService : ICompanyService
         var companies = await _db.Companies
             .Where(c => featuredUserIds.Contains(c.OwnerId) && !c.IsBlocked)
             .OrderByDescending(c => c.CreatedAt)
-            .Select(c => new CompanyDto(c.Id, c.OwnerId, c.Name, c.Description, c.Website, c.Address, c.CompanySize, c.LogoUrl, c.IsBlocked, c.CreatedAt, c.TaxCode, c.ContactEmail, c.ContactPhone))
+            .Select(c => new CompanyDto(c.Id, c.OwnerId, c.Name, c.Description, c.Website, c.Address, c.CompanySize, c.LogoUrl, c.CoverImageUrl, c.IsBlocked, c.CreatedAt, c.TaxCode, c.ContactEmail, c.ContactPhone))
             .ToListAsync(ct);
 
         return companies;
+    }
+
+    public async Task<string> UploadLogoAsync(string userId, Guid companyId, Stream content, string fileName, CancellationToken ct)
+    {
+        var company = await _db.Companies.FirstOrDefaultAsync(x => x.Id == companyId, ct);
+        if (company is null) throw new InvalidOperationException("Company not found");
+        if (company.OwnerId != userId) throw new UnauthorizedAccessException("You can only update your own company.");
+
+        if (!string.IsNullOrEmpty(company.LogoPublicId))
+        {
+            await _imageStorage.DeleteAsync(company.LogoPublicId, ct);
+        }
+
+        var result = await _imageStorage.UploadAvatarAsync(content, fileName, ct);
+        company.LogoUrl = result.Url;
+        company.LogoPublicId = result.PublicId;
+        company.UpdatedAt = DateTime.UtcNow;
+
+        await _db.SaveChangesAsync(ct);
+        return result.Url;
+    }
+
+    public async Task<string> UploadCoverImageAsync(string userId, Guid companyId, Stream content, string fileName, CancellationToken ct)
+    {
+        var company = await _db.Companies.FirstOrDefaultAsync(x => x.Id == companyId, ct);
+        if (company is null) throw new InvalidOperationException("Company not found");
+        if (company.OwnerId != userId) throw new UnauthorizedAccessException("You can only update your own company.");
+
+        if (!string.IsNullOrEmpty(company.CoverImagePublicId))
+        {
+            await _imageStorage.DeleteAsync(company.CoverImagePublicId, ct);
+        }
+
+        var result = await _imageStorage.UploadAvatarAsync(content, fileName, ct);
+        company.CoverImageUrl = result.Url;
+        company.CoverImagePublicId = result.PublicId;
+        company.UpdatedAt = DateTime.UtcNow;
+
+        await _db.SaveChangesAsync(ct);
+        return result.Url;
     }
 }

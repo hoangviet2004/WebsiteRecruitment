@@ -25,7 +25,7 @@ public sealed class CloudinaryCvStorageService : ICvStorageService
 
     public async Task<(string Url, string PublicId)> UploadCvAsync(Stream content, string fileName, CancellationToken ct)
     {
-        var upload = new RawUploadParams
+        var upload = new ImageUploadParams
         {
             File = new FileDescription(fileName, content),
             Folder = "cvs",
@@ -45,6 +45,6 @@ public sealed class CloudinaryCvStorageService : ICvStorageService
     {
         if (string.IsNullOrWhiteSpace(publicId)) return;
         ct.ThrowIfCancellationRequested();
-        await _cloudinary.DestroyAsync(new DeletionParams(publicId) { ResourceType = ResourceType.Raw });
+        await _cloudinary.DestroyAsync(new DeletionParams(publicId) { ResourceType = ResourceType.Image });
     }
 }
