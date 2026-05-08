@@ -127,6 +127,7 @@ function renderPackages() {
             <td>${p.durationDays} ngày</td>
             <td>${p.isHighlighted ? '<span class="badge badge-active">Có</span>' : '<span class="badge" style="background:#e2e8f0;">Không</span>'}</td>
             <td>${p.allowFeaturedJob ? '<span class="badge badge-active">Có</span>' : '<span class="badge" style="background:#e2e8f0;">Không</span>'}</td>
+            <td>${p.allowFeaturedCompany ? '<span class="badge badge-active">Có</span>' : '<span class="badge" style="background:#e2e8f0;">Không</span>'}</td>
             <td>${p.isActive ? '<span class="badge badge-active">Hoạt động</span>' : '<span class="badge badge-blocked">Ngừng</span>'}</td>
             <td>
                 <button class="btn-action text-primary" onclick="editPackage('${p.id}')"><i class="fa-solid fa-pen"></i></button>
@@ -157,10 +158,12 @@ function editPackage(id) {
     // Đảm bảo đọc đúng giá trị nổi bật (thử cả camelCase và PascalCase)
     const highlighted = p.isHighlighted !== undefined ? p.isHighlighted : p.IsHighlighted;
     const allowFeatured = p.allowFeaturedJob !== undefined ? p.allowFeaturedJob : p.AllowFeaturedJob;
+    const allowFeaturedCompany = p.allowFeaturedCompany !== undefined ? p.allowFeaturedCompany : p.AllowFeaturedCompany;
     const active = p.isActive !== undefined ? p.isActive : p.IsActive;
     
     document.getElementById('pkg-highlighted').checked = !!highlighted;
     document.getElementById('pkg-allow-featured').checked = !!allowFeatured;
+    document.getElementById('pkg-allow-featured-company').checked = !!allowFeaturedCompany;
     document.getElementById('pkg-active').checked = !!active;
     
     let features = [];
@@ -181,6 +184,7 @@ async function savePackage(e) {
     const order = parseInt(document.getElementById('pkg-order').value) || 0;
     const isHighlighted = document.getElementById('pkg-highlighted').checked;
     const allowFeaturedJob = document.getElementById('pkg-allow-featured').checked;
+    const allowFeaturedCompany = document.getElementById('pkg-allow-featured-company').checked;
     const isActive = document.getElementById('pkg-active').checked;
     
     const featuresStr = document.getElementById('pkg-features').value;
@@ -194,6 +198,7 @@ async function savePackage(e) {
         displayOrder: order,
         isHighlighted: isHighlighted,
         allowFeaturedJob: allowFeaturedJob,
+        allowFeaturedCompany: allowFeaturedCompany,
         isActive: isActive,
         features: JSON.stringify(features)
     };

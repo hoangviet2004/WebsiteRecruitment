@@ -20,12 +20,20 @@ public sealed class CompanyService : ICompanyService
 
     public async Task<List<CompanyDto>> GetAllCompaniesAsync(CancellationToken ct)
     {
+        var featuredUserIds = await _db.Subscriptions
+            .Include(s => s.Package)
+            .Where(s => s.Status == TechList.Domain.Enums.SubscriptionStatus.Active &&
+                        s.Package.AllowFeaturedCompany == true)
+            .Select(s => s.UserId)
+            .ToListAsync(ct);
+
         var companies = await _db.Companies
             .AsNoTracking()
             .ToListAsync(ct);
 
         return companies.Select(c => new CompanyDto(
-            c.Id, c.OwnerId, c.Name, c.Description, c.Website, c.Address, c.CompanySize, c.LogoUrl, c.CoverImageUrl, c.IsBlocked, c.CreatedAt, c.TaxCode, c.ContactEmail, c.ContactPhone)).ToList();
+            c.Id, c.OwnerId, c.Name, c.Description, c.Website, c.Address, c.CompanySize, c.LogoUrl, c.CoverImageUrl, c.IsBlocked, c.CreatedAt, c.TaxCode, c.ContactEmail, c.ContactPhone,
+            featuredUserIds.Contains(c.OwnerId))).ToList();
     }
 
     public async Task<CompanyDto> GetCompanyByIdAsync(Guid id, CancellationToken ct)
@@ -33,11 +41,17 @@ public sealed class CompanyService : ICompanyService
         var c = await _db.Companies
             .AsNoTracking()
             .FirstOrDefaultAsync(x => x.Id == id, ct);
-
+ 
         if (c is null)
             throw new InvalidOperationException("Company not found");
 
-        return new CompanyDto(c.Id, c.OwnerId, c.Name, c.Description, c.Website, c.Address, c.CompanySize, c.LogoUrl, c.CoverImageUrl, c.IsBlocked, c.CreatedAt, c.TaxCode, c.ContactEmail, c.ContactPhone);
+        var isFeatured = await _db.Subscriptions
+            .Include(s => s.Package)
+            .AnyAsync(s => s.UserId == c.OwnerId && 
+                          s.Status == TechList.Domain.Enums.SubscriptionStatus.Active && 
+                          s.Package.AllowFeaturedCompany == true, ct);
+ 
+        return new CompanyDto(c.Id, c.OwnerId, c.Name, c.Description, c.Website, c.Address, c.CompanySize, c.LogoUrl, c.CoverImageUrl, c.IsBlocked, c.CreatedAt, c.TaxCode, c.ContactEmail, c.ContactPhone, isFeatured);
     }
 
     public async Task<CompanyDto> GetMyCompanyAsync(string userId, CancellationToken ct)
@@ -45,11 +59,17 @@ public sealed class CompanyService : ICompanyService
         var c = await _db.Companies
             .AsNoTracking()
             .FirstOrDefaultAsync(x => x.OwnerId == userId, ct);
-
+ 
         if (c is null)
             throw new InvalidOperationException("You do not have a company profile yet.");
 
-        return new CompanyDto(c.Id, c.OwnerId, c.Name, c.Description, c.Website, c.Address, c.CompanySize, c.LogoUrl, c.CoverImageUrl, c.IsBlocked, c.CreatedAt, c.TaxCode, c.ContactEmail, c.ContactPhone);
+        var isFeatured = await _db.Subscriptions
+            .Include(s => s.Package)
+            .AnyAsync(s => s.UserId == userId && 
+                          s.Status == TechList.Domain.Enums.SubscriptionStatus.Active && 
+                          s.Package.AllowFeaturedCompany == true, ct);
+ 
+        return new CompanyDto(c.Id, c.OwnerId, c.Name, c.Description, c.Website, c.Address, c.CompanySize, c.LogoUrl, c.CoverImageUrl, c.IsBlocked, c.CreatedAt, c.TaxCode, c.ContactEmail, c.ContactPhone, isFeatured);
     }
 
     public async Task<CompanyDto> CreateCompanyAsync(string userId, CreateCompanyRequest request, CancellationToken ct)
@@ -99,7 +119,7 @@ public sealed class CompanyService : ICompanyService
             }
         }
 
-        return new CompanyDto(company.Id, company.OwnerId, company.Name, company.Description, company.Website, company.Address, company.CompanySize, company.LogoUrl, company.CoverImageUrl, company.IsBlocked, company.CreatedAt, company.TaxCode, company.ContactEmail, company.ContactPhone);
+        return new CompanyDto(company.Id, company.OwnerId, company.Name, company.Description, company.Website, company.Address, company.CompanySize, company.LogoUrl, company.CoverImageUrl, company.IsBlocked, company.CreatedAt, company.TaxCode, company.ContactEmail, company.ContactPhone, false);
     }
 
     public async Task<CompanyDto> UpdateCompanyAsync(string userId, Guid companyId, UpdateCompanyRequest request, CancellationToken ct)
@@ -123,25 +143,34 @@ public sealed class CompanyService : ICompanyService
 
         await _db.SaveChangesAsync(ct);
 
-        return new CompanyDto(company.Id, company.OwnerId, company.Name, company.Description, company.Website, company.Address, company.CompanySize, company.LogoUrl, company.CoverImageUrl, company.IsBlocked, company.CreatedAt, company.TaxCode, company.ContactEmail, company.ContactPhone);
+        var isFeatured = await _db.Subscriptions
+            .Include(s => s.Package)
+            .AnyAsync(s => s.UserId == userId && 
+                          s.Status == TechList.Domain.Enums.SubscriptionStatus.Active && 
+                          s.Package.AllowFeaturedCompany == true, ct);
+
+        return new CompanyDto(company.Id, company.OwnerId, company.Name, company.Description, company.Website, company.Address, company.CompanySize, company.LogoUrl, company.CoverImageUrl, company.IsBlocked, company.CreatedAt, company.TaxCode, company.ContactEmail, company.ContactPhone, isFeatured);
     }
 
     public async Task<List<CompanyDto>> GetFeaturedCompaniesAsync(CancellationToken ct)
     {
-        // Find user IDs who have active Pro or Premium subscriptions
+        // Find user IDs who have active subscriptions that allow featured company
         var featuredUserIds = await _db.Subscriptions
             .Include(s => s.Package)
             .Where(s => s.Status == TechList.Domain.Enums.SubscriptionStatus.Active &&
-                        (s.Package.Name == "Pro" || s.Package.Name == "Premium"))
+                        s.Package.AllowFeaturedCompany == true)
             .Select(s => s.UserId)
             .Distinct()
             .ToListAsync(ct);
-
+            
         // Fetch their companies
         var companies = await _db.Companies
             .Where(c => featuredUserIds.Contains(c.OwnerId) && !c.IsBlocked)
             .OrderByDescending(c => c.CreatedAt)
-            .Select(c => new CompanyDto(c.Id, c.OwnerId, c.Name, c.Description, c.Website, c.Address, c.CompanySize, c.LogoUrl, c.CoverImageUrl, c.IsBlocked, c.CreatedAt, c.TaxCode, c.ContactEmail, c.ContactPhone))
+            .Select(c => new CompanyDto(
+                c.Id, c.OwnerId, c.Name, c.Description, c.Website, c.Address, c.CompanySize, 
+                c.LogoUrl, c.CoverImageUrl, c.IsBlocked, c.CreatedAt, c.TaxCode, 
+                c.ContactEmail, c.ContactPhone, true))
             .ToListAsync(ct);
 
         return companies;

@@ -29,6 +29,9 @@ public class ServicePackage
     /// <summary>Cho phép nhà tuyển dụng đăng tin nổi bật.</summary>
     public bool AllowFeaturedJob { get; set; } = false;
 
+    /// <summary>Cho phép công ty hiển thị nổi bật.</summary>
+    public bool AllowFeaturedCompany { get; set; } = false;
+
     /// <summary>Thứ tự hiển thị.</summary>
     public int DisplayOrder { get; set; }
 

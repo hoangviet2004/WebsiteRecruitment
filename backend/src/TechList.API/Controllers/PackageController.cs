@@ -37,7 +37,7 @@ public sealed class PackageController : ControllerBase
             .ThenBy(p => p.Price)
             .Select(p => new PackageDto(
                 p.Id, p.Name, p.Price, p.MaxJobPosts, p.DurationDays,
-                p.Features, p.IsHighlighted, p.AllowFeaturedJob, p.IsActive, p.DisplayOrder,
+                p.Features, p.IsHighlighted, p.AllowFeaturedJob, p.AllowFeaturedCompany, p.IsActive, p.DisplayOrder,
                 p.CreatedAt, p.UpdatedAt))
             .ToListAsync(ct);
 
@@ -92,6 +92,7 @@ public sealed class PackageController : ControllerBase
             daysRemaining = current == null ? 0 : Math.Max(0, (int)(current.EndDate - DateTime.UtcNow).TotalDays),
             packagePrice = current?.Package.Price ?? 0,
             allowFeaturedJob = current?.Package.AllowFeaturedJob ?? false,
+            allowFeaturedCompany = current?.Package.AllowFeaturedCompany ?? false,
             packageFeatures = current?.Package.Features ?? "[]",
 
             // Danh sách các gói đang sở hữu và còn hạn

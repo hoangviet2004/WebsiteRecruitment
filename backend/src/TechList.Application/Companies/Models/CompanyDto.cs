@@ -14,5 +14,6 @@ public sealed record CompanyDto(
     DateTime CreatedAt,
     string TaxCode,
     string? ContactEmail,
-    string? ContactPhone
+    string? ContactPhone,
+    bool IsFeatured = false
 );

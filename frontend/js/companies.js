@@ -86,9 +86,12 @@ function buildCard(company, idx) {
         : '';
 
     const animDelay = `style="animation-delay: ${idx * 0.06}s"`;
+    const featuredClass = company.isFeatured ? 'featured' : '';
+    const featuredBadge = company.isFeatured ? `<div class="co-badge-featured"><i class="fa-solid fa-crown"></i> Nổi bật</div>` : '';
 
     return `
-        <div class="co-card co-card-anim" ${animDelay} onclick="goToCompany('${company.id}')">
+        <div class="co-card co-card-anim ${featuredClass}" ${animDelay} onclick="goToCompany('${company.id}')">
+            ${featuredBadge}
             <div class="co-card-cover">${coverHtml}</div>
             <div class="co-card-body">
                 <div class="co-card-logo-wrap">
