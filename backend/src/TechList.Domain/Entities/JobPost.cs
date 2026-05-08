@@ -24,6 +24,7 @@ public class JobPost
     public string? Education { get; set; }
     public int? ApplicationLimit { get; set; }
     public bool IsFeatured { get; set; } = false;
+    public string? FeaturedLevel { get; set; } // e.g. Silver, Gold
 
     public DateTime ExpiresAt { get; set; } 
     public bool IsActive { get; set; } = true;

@@ -24,6 +24,7 @@ public sealed record PackageDto(
     bool IsHighlighted,
     bool AllowFeaturedJob,
     bool AllowFeaturedCompany,
+    string FeaturedLevel,
     bool IsActive,
     int DisplayOrder,
     DateTime CreatedAt,
@@ -39,6 +40,7 @@ public sealed record CreatePackageRequest(
     bool IsHighlighted,
     bool AllowFeaturedJob,
     bool AllowFeaturedCompany,
+    string FeaturedLevel,
     bool IsActive,
     int DisplayOrder
 );
@@ -52,6 +54,7 @@ public sealed record UpdatePackageRequest(
     bool IsHighlighted,
     bool AllowFeaturedJob,
     bool AllowFeaturedCompany,
+    string FeaturedLevel,
     bool IsActive,
     int DisplayOrder
 );

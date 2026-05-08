@@ -330,6 +330,56 @@
     border-color: #cbd5e1;
 }
 
+.job-list-card.job-featured-gold {
+    border: 2px solid #f59e0b !important;
+    background: linear-gradient(to bottom, #fffcf0, #ffffff) !important;
+}
+
+.job-list-card.job-featured-gold:hover {
+    box-shadow: 0 16px 40px rgba(245, 158, 11, 0.15) !important;
+}
+
+.job-list-card.job-featured-silver {
+    border: 2px solid #94a3b8 !important;
+    background: linear-gradient(to bottom, #f8fafc, #ffffff) !important;
+}
+
+.job-list-card.job-featured-silver:hover {
+    box-shadow: 0 16px 40px rgba(148, 163, 184, 0.1) !important;
+}
+
+.badge-featured {
+    padding: 5px 12px;
+    border-radius: 8px;
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    z-index: 5;
+    animation: job-badgePulse 2s infinite;
+}
+
+@keyframes job-badgePulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+.badge-featured-gold {
+    background: linear-gradient(135deg, #f59e0b, #fbbf24);
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4);
+}
+
+.badge-featured-silver {
+    background: linear-gradient(135deg, #64748b, #94a3b8);
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(100, 116, 139, 0.3);
+}
+
 .job-list-card.is-new::before {
     content: "Mới";
     position: absolute;
@@ -342,6 +392,7 @@
     padding: 4px 10px;
     border-radius: 0 0 4px 4px;
     text-transform: uppercase;
+    z-index: 3;
 }
 
 .job-list-card .btn-bookmark {

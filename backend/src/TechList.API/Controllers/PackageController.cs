@@ -37,7 +37,7 @@ public sealed class PackageController : ControllerBase
             .ThenBy(p => p.Price)
             .Select(p => new PackageDto(
                 p.Id, p.Name, p.Price, p.MaxJobPosts, p.DurationDays,
-                p.Features, p.IsHighlighted, p.AllowFeaturedJob, p.AllowFeaturedCompany, p.IsActive, p.DisplayOrder,
+                p.Features, p.IsHighlighted, p.AllowFeaturedJob, p.AllowFeaturedCompany, p.FeaturedLevel, p.IsActive, p.DisplayOrder,
                 p.CreatedAt, p.UpdatedAt))
             .ToListAsync(ct);
 

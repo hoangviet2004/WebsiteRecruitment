@@ -15,5 +15,6 @@ public sealed record CompanyDto(
     string TaxCode,
     string? ContactEmail,
     string? ContactPhone,
-    bool IsFeatured = false
+    bool IsFeatured = false,
+    string? FeaturedLevel = null
 );

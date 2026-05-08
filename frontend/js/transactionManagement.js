@@ -165,6 +165,9 @@ function editPackage(id) {
     document.getElementById('pkg-allow-featured').checked = !!allowFeatured;
     document.getElementById('pkg-allow-featured-company').checked = !!allowFeaturedCompany;
     document.getElementById('pkg-active').checked = !!active;
+
+    const featuredLevel = p.featuredLevel !== undefined ? p.featuredLevel : p.FeaturedLevel;
+    document.getElementById('pkg-featured-level').value = featuredLevel || 'None';
     
     let features = [];
     try { features = JSON.parse(p.features); } catch(e) {}
@@ -185,6 +188,7 @@ async function savePackage(e) {
     const isHighlighted = document.getElementById('pkg-highlighted').checked;
     const allowFeaturedJob = document.getElementById('pkg-allow-featured').checked;
     const allowFeaturedCompany = document.getElementById('pkg-allow-featured-company').checked;
+    const featuredLevel = document.getElementById('pkg-featured-level').value;
     const isActive = document.getElementById('pkg-active').checked;
     
     const featuresStr = document.getElementById('pkg-features').value;
@@ -199,6 +203,7 @@ async function savePackage(e) {
         isHighlighted: isHighlighted,
         allowFeaturedJob: allowFeaturedJob,
         allowFeaturedCompany: allowFeaturedCompany,
+        featuredLevel: featuredLevel,
         isActive: isActive,
         features: JSON.stringify(features)
     };

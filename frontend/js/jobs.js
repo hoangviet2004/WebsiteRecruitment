@@ -95,11 +95,31 @@ function applyFilters() {
     });
     
     // Sort logic
-    if (sortOrder === 'newest') {
-        filteredJobs.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-    } else if (sortOrder === 'salary_desc') {
-        filteredJobs.sort((a, b) => (b.maxSalary || b.minSalary || 0) - (a.maxSalary || a.minSalary || 0));
-    }
+    filteredJobs.sort((a, b) => {
+        const getPriority = (lvl) => {
+            const l = (lvl || '').toLowerCase();
+            if (l === 'gold') return 2;
+            if (l === 'silver') return 1;
+            return 0;
+        };
+
+        if (sortOrder === 'featured') {
+            // 1. Ưu tiên cấp bậc hiển thị (Gold > Silver > None)
+            const pA = getPriority(a.featuredLevel);
+            const pB = getPriority(b.featuredLevel);
+            if (pA !== pB) return pB - pA;
+        } else if (sortOrder === 'salary_desc') {
+            // 2. Ưu tiên lương cao nhất tuyệt đối
+            const valA = Math.max(Number(a.maxSalary || 0), Number(a.minSalary || 0));
+            const valB = Math.max(Number(b.maxSalary || 0), Number(b.minSalary || 0));
+            if (valB !== valA) return valB - valA;
+        }
+
+        // Mặc định hoặc khi chọn "Mới nhất": Sắp xếp theo thời gian đăng (Mới nhất lên đầu)
+        const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+        const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+        return dateB - dateA;
+    });
 
     currentPage = 1;
     renderJobs();
@@ -108,7 +128,7 @@ function applyFilters() {
 function clearFilters() {
     document.getElementById('filter-keyword').value = '';
     document.getElementById('filter-location').value = '';
-    document.getElementById('sort-order').value = 'newest';
+    document.getElementById('sort-order').value = 'featured';
     
     const checkboxes = document.querySelectorAll('input[name="jobType"]');
     checkboxes.forEach(cb => cb.checked = false);
@@ -121,12 +141,10 @@ function clearFilters() {
 // ── Render Jobs ──────────────────────────────────────────
 function renderJobs() {
     const container = document.getElementById('jobs-list-container');
-    const resultCount = document.getElementById('results-count');
     
     container.innerHTML = '';
     
     if (filteredJobs.length === 0) {
-        resultCount.innerHTML = `Không tìm thấy việc làm phù hợp.`;
         container.innerHTML = `<div style="text-align:center; padding: 40px; color:#64748b; background:#fff; border-radius:12px; border:1px solid #e2e8f0;">
             <i class="fa-solid fa-magnifying-glass" style="font-size:40px; margin-bottom:16px; color:#cbd5e1;"></i>
             <p>Rất tiếc, không có công việc nào khớp với tiêu chí tìm kiếm của bạn.</p>
@@ -139,8 +157,6 @@ function renderJobs() {
     const totalItems = filteredJobs.length;
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
-    
-    resultCount.innerHTML = `Hiển thị <strong>${startIndex + 1}-${endIndex}</strong> trong số <strong>${totalItems}</strong> việc làm`;
     
     const pageJobs = filteredJobs.slice(startIndex, endIndex);
     
@@ -160,15 +176,20 @@ function renderJobs() {
 
         const isNew = (new Date() - new Date(job.createdAt)) < 86400000 * 3; // within 3 days
         const newBadge = isNew ? 'is-new' : '';
-        const featuredClass = job.isFeatured ? ' job-featured' : '';
-        const featuredBadge = job.isFeatured
-            ? `<span class="badge-featured" style="position:absolute;top:16px;right:52px;z-index:2;"><i class="fa-solid fa-star"></i> Nổi bật</span>`
-            : '';
+        
+        let featuredClass = '';
+        let featuredBadge = '';
+        if (job.isFeatured && job.featuredLevel && job.featuredLevel.toLowerCase() !== 'none') {
+            const level = job.featuredLevel.toLowerCase();
+            featuredClass = ` job-featured-${level}`;
+            const label = level === 'gold' ? 'Gold Featured' : 'Silver Featured';
+            featuredBadge = `<span class="badge-featured badge-featured-${level}" style="position:absolute;top:16px;right:52px;z-index:2;"><i class="fa-solid fa-star"></i> ${label}</span>`;
+        }
 
         const isSaved = window._jobsBookmarkMap?.[job.id];
         const cardHtml = `
             <div class="job-list-card ${newBadge}${featuredClass}" onclick="window.location.href='job-detail.html?id=${job.id}'"
-                 id="jcard-${job.id}" style="${job.isFeatured ? 'background:linear-gradient(135deg,#fffbeb 0%,#fef3c7 100%);border-color:#f59e0b;box-shadow:0 4px 16px rgba(245,158,11,0.15);' : ''}">
+                 id="jcard-${job.id}">
                 ${featuredBadge}
                 <button class="btn-bookmark ${isSaved ? 'active' : ''}"
                         title="${isSaved ? 'Bỏ lưu' : 'Lưu tin'}"

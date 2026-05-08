@@ -33,7 +33,7 @@ public sealed class TransactionManagementService : ITransactionManagementService
             .ThenBy(x => x.Price)
             .Select(x => new PackageDto(
                 x.Id, x.Name, x.Price, x.MaxJobPosts, x.DurationDays,
-                x.Features, x.IsHighlighted, x.AllowFeaturedJob, x.AllowFeaturedCompany, x.IsActive, x.DisplayOrder,
+                x.Features, x.IsHighlighted, x.AllowFeaturedJob, x.AllowFeaturedCompany, x.FeaturedLevel, x.IsActive, x.DisplayOrder,
                 DateTime.SpecifyKind(x.CreatedAt, DateTimeKind.Utc), 
                 DateTime.SpecifyKind(x.UpdatedAt, DateTimeKind.Utc)))
             .ToListAsync(ct);
@@ -51,6 +51,7 @@ public sealed class TransactionManagementService : ITransactionManagementService
             IsHighlighted = request.IsHighlighted,
             AllowFeaturedJob = request.AllowFeaturedJob,
             AllowFeaturedCompany = request.AllowFeaturedCompany,
+            FeaturedLevel = request.FeaturedLevel,
             IsActive = request.IsActive,
             DisplayOrder = request.DisplayOrder
         };
@@ -61,7 +62,7 @@ public sealed class TransactionManagementService : ITransactionManagementService
         return new PackageDto(
             package.Id, package.Name, package.Price, package.MaxJobPosts,
             package.DurationDays, package.Features, package.IsHighlighted,
-            package.AllowFeaturedJob, package.AllowFeaturedCompany, package.IsActive, package.DisplayOrder, 
+            package.AllowFeaturedJob, package.AllowFeaturedCompany, package.FeaturedLevel, package.IsActive, package.DisplayOrder, 
             package.CreatedAt, package.UpdatedAt);
     }
 
@@ -78,6 +79,7 @@ public sealed class TransactionManagementService : ITransactionManagementService
         package.IsHighlighted = request.IsHighlighted;
         package.AllowFeaturedJob = request.AllowFeaturedJob;
         package.AllowFeaturedCompany = request.AllowFeaturedCompany;
+        package.FeaturedLevel = request.FeaturedLevel;
         package.IsActive = request.IsActive;
         package.DisplayOrder = request.DisplayOrder;
         package.UpdatedAt = DateTime.UtcNow;
@@ -87,7 +89,7 @@ public sealed class TransactionManagementService : ITransactionManagementService
         return new PackageDto(
             package.Id, package.Name, package.Price, package.MaxJobPosts,
             package.DurationDays, package.Features, package.IsHighlighted,
-            package.AllowFeaturedJob, package.AllowFeaturedCompany, package.IsActive, package.DisplayOrder, 
+            package.AllowFeaturedJob, package.AllowFeaturedCompany, package.FeaturedLevel, package.IsActive, package.DisplayOrder, 
             package.CreatedAt, package.UpdatedAt);
     }
 

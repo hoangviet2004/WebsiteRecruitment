@@ -324,19 +324,26 @@
     box-shadow: 0 16px 40px rgba(59, 130, 246, 0.12);
     border-color: #bfdbfe;
 }
-.co-card.featured {
-    border: 2px solid #f59e0b;
-    background: linear-gradient(to bottom, #fffcf0, #ffffff);
+.co-card.featured-gold {
+    border: 2px solid #f59e0b !important;
+    background: linear-gradient(to bottom, #fffcf0, #ffffff) !important;
 }
-.co-card.featured:hover {
-    box-shadow: 0 16px 40px rgba(245, 158, 11, 0.15);
+.co-card.featured-gold:hover {
+    box-shadow: 0 16px 40px rgba(245, 158, 11, 0.15) !important;
+}
+
+.co-card.featured-silver {
+    border: 2px solid #94a3b8 !important;
+    background: linear-gradient(to bottom, #f8fafc, #ffffff) !important;
+}
+.co-card.featured-silver:hover {
+    box-shadow: 0 16px 40px rgba(148, 163, 184, 0.1) !important;
 }
 
 .co-badge-featured {
     position: absolute;
     top: 12px;
     right: 12px;
-    background: linear-gradient(135deg, #f59e0b, #fbbf24);
     color: #fff;
     padding: 4px 10px;
     border-radius: 8px;
@@ -346,11 +353,21 @@
     display: flex;
     align-items: center;
     gap: 5px;
-    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4);
     text-transform: uppercase;
     letter-spacing: 0.05em;
     animation: co-badgePulse 2s infinite;
 }
+
+.co-badge-featured-gold {
+    background: linear-gradient(135deg, #f59e0b, #fbbf24);
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4);
+}
+
+.co-badge-featured-silver {
+    background: linear-gradient(135deg, #64748b, #94a3b8);
+    box-shadow: 0 4px 12px rgba(100, 116, 139, 0.3);
+}
+
 @keyframes co-badgePulse {
     0% { transform: scale(1); }
     50% { transform: scale(1.05); }

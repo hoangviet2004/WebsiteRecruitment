@@ -20,20 +20,25 @@ public sealed class CompanyService : ICompanyService
 
     public async Task<List<CompanyDto>> GetAllCompaniesAsync(CancellationToken ct)
     {
-        var featuredUserIds = await _db.Subscriptions
+        var userFeaturedMap = await _db.Subscriptions
             .Include(s => s.Package)
-            .Where(s => s.Status == TechList.Domain.Enums.SubscriptionStatus.Active &&
-                        s.Package.AllowFeaturedCompany == true)
-            .Select(s => s.UserId)
-            .ToListAsync(ct);
+            .Where(s => s.Status == TechList.Domain.Enums.SubscriptionStatus.Active && s.Package.AllowFeaturedCompany == true)
+            .OrderByDescending(s => s.Package.Price)
+            .GroupBy(s => s.UserId)
+            .Select(g => new { UserId = g.Key, Level = g.First().Package.FeaturedLevel })
+            .ToDictionaryAsync(x => x.UserId, x => x.Level, ct);
 
         var companies = await _db.Companies
             .AsNoTracking()
             .ToListAsync(ct);
 
-        return companies.Select(c => new CompanyDto(
-            c.Id, c.OwnerId, c.Name, c.Description, c.Website, c.Address, c.CompanySize, c.LogoUrl, c.CoverImageUrl, c.IsBlocked, c.CreatedAt, c.TaxCode, c.ContactEmail, c.ContactPhone,
-            featuredUserIds.Contains(c.OwnerId))).ToList();
+        return companies.Select(c => {
+            var level = userFeaturedMap.GetValueOrDefault(c.OwnerId);
+            return new CompanyDto(
+                c.Id, c.OwnerId, c.Name, c.Description, c.Website, c.Address, c.CompanySize, c.LogoUrl, c.CoverImageUrl, c.IsBlocked, c.CreatedAt, c.TaxCode, c.ContactEmail, c.ContactPhone,
+                level != null && level != "None",
+                level);
+        }).ToList();
     }
 
     public async Task<CompanyDto> GetCompanyByIdAsync(Guid id, CancellationToken ct)
@@ -45,13 +50,16 @@ public sealed class CompanyService : ICompanyService
         if (c is null)
             throw new InvalidOperationException("Company not found");
 
-        var isFeatured = await _db.Subscriptions
+        var sub = await _db.Subscriptions
             .Include(s => s.Package)
-            .AnyAsync(s => s.UserId == c.OwnerId && 
+            .Where(s => s.UserId == c.OwnerId && 
                           s.Status == TechList.Domain.Enums.SubscriptionStatus.Active && 
-                          s.Package.AllowFeaturedCompany == true, ct);
+                          s.Package.AllowFeaturedCompany == true)
+            .OrderByDescending(s => s.Package.Price)
+            .FirstOrDefaultAsync(ct);
  
-        return new CompanyDto(c.Id, c.OwnerId, c.Name, c.Description, c.Website, c.Address, c.CompanySize, c.LogoUrl, c.CoverImageUrl, c.IsBlocked, c.CreatedAt, c.TaxCode, c.ContactEmail, c.ContactPhone, isFeatured);
+        var level = sub?.Package.FeaturedLevel;
+        return new CompanyDto(c.Id, c.OwnerId, c.Name, c.Description, c.Website, c.Address, c.CompanySize, c.LogoUrl, c.CoverImageUrl, c.IsBlocked, c.CreatedAt, c.TaxCode, c.ContactEmail, c.ContactPhone, level != null && level != "None", level);
     }
 
     public async Task<CompanyDto> GetMyCompanyAsync(string userId, CancellationToken ct)
@@ -154,26 +162,28 @@ public sealed class CompanyService : ICompanyService
 
     public async Task<List<CompanyDto>> GetFeaturedCompaniesAsync(CancellationToken ct)
     {
-        // Find user IDs who have active subscriptions that allow featured company
-        var featuredUserIds = await _db.Subscriptions
+        // Find users with active featured subs
+        var userFeaturedMap = await _db.Subscriptions
             .Include(s => s.Package)
-            .Where(s => s.Status == TechList.Domain.Enums.SubscriptionStatus.Active &&
-                        s.Package.AllowFeaturedCompany == true)
-            .Select(s => s.UserId)
-            .Distinct()
-            .ToListAsync(ct);
+            .Where(s => s.Status == TechList.Domain.Enums.SubscriptionStatus.Active && s.Package.AllowFeaturedCompany == true)
+            .OrderByDescending(s => s.Package.Price)
+            .GroupBy(s => s.UserId)
+            .Select(g => new { UserId = g.Key, Level = g.First().Package.FeaturedLevel })
+            .ToDictionaryAsync(x => x.UserId, x => x.Level, ct);
             
+        var featuredUserIds = userFeaturedMap.Keys.ToList();
+
         // Fetch their companies
-        var companies = await _db.Companies
+        var dbCompanies = await _db.Companies
             .Where(c => featuredUserIds.Contains(c.OwnerId) && !c.IsBlocked)
             .OrderByDescending(c => c.CreatedAt)
-            .Select(c => new CompanyDto(
-                c.Id, c.OwnerId, c.Name, c.Description, c.Website, c.Address, c.CompanySize, 
-                c.LogoUrl, c.CoverImageUrl, c.IsBlocked, c.CreatedAt, c.TaxCode, 
-                c.ContactEmail, c.ContactPhone, true))
             .ToListAsync(ct);
 
-        return companies;
+        return dbCompanies.Select(c => new CompanyDto(
+                c.Id, c.OwnerId, c.Name, c.Description, c.Website, c.Address, c.CompanySize, 
+                c.LogoUrl, c.CoverImageUrl, c.IsBlocked, c.CreatedAt, c.TaxCode, 
+                c.ContactEmail, c.ContactPhone, true, userFeaturedMap[c.OwnerId]))
+            .ToList();
     }
 
     public async Task<string> UploadLogoAsync(string userId, Guid companyId, Stream content, string fileName, CancellationToken ct)

@@ -32,6 +32,9 @@ public class ServicePackage
     /// <summary>Cho phép công ty hiển thị nổi bật.</summary>
     public bool AllowFeaturedCompany { get; set; } = false;
 
+    /// <summary>Cấp bậc hiển thị (None, Silver, Gold).</summary>
+    public string FeaturedLevel { get; set; } = "None";
+
     /// <summary>Thứ tự hiển thị.</summary>
     public int DisplayOrder { get; set; }
 

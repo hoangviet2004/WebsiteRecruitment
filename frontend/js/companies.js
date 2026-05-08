@@ -11,7 +11,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
 async function loadAllCompanies() {
     const grid = document.getElementById('co-company-grid');
-    const countEl = document.getElementById('co-result-count');
 
     try {
         const response = await apiFetch('/api/companies', { method: 'GET' });
@@ -27,13 +26,11 @@ async function loadAllCompanies() {
     } catch (e) {
         console.error('Lỗi khi tải danh sách công ty:', e);
         grid.innerHTML = '<p style="grid-column:1/-1;text-align:center;color:#ef4444;">Đã có lỗi xảy ra. Vui lòng thử lại sau.</p>';
-        if (countEl) countEl.textContent = '';
     }
 }
 
 function renderCompanies(companies) {
     const grid = document.getElementById('co-company-grid');
-    const countEl = document.getElementById('co-result-count');
     const emptyEl = document.getElementById('co-empty-state');
 
     grid.innerHTML = '';
@@ -43,12 +40,19 @@ function renderCompanies(companies) {
         return;
     }
 
+    // Sắp xếp ưu tiên: Gold > Silver > Thường
+    companies.sort((a, b) => {
+        const getPriority = (lvl) => {
+            const l = (lvl || '').toLowerCase();
+            if (l === 'gold') return 2;
+            if (l === 'silver') return 1;
+            return 0;
+        };
+        return getPriority(b.featuredLevel) - getPriority(a.featuredLevel);
+    });
+
     emptyEl.style.display = 'none';
     grid.style.display = 'grid';
-
-    if (countEl) {
-        countEl.textContent = `Hiển thị ${companies.length} công ty`;
-    }
 
     companies.forEach((company, idx) => {
         const card = buildCard(company, idx);
@@ -86,8 +90,14 @@ function buildCard(company, idx) {
         : '';
 
     const animDelay = `style="animation-delay: ${idx * 0.06}s"`;
-    const featuredClass = company.isFeatured ? 'featured' : '';
-    const featuredBadge = company.isFeatured ? `<div class="co-badge-featured"><i class="fa-solid fa-crown"></i> Nổi bật</div>` : '';
+    
+    let featuredClass = '';
+    let featuredBadge = '';
+    if (company.isFeatured && company.featuredLevel && company.featuredLevel.toLowerCase() !== 'none') {
+        const level = company.featuredLevel.toLowerCase();
+        featuredClass = ` featured-${level}`;
+        featuredBadge = `<div class="co-badge-featured co-badge-featured-${level}"><i class="fa-solid fa-crown"></i> ${level === 'gold' ? 'Gold' : 'Silver'} Partner</div>`;
+    }
 
     return `
         <div class="co-card co-card-anim ${featuredClass}" ${animDelay} onclick="goToCompany('${company.id}')">
@@ -126,10 +136,8 @@ function resetSearch() {
 function showEmpty() {
     const grid = document.getElementById('co-company-grid');
     const emptyEl = document.getElementById('co-empty-state');
-    const countEl = document.getElementById('co-result-count');
     if (grid) grid.innerHTML = '';
     if (emptyEl) emptyEl.style.display = 'block';
-    if (countEl) countEl.textContent = '';
 }
 
 function goToCompany(id) {
