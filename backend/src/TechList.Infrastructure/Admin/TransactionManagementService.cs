@@ -34,7 +34,8 @@ public sealed class TransactionManagementService : ITransactionManagementService
             .Select(x => new PackageDto(
                 x.Id, x.Name, x.Price, x.MaxJobPosts, x.DurationDays,
                 x.Features, x.IsHighlighted, x.IsActive, x.DisplayOrder,
-                x.CreatedAt, x.UpdatedAt))
+                DateTime.SpecifyKind(x.CreatedAt, DateTimeKind.Utc), 
+                DateTime.SpecifyKind(x.UpdatedAt, DateTimeKind.Utc)))
             .ToListAsync(ct);
     }
 
@@ -141,9 +142,12 @@ public sealed class TransactionManagementService : ITransactionManagementService
                 user?.FullName ?? "N/A",
                 company?.Name ?? "N/A",
                 s.PackageId, s.Package.Name,
-                s.StartDate, s.EndDate, s.Status,
+                DateTime.SpecifyKind(s.StartDate, DateTimeKind.Utc), 
+                DateTime.SpecifyKind(s.EndDate, DateTimeKind.Utc), 
+                s.Status,
                 s.JobPostsUsed, s.Package.MaxJobPosts,
-                daysRemaining, s.CreatedAt);
+                daysRemaining, 
+                DateTime.SpecifyKind(s.CreatedAt, DateTimeKind.Utc));
         }).ToList();
 
         if (!string.IsNullOrWhiteSpace(search))
@@ -289,10 +293,11 @@ public sealed class TransactionManagementService : ITransactionManagementService
             return new TransactionDto(
                 t.Id, t.TransactionCode, t.UserId,
                 user?.Email ?? "N/A", t.CompanyName,
-                t.PackageId, t.Package.Name,
+                t.PackageId, t.Package.Name, t.Package.DurationDays,
                 t.Amount, t.DiscountAmount, t.FinalAmount,
                 t.Coupon?.Code, t.PaymentMethod,
-                t.Status, t.CreatedAt);
+                t.Status, 
+                DateTime.SpecifyKind(t.CreatedAt, DateTimeKind.Utc));
         }).ToList();
 
         return new PagedResult<TransactionDto>(items, totalCount, page, pageSize, totalPages);
@@ -312,11 +317,13 @@ public sealed class TransactionManagementService : ITransactionManagementService
         return new TransactionDetailDto(
             t.Id, t.TransactionCode, t.UserId,
             user?.Email ?? "N/A", user?.FullName ?? "N/A",
-            t.CompanyName, t.PackageId, t.Package.Name, t.Package.Price,
+            t.CompanyName, t.PackageId, t.Package.Name, t.Package.DurationDays, t.Package.Price,
             t.Amount, t.DiscountAmount, t.FinalAmount,
             t.CouponId, t.Coupon?.Code, t.PaymentMethod,
             t.Status, t.PaymentGatewayRef, t.StatusHistory,
-            t.RefundReason, t.RefundedBy, t.CreatedAt, t.UpdatedAt);
+            t.RefundReason, t.RefundedBy, 
+            DateTime.SpecifyKind(t.CreatedAt, DateTimeKind.Utc), 
+            DateTime.SpecifyKind(t.UpdatedAt, DateTimeKind.Utc));
     }
 
     public async Task RefundTransactionAsync(Guid id, string reason, string adminUserId, CancellationToken ct)

@@ -39,6 +39,9 @@
                     <i class="fa-solid fa-comments"></i> Tin nhắn
                     <span class="msg-badge-dot" id="msg-unread-badge" style="display:none;"></span>
                 </a>
+                <a href="#" class="menu-item" onclick="switchTab('transactions', this)">
+                    <i class="fa-solid fa-receipt"></i> Lịch sử giao dịch
+                </a>
             </div>
         </aside>
 
@@ -427,6 +430,35 @@
 
                 </div>
             </section>
+            
+            <!-- TAB 7: Lịch sử giao dịch -->
+            <section id="tab-transactions" class="tab-pane">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Lịch sử Giao dịch</h2>
+                        <p>Danh sách các gói dịch vụ bạn đã đăng ký và trạng thái thanh toán.</p>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Mã giao dịch</th>
+                                        <th>Gói dịch vụ</th>
+                                        <th>Số tiền</th>
+                                        <th>Phương thức</th>
+                                        <th>Ngày tạo</th>
+                                        <th>Ngày hết hạn</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="txn-table-body">
+                                    <tr><td colspan="6" style="text-align: center;">Đang tải...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
         </main>
     </div>
 
@@ -593,6 +625,28 @@
         </div>
     </div>
 
+    <!-- Modal Thanh toán -->
+    <div id="payment-modal" class="modal">
+        <div class="modal-content" style="max-width: 400px; text-align: center;">
+            <div class="modal-header">
+                <h3>Chọn phương thức thanh toán</h3>
+                <span class="close-btn" onclick="closePaymentModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <p style="margin-bottom: 20px; color: #64748b;">Gói dịch vụ: <strong id="payment-pkg-name" style="color: #0f172a;"></strong><br>Số tiền: <strong id="payment-pkg-price" style="color: #ef4444;"></strong></p>
+                
+                <div style="display: flex; flex-direction: column; gap: 12px;">
+                    <button class="btn-primary" style="width: 100%; padding: 12px; background: #005baa; justify-content: center;" onclick="confirmPayment('VNPay')">
+                        <i class="fa-solid fa-credit-card" style="margin-right: 8px;"></i> Thanh toán qua VNPay
+                    </button>
+                    <button class="btn-secondary" style="width: 100%; padding: 12px; justify-content: center;" onclick="confirmPayment('Manual')">
+                        <i class="fa-solid fa-money-bill-transfer" style="margin-right: 8px;"></i> Chuyển khoản thủ công (Demo)
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="../js/api.js"></script>
     <script src="../js/navbar.js"></script>
     <script src="../js/home.js"></script>
@@ -600,5 +654,6 @@
     <script src="../js/candidateManagementRecruiter.js"></script>
     <script src="../js/recruiterAnalytics.js"></script>
     <script src="../js/recruiterMessaging.js"></script>
+    <script src="../js/recruiterTransactions.js"></script>
 </body>
 </html>

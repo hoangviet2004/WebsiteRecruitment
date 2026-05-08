@@ -28,6 +28,8 @@ function switchTab(tabName, element) {
         document.getElementById('job-table-body').innerHTML = `<tr><td colspan="4" style="text-align:center;color:#ef4444;">Vui lòng tạo Hồ sơ Công ty trước khi đăng tin.</td></tr>`;
     } else if (tabName === 'packages') {
         loadPackages();
+    } else if (tabName === 'transactions') {
+        loadMyTransactions();
     }
 }
 
@@ -122,16 +124,50 @@ async function loadPackages() {
     }
 }
 
+let _selectedPackageId = null;
+let _selectedPackageName = null;
+
 async function selectPackage(packageId, packageName, price) {
     var action = price === 0 ? 'kích hoạt' : 'đăng ký';
-    if (!confirm('Bạn có muốn ' + action + ' gói "' + packageName + '"?')) return;
+    
+    if (price > 0) {
+        _selectedPackageId = packageId;
+        _selectedPackageName = packageName;
+        
+        document.getElementById('payment-pkg-name').innerText = packageName;
+        document.getElementById('payment-pkg-price').innerText = formatVND(price);
+        document.getElementById('payment-modal').classList.add('show');
+    } else {
+        if (!confirm('Bạn có muốn ' + action + ' gói "' + packageName + '"?')) return;
+        executePackageRegistration(packageId, packageName, 'Manual');
+    }
+}
 
+function closePaymentModal() {
+    document.getElementById('payment-modal').classList.remove('show');
+    _selectedPackageId = null;
+    _selectedPackageName = null;
+}
+
+function confirmPayment(method) {
+    if (!_selectedPackageId) return;
+    executePackageRegistration(_selectedPackageId, _selectedPackageName, method);
+    closePaymentModal();
+}
+
+async function executePackageRegistration(packageId, packageName, paymentMethod) {
     try {
-        var response = await apiFetchAuth('/api/packages/register/' + packageId, { method: 'POST' });
-        var res = await response.json();
+        const url = `/api/packages/register/${packageId}?paymentMethod=${paymentMethod}`;
+        const response = await apiFetchAuth(url, { method: 'POST' });
+        const res = await response.json();
 
         if (!response.ok || !res.success) {
             alert('Lỗi: ' + (res.message || 'Không thể đăng ký gói dịch vụ'));
+            return;
+        }
+
+        if (res.data && res.data.paymentUrl) {
+            window.location.href = res.data.paymentUrl;
             return;
         }
 
@@ -434,4 +470,58 @@ async function deleteJob(jobId) {
 document.addEventListener('DOMContentLoaded', function() {
     requireRecruiter();
     loadMyCompany();
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const tab = urlParams.get('tab') || 'company';
+    const vnpResponse = urlParams.get('vnp_ResponseCode');
+
+    if (vnpResponse) {
+        // *** Lấy rawQuery TRƯỚC khi thay đổi URL ***
+        const rawQuery = window.location.search.slice(1);
+
+        // Làm sạch URL
+        const cleanUrl = window.location.protocol + '//' + window.location.host + window.location.pathname + '?tab=packages';
+        window.history.replaceState({}, '', cleanUrl);
+
+        if (vnpResponse === '00') {
+            console.log('[VNPay] Raw query gửi verify:', rawQuery);
+            _packagesLoaded = false;
+
+            // Gọi API verify để kích hoạt subscription
+            apiFetchAuth('/api/packages/verify-vnpay', {
+                method: 'POST',
+                body: JSON.stringify({ rawQuery })
+            })
+            .then(res => res.json())
+            .then(data => {
+                console.log('[VNPay] Verify response:', data);
+                if (data.success) {
+                    alert('Thanh toán thành công! Gói dịch vụ của bạn đã được kích hoạt.');
+                } else {
+                    console.error('[VNPay] Verify failed:', data.message);
+                    alert('Lỗi kích hoạt: ' + data.message);
+                }
+            })
+            .catch(err => {
+                console.error('[VNPay] Verify error:', err);
+                alert('Thanh toán thành công nhưng xảy ra lỗi kết nối. Vui lòng tải lại trang.');
+            })
+            .finally(() => {
+                // Chuyển sang tab packages và reload dữ liệu
+                const pkgItem = document.querySelector('.menu-item[onclick*="packages"]');
+                if (pkgItem) switchTab('packages', pkgItem);
+            });
+        } else {
+            alert('Thanh toán thất bại hoặc bị hủy (Mã lỗi: ' + vnpResponse + '). Vui lòng thử lại.');
+            const pkgItem = document.querySelector('.menu-item[onclick*="packages"]');
+            if (pkgItem) switchTab('packages', pkgItem);
+        }
+        return;
+    }
+
+    // Xử lý tab param thông thường (không phải từ VNPay)
+    if (tab && tab !== 'company') {
+        const targetItem = document.querySelector(`.menu-item[onclick*="'${tab}'"]`);
+        if (targetItem) switchTab(tab, targetItem);
+    }
 });
