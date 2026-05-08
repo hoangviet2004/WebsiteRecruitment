@@ -51,60 +51,110 @@ public sealed class PackageController : ControllerBase
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirstValue("sub");
 
-        var subscription = await _db.Subscriptions
+        var allActive = await _db.Subscriptions
             .Include(s => s.Package)
             .Where(s => s.UserId == userId && s.Status == SubscriptionStatus.Active)
-            .OrderByDescending(s => s.CreatedAt)
-            .FirstOrDefaultAsync(ct);
+            .OrderByDescending(s => s.IsSelected)
+            .ThenByDescending(s => s.CreatedAt)
+            .ToListAsync(ct);
 
-        if (subscription == null)
+        // Auto-expire
+        bool changed = false;
+        foreach (var s in allActive.ToList())
         {
-            return Ok(ApiResponse<object>.Ok(new
+            if (s.EndDate < DateTime.UtcNow)
             {
-                hasSubscription = false,
-                packageName = (string?)null,
-                maxJobPosts = 0,
-                jobPostsUsed = 0,
-                endDate = (DateTime?)null,
-                daysRemaining = 0
-            }));
+                s.Status = SubscriptionStatus.Expired;
+                s.IsSelected = false;
+                allActive.Remove(s);
+                changed = true;
+            }
         }
+        if (changed) await _db.SaveChangesAsync(ct);
 
-        // Auto-expire if past end date
-        if (subscription.EndDate < DateTime.UtcNow)
+        var current = allActive.FirstOrDefault(s => s.IsSelected) ?? allActive.FirstOrDefault();
+        if (current != null && !current.IsSelected)
         {
-            subscription.Status = SubscriptionStatus.Expired;
+            current.IsSelected = true;
             await _db.SaveChangesAsync(ct);
-
-            return Ok(ApiResponse<object>.Ok(new
-            {
-                hasSubscription = false,
-                packageName = subscription.Package.Name,
-                maxJobPosts = subscription.Package.MaxJobPosts,
-                jobPostsUsed = subscription.JobPostsUsed,
-                endDate = subscription.EndDate,
-                daysRemaining = 0,
-                expired = true
-            }));
         }
 
         return Ok(ApiResponse<object>.Ok(new
         {
-            hasSubscription = true,
-            subscriptionId = subscription.Id,
-            packageId = subscription.Package.Id,
-            packageName = subscription.Package.Name,
-            maxJobPosts = subscription.Package.MaxJobPosts,
-            jobPostsUsed = subscription.JobPostsUsed,
-            jobPostsRemaining = subscription.Package.MaxJobPosts == -1
-                ? -1
-                : subscription.Package.MaxJobPosts - subscription.JobPostsUsed,
-            startDate = subscription.StartDate,
-            endDate = subscription.EndDate,
-            daysRemaining = Math.Max(0, (int)(subscription.EndDate - DateTime.UtcNow).TotalDays),
-            packagePrice = subscription.Package.Price,
-            packageFeatures = subscription.Package.Features
+            hasSubscription = current != null,
+            subscriptionId = current?.Id,
+            packageId = current?.Package.Id,
+            packageName = current?.Package.Name,
+            maxJobPosts = current?.Package.MaxJobPosts ?? 0,
+            jobPostsUsed = current?.JobPostsUsed ?? 0,
+            jobPostsRemaining = current == null ? 0 : (current.Package.MaxJobPosts == -1 ? -1 : Math.Max(0, current.Package.MaxJobPosts - current.JobPostsUsed)),
+            endDate = current?.EndDate,
+            daysRemaining = current == null ? 0 : Math.Max(0, (int)(current.EndDate - DateTime.UtcNow).TotalDays),
+            packagePrice = current?.Package.Price ?? 0,
+            packageFeatures = current?.Package.Features ?? "[]",
+
+            // Danh sách các gói đang sở hữu và còn hạn
+            ownedSubscriptions = allActive.Select(s => new {
+                s.Id,
+                s.PackageId,
+                packageName = s.Package.Name,
+                s.EndDate,
+                s.IsSelected,
+                maxJobPosts = s.Package.MaxJobPosts
+            }).ToList()
         }));
+    }
+
+    [HttpPost("select-subscription/{id:guid}")]
+    [Authorize(Roles = "Recruiter")]
+    public async Task<ActionResult<ApiResponse<object>>> SelectSubscription(Guid id, CancellationToken ct)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirstValue("sub");
+
+        var allActive = await _db.Subscriptions
+            .Where(s => s.UserId == userId && s.Status == SubscriptionStatus.Active)
+            .ToListAsync(ct);
+
+        var target = allActive.FirstOrDefault(s => s.Id == id);
+        if (target == null) return NotFound(ApiResponse<object>.Fail("Không tìm thấy gói dịch vụ hợp lệ hoặc gói đã hết hạn."));
+
+        if (target.EndDate < DateTime.UtcNow)
+        {
+            target.Status = SubscriptionStatus.Expired;
+            target.IsSelected = false;
+            await _db.SaveChangesAsync(ct);
+            return BadRequest(ApiResponse<object>.Fail("Gói dịch vụ này đã hết hạn."));
+        }
+
+        foreach (var s in allActive)
+        {
+            s.IsSelected = (s.Id == id);
+        }
+
+        // Kiểm tra giới hạn tin tuyển dụng khi chuyển gói
+        var package = await _db.ServicePackages.FindAsync(new object[] { target.PackageId }, ct);
+        var company = await _db.Companies.FirstOrDefaultAsync(c => c.OwnerId == userId, ct);
+        if (company != null && package != null && package.MaxJobPosts != -1)
+        {
+            var activeJobCount = await _db.JobPosts.CountAsync(j => j.CompanyId == company.Id && j.IsActive, ct);
+            if (activeJobCount > package.MaxJobPosts)
+            {
+                var excessJobs = await _db.JobPosts
+                    .Where(j => j.CompanyId == company.Id && j.IsActive)
+                    .OrderBy(j => j.CreatedAt)
+                    .Take(activeJobCount - package.MaxJobPosts)
+                    .ToListAsync(ct);
+
+                foreach (var job in excessJobs)
+                {
+                    job.IsActive = false;
+                    job.UpdatedAt = DateTime.UtcNow;
+                }
+            }
+        }
+
+        await _db.SaveChangesAsync(ct);
+        return Ok(ApiResponse<object>.Ok(null!, "Đã chuyển sang gói \"" + package?.Name + "\""));
     }
 
     /// <summary>Đăng ký gói dịch vụ (Free = tự động kích hoạt, trả phí = placeholder).</summary>
@@ -138,11 +188,13 @@ public sealed class PackageController : ControllerBase
             if (currentSub != null && currentSub.Package.Price == 0)
                 return BadRequest(ApiResponse<object>.Fail("Bạn đã đang sử dụng gói Free."));
 
-            // Revoke old subscription if any
-            if (currentSub != null)
+            var allActive = await _db.Subscriptions
+                .Where(s => s.UserId == userId && s.Status == SubscriptionStatus.Active)
+                .ToListAsync(ct);
+            
+            foreach (var s in allActive)
             {
-                currentSub.Status = SubscriptionStatus.Revoked;
-                currentSub.UpdatedAt = DateTime.UtcNow;
+                s.IsSelected = false;
             }
 
             var newSub = new Subscription
@@ -152,6 +204,7 @@ public sealed class PackageController : ControllerBase
                 StartDate = DateTime.UtcNow,
                 EndDate = DateTime.UtcNow.AddDays(package.DurationDays),
                 Status = SubscriptionStatus.Active,
+                IsSelected = true,
                 JobPostsUsed = actualJobCount
             };
             _db.Subscriptions.Add(newSub);
@@ -316,13 +369,13 @@ public sealed class PackageController : ControllerBase
         // 5. Kích hoạt subscription
         var package = transaction.Package;
 
-        var oldSub = await _db.Subscriptions
+        var allActive = await _db.Subscriptions
             .Where(s => s.UserId == userId && s.Status == SubscriptionStatus.Active)
-            .FirstOrDefaultAsync(ct);
-        if (oldSub != null)
+            .ToListAsync(ct);
+        
+        foreach (var s in allActive)
         {
-            oldSub.Status = SubscriptionStatus.Revoked;
-            oldSub.UpdatedAt = DateTime.UtcNow;
+            s.IsSelected = false;
         }
 
         var company = await _db.Companies.FirstOrDefaultAsync(c => c.OwnerId == userId, ct);
@@ -334,9 +387,11 @@ public sealed class PackageController : ControllerBase
         {
             UserId = userId!,
             PackageId = package.Id,
+            TransactionId = transaction.Id,
             StartDate = DateTime.UtcNow,
             EndDate = DateTime.UtcNow.AddDays(package.DurationDays),
             Status = SubscriptionStatus.Active,
+            IsSelected = true,
             JobPostsUsed = actualJobCount
         };
         _db.Subscriptions.Add(newSub);

@@ -11,6 +11,9 @@ public class Subscription
     /// <summary>Gói dịch vụ đã đăng ký.</summary>
     public Guid PackageId { get; set; }
 
+    /// <summary>Giao dịch tương ứng (nếu có).</summary>
+    public Guid? TransactionId { get; set; }
+
     public DateTime StartDate { get; set; }
     public DateTime EndDate { get; set; }
 
@@ -20,9 +23,13 @@ public class Subscription
     /// <summary>Số tin tuyển dụng đã dùng trong kỳ hiện tại.</summary>
     public int JobPostsUsed { get; set; }
 
+    /// <summary>Gói này có đang được chọn làm gói hiện tại hay không.</summary>
+    public bool IsSelected { get; set; } = false;
+
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
     // Navigation properties
     public ServicePackage Package { get; set; } = default!;
+    public Transaction? Transaction { get; set; }
 }

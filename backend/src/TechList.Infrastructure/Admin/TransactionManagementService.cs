@@ -357,6 +357,16 @@ public sealed class TransactionManagementService : ITransactionManagementService
             Details = JsonSerializer.Serialize(new { reason, amount = t.FinalAmount, transactionCode = t.TransactionCode })
         });
 
+        // Thu hồi subscription tương ứng nếu có
+        var sub = await _db.Subscriptions
+            .FirstOrDefaultAsync(s => s.TransactionId == id && s.Status == SubscriptionStatus.Active, ct);
+        if (sub != null)
+        {
+            sub.Status = SubscriptionStatus.Revoked;
+            sub.IsSelected = false;
+            sub.UpdatedAt = DateTime.UtcNow;
+        }
+
         await _db.SaveChangesAsync(ct);
     }
 

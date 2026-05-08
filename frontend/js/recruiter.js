@@ -95,13 +95,20 @@ async function loadPackages() {
                 ? 'Không giới hạn tin đăng'
                 : 'Tối đa ' + pkg.maxJobPosts + ' tin đăng';
 
-            var isCurrentPkg = _currentSubscription && _currentSubscription.hasSubscription && _currentSubscription.packageId === pkg.id;
+            var ownedSub = _currentSubscription && _currentSubscription.ownedSubscriptions 
+                ? _currentSubscription.ownedSubscriptions.find(os => os.packageId === pkg.id) 
+                : null;
+            
+            var isCurrentPkg = ownedSub && ownedSub.isSelected;
             var highlightClass = pkg.isHighlighted ? ' pkg-highlighted' : '';
             var currentClass = isCurrentPkg ? ' pkg-current' : '';
 
             var btnHtml;
             if (isCurrentPkg) {
                 btnHtml = '<button class="pkg-btn pkg-btn-current" disabled><i class="fa-solid fa-check-circle" style="margin-right:6px;"></i>Đang sử dụng</button>';
+            } else if (ownedSub) {
+                // Đã sở hữu nhưng chưa chọn
+                btnHtml = '<button class="pkg-btn pkg-btn-primary" onclick="switchActiveSubscription(\'' + ownedSub.id + '\')"><i class="fa-solid fa-toggle-on" style="margin-right:6px;"></i>Sử dụng gói</button>';
             } else {
                 var btnLabel = pkg.price === 0 ? 'Dùng miễn phí' : 'Đăng ký ngay';
                 btnHtml = '<button class="pkg-btn' + (pkg.isHighlighted ? ' pkg-btn-primary' : '') + '" onclick="selectPackage(\'' + pkg.id + '\', \'' + escapeHtmlPkg(pkg.name) + '\', ' + pkg.price + ')"><i class="fa-solid fa-cart-shopping" style="margin-right:6px;"></i>' + btnLabel + '</button>';
@@ -121,6 +128,25 @@ async function loadPackages() {
         _packagesLoaded = true;
     } catch (e) {
         container.innerHTML = '<div style="text-align:center; padding:32px 0;"><i class="fa-solid fa-circle-exclamation" style="font-size:32px; color:#ef4444;"></i><p style="margin-top:12px; color:#ef4444; font-weight:600;">Lỗi tải gói dịch vụ</p><p style="color:#64748b; font-size:13px;">' + e.message + '</p></div>';
+    }
+}
+
+async function switchActiveSubscription(subscriptionId) {
+    if (!confirm('Bạn có chắc muốn chuyển sang sử dụng gói này? Một số tin tuyển dụng có thể bị ẩn nếu gói mới có giới hạn thấp hơn.')) return;
+
+    try {
+        const res = await apiFetchAuth('/api/packages/select-subscription/' + subscriptionId, { method: 'POST' });
+        const data = await res.json();
+
+        if (data.success) {
+            alert(data.message || 'Đã chuyển gói thành công!');
+            loadPackages(); // Tải lại để cập nhật giao diện
+        } else {
+            alert('Lỗi: ' + data.message);
+        }
+    } catch (e) {
+        console.error('Error switching subscription:', e);
+        alert('Lỗi kết nối máy chủ.');
     }
 }
 
