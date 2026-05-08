@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Danh sách Công ty – TechList</title>
+    <meta name="description" content="Khám phá hàng trăm công ty công nghệ hàng đầu đang tuyển dụng trên TechList. Tìm nơi làm việc lý tưởng dành cho bạn.">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="../assets/css/home.css">
+    <link rel="stylesheet" href="../assets/css/companies.css">
+</head>
+<body>
+    <nav class="homebar">
+        <div class="left">
+            <a href="home.html" class="logo-svg"><img src="../assets/logo.svg" alt="Logo">TechList</a>
+            <ul>
+                <li><a href="jobs.html">Tìm việc</a></li>
+                <li><a href="companies.html" class="active">Công ty</a></li>
+                <li><a href="blog.html">Blog</a></li>
+            </ul>
+        </div>
+        <div class="right" id="nav-right"></div>
+    </nav>
+
+    <!-- Hero Banner -->
+    <section class="co-banner">
+        <div class="co-banner-content">
+            <p class="co-banner-eyebrow"><i class="fa-solid fa-building-columns"></i> Khám phá doanh nghiệp</p>
+            <h1 class="co-banner-title">Tìm kiếm <span class="co-highlight">công ty lý tưởng</span><br>dành cho bạn</h1>
+            <p class="co-banner-sub">Tra cứu thông tin công ty và tìm kiếm nơi làm việc tốt nhất dành cho bạn</p>
+            <div class="co-search-bar">
+                <i class="fa-solid fa-magnifying-glass co-search-icon"></i>
+                <input type="text" id="co-search-input" placeholder="Nhập tên công ty..." autocomplete="off" oninput="filterCompanies()" onkeydown="if(event.key==='Enter') filterCompanies()">
+                <button class="co-search-btn" onclick="filterCompanies()">Tìm kiếm</button>
+            </div>
+        </div>
+        <div class="co-banner-illustration">
+            <div class="co-banner-blob co-blob-1"></div>
+            <div class="co-banner-blob co-blob-2"></div>
+            <div class="co-illustration-graphic">
+                <div class="co-graphic-circle co-gc-1"></div>
+                <div class="co-graphic-circle co-gc-2"></div>
+                <div class="co-graphic-circle co-gc-3"></div>
+                <div class="co-graphic-bars">
+                    <div class="co-bar co-bar-1"></div>
+                    <div class="co-bar co-bar-2"></div>
+                    <div class="co-bar co-bar-3"></div>
+                    <div class="co-bar co-bar-4"></div>
+                </div>
+                <div class="co-graphic-stat">
+                    <i class="fa-solid fa-chart-line"></i>
+                    <span>+100 Công ty</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <main class="co-main">
+        <div class="co-section-header">
+            <h2 class="co-section-title">DANH SÁCH CÁC CÔNG TY NỔI BẬT</h2>
+            <p class="co-section-sub" id="co-result-count">Đang tải dữ liệu...</p>
+        </div>
+
+        <div class="co-grid" id="co-company-grid">
+            <!-- Skeleton loading -->
+            <div class="co-skeleton"></div>
+            <div class="co-skeleton"></div>
+            <div class="co-skeleton"></div>
+            <div class="co-skeleton"></div>
+            <div class="co-skeleton"></div>
+            <div class="co-skeleton"></div>
+        </div>
+
+        <div class="co-empty" id="co-empty-state" style="display:none;">
+            <i class="fa-regular fa-building"></i>
+            <p>Không tìm thấy công ty phù hợp.</p>
+            <button class="co-reset-btn" onclick="resetSearch()">Xem tất cả</button>
+        </div>
+    </main>
+
+    <footer class="co-footer">
+        <p>© 2026 TechList. Nền tảng tuyển dụng công nghệ hàng đầu Việt Nam.</p>
+    </footer>
+
+    <script src="../js/api.js"></script>
+    <script src="../js/navbar.js"></script>
+    <script src="../js/companies.js"></script>
+</body>
+</html>
