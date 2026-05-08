@@ -22,6 +22,7 @@ public class JobPost
 
     public string? Experience { get; set; }
     public string? Education { get; set; }
+    public int? ApplicationLimit { get; set; }
 
     public DateTime ExpiresAt { get; set; } 
     public bool IsActive { get; set; } = true;

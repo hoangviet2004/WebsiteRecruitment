@@ -132,6 +132,8 @@ using (var scope = app.Services.CreateScope())
         var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
         var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
         var db = services.GetRequiredService<AppDbContext>();
+        // Tự động cập nhật cấu trúc Database (Fix lỗi thiếu cột ApplicationLimit)
+        await db.Database.MigrateAsync();
 
         foreach (var role in AppRole.All)
         {
@@ -306,6 +308,7 @@ using (var scope = app.Services.CreateScope())
                             JobType = "Full-time",
                             Experience = "3-5 năm",
                             Education = "Cử nhân CNTT",
+                            ApplicationLimit = 50,
                             ExpiresAt = DateTime.UtcNow.AddDays(30)
                         });
 
@@ -322,6 +325,7 @@ using (var scope = app.Services.CreateScope())
                             JobType = "Hybrid",
                             Experience = "1-2 năm",
                             Education = "Đại học",
+                            ApplicationLimit = 100,
                             ExpiresAt = DateTime.UtcNow.AddDays(45)
                         });
                     }

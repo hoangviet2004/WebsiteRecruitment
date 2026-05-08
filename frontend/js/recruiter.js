@@ -531,6 +531,7 @@ async function submitJobForm() {
         description: document.getElementById('job-desc').value,
         requirements: document.getElementById('job-req').value,
         benefits: document.getElementById('job-ben').value,
+        applicationLimit: parseInt(document.getElementById('job-app-limit').value) || null,
         expiresAt: new Date(document.getElementById('job-expires').value).toISOString(),
         isActive: document.getElementById('job-active').value === 'true'
     };
@@ -589,6 +590,7 @@ async function editJob(jobId) {
             document.getElementById('job-expires').value = localISOTime;
             
             document.getElementById('job-active').value = job.isActive.toString();
+            document.getElementById('job-app-limit').value = job.applicationLimit || '';
 
             document.getElementById('job-modal-title').innerText = 'Chỉnh sửa tin tuyển dụng';
             document.getElementById('job-modal').classList.add('show');
