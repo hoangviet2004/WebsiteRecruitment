@@ -101,6 +101,7 @@
               <th>Gói phổ biến</th>
               <th>Tin nổi bật</th>
               <th>CT nổi bật</th>
+              <th>Cấp bậc</th>
               <th>Trạng thái</th>
               <th>Thao tác</th>
             </tr>
@@ -305,17 +306,17 @@
           <textarea id="pkg-features" class="form-textarea" rows="4" placeholder="VD:&#10;10 tin tuyển dụng/tháng&#10;Hiển thị ưu tiên&#10;Hỗ trợ 24/7"></textarea>
         </div>
 
-        <div style="display:flex;gap:20px;align-items:center;padding:16px;flex-wrap:wrap;background:#f8fafc;border-radius:12px;margin-top:16px;border:1px solid #e2e8f0;">
-          <label class="form-checkbox">
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px; padding:16px; background:#f8fafc; border-radius:12px; margin-top:16px; border:1px solid #e2e8f0;">
+          <label class="form-checkbox" style="margin:0;">
             <input type="checkbox" id="pkg-highlighted"> Gói phổ biến
           </label>
-          <label class="form-checkbox">
+          <label class="form-checkbox" style="margin:0;">
             <input type="checkbox" id="pkg-allow-featured"> Cho phép tin nổi bật
           </label>
-          <label class="form-checkbox">
+          <label class="form-checkbox" style="margin:0;">
             <input type="checkbox" id="pkg-allow-featured-company"> Công ty nổi bật
           </label>
-          <label class="form-checkbox">
+          <label class="form-checkbox" style="margin:0;">
             <input type="checkbox" id="pkg-active" checked> Hoạt động
           </label>
         </div>

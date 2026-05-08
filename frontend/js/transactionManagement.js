@@ -114,27 +114,36 @@ function renderPackages() {
     let filtered = packages.filter(p => p.name.toLowerCase().includes(search));
 
     if (filtered.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;">Không tìm thấy gói nào.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="11" style="text-align:center;">Không tìm thấy gói nào.</td></tr>';
         return;
     }
 
-    tbody.innerHTML = filtered.map(p => `
-        <tr>
-            <td>${p.displayOrder}</td>
-            <td><strong>${p.name}</strong></td>
-            <td style="color:#10b981;font-weight:600;">${formatMoney(p.price)}</td>
-            <td>${p.maxJobPosts === -1 ? 'Không giới hạn' : p.maxJobPosts}</td>
-            <td>${p.durationDays} ngày</td>
-            <td>${p.isHighlighted ? '<span class="badge badge-active">Có</span>' : '<span class="badge" style="background:#e2e8f0;">Không</span>'}</td>
-            <td>${p.allowFeaturedJob ? '<span class="badge badge-active">Có</span>' : '<span class="badge" style="background:#e2e8f0;">Không</span>'}</td>
-            <td>${p.allowFeaturedCompany ? '<span class="badge badge-active">Có</span>' : '<span class="badge" style="background:#e2e8f0;">Không</span>'}</td>
-            <td>${p.isActive ? '<span class="badge badge-active">Hoạt động</span>' : '<span class="badge badge-blocked">Ngừng</span>'}</td>
-            <td>
-                <button class="btn-action text-primary" onclick="editPackage('${p.id}')"><i class="fa-solid fa-pen"></i></button>
-                <button class="btn-action text-danger" onclick="deletePackage('${p.id}')"><i class="fa-solid fa-trash"></i></button>
-            </td>
-        </tr>
-    `).join('');
+    tbody.innerHTML = filtered.map(p => {
+        const featuredLevel = p.featuredLevel || p.FeaturedLevel || 'None';
+        let levelBadge = '';
+        if (featuredLevel === 'Gold') levelBadge = '<span class="badge" style="background:#fffcf0;color:#92400e;border:1px solid #f59e0b;font-weight:700;">Vàng</span>';
+        else if (featuredLevel === 'Silver') levelBadge = '<span class="badge" style="background:#f8fafc;color:#475569;border:1px solid #94a3b8;font-weight:700;">Bạc</span>';
+        else levelBadge = '<span class="badge" style="background:#e2e8f0;color:#64748b;">Thường</span>';
+
+        return `
+            <tr>
+                <td>${p.displayOrder}</td>
+                <td><strong>${p.name}</strong></td>
+                <td style="color:#10b981;font-weight:600;">${formatMoney(p.price)}</td>
+                <td>${p.maxJobPosts === -1 ? 'Không giới hạn' : p.maxJobPosts}</td>
+                <td>${p.durationDays} ngày</td>
+                <td>${p.isHighlighted ? '<span class="badge badge-active">Có</span>' : '<span class="badge" style="background:#e2e8f0;">Không</span>'}</td>
+                <td>${p.allowFeaturedJob ? '<span class="badge badge-active">Có</span>' : '<span class="badge" style="background:#e2e8f0;">Không</span>'}</td>
+                <td>${p.allowFeaturedCompany ? '<span class="badge badge-active">Có</span>' : '<span class="badge" style="background:#e2e8f0;">Không</span>'}</td>
+                <td>${levelBadge}</td>
+                <td>${p.isActive ? '<span class="badge badge-active">Hoạt động</span>' : '<span class="badge badge-blocked">Ngừng</span>'}</td>
+                <td>
+                    <button class="btn-action text-primary" onclick="editPackage('${p.id}')"><i class="fa-solid fa-pen"></i></button>
+                    <button class="btn-action text-danger" onclick="deletePackage('${p.id}')"><i class="fa-solid fa-trash"></i></button>
+                </td>
+            </tr>
+        `;
+    }).join('');
 }
 
 function openPackageModal() {
