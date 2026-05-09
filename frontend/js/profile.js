@@ -48,6 +48,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     initLevelPicker();
 
     await loadProfile();
+    initScrollHighlight();
 });
 
 // ── Load profile from API ────────────────────────────────────
@@ -537,8 +538,6 @@ function showCurrentCv(url, filename) {
 
 // ── Navigation scroll ─────────────────────────────────────────
 function scrollToSection(id, linkEl) {
-    document.querySelectorAll('.pf-nav-link').forEach(l => l.classList.remove('active'));
-    linkEl?.classList.add('active');
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     return false;
 }
@@ -611,4 +610,27 @@ function formatPeriod(from, to, current) {
     }
 
     return `${start} – ${end}${dur}`;
+}
+
+function initScrollHighlight() {
+    const observerOptions = {
+        root: null,
+        rootMargin: '-100px 0px -70% 0px',
+        threshold: 0
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const id = entry.target.getAttribute('id');
+                document.querySelectorAll('.pf-nav-link').forEach(link => {
+                    link.classList.toggle('active', link.getAttribute('href') === '#' + id);
+                });
+            }
+        });
+    }, observerOptions);
+
+    document.querySelectorAll('section.pf-card').forEach(section => {
+        observer.observe(section);
+    });
 }
