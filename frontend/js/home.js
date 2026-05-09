@@ -149,7 +149,6 @@ async function loadJobs() {
 
             const cardHtml = `
                 <div class="job-card${featuredClass}" onclick="window.location.href='job-detail.html?id=${job.id || job.Id}'">
-                    ${featuredBadge}
                     <div class="job-card-header">
                         ${logoHtml}
                         <div class="job-info">

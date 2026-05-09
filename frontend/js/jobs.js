@@ -193,7 +193,6 @@ function renderJobs() {
         const cardHtml = `
             <div class="job-list-card ${newBadge}${featuredClass}" onclick="window.location.href='job-detail.html?id=${job.id}'"
                  id="jcard-${job.id}">
-                ${featuredBadge}
                 <button class="btn-bookmark ${isSaved ? 'active' : ''}"
                         title="${isSaved ? 'Bỏ lưu' : 'Lưu tin'}"
                         onclick="event.stopPropagation(); jobsToggleBookmark(event,'${job.id}',this)">
