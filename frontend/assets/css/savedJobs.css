@@ -5,7 +5,20 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
-body { font-family: 'Inter', sans-serif; background: #f8fafc; color: #1e293b; display: flex; min-height: 100vh; }
+body { font-family: 'Inter', sans-serif; background: #f8fafc; color: #1e293b; display: flex; flex-direction: column; min-height: 100vh; scrollbar-gutter: stable; }
+
+/* ── Layout ───────────────────────────────────────────────── */
+.sj-container { 
+    display: flex; 
+    justify-content: center; 
+    padding: 40px 20px; 
+    width: 100%;
+}
+.sj-content { 
+    width: 100%; 
+    max-width: 1200px; 
+    min-height: 600px;
+}
 
 /* ── Main Content ─────────────────────────────────────────── */
 .sj-header { display: flex; align-items: center; justify-content: space-between;
@@ -65,7 +78,7 @@ body { font-family: 'Inter', sans-serif; background: #f8fafc; color: #1e293b; di
 .sj-filter-btn:hover { border-color: #3b82f6; color: #3b82f6; }
 
 /* ── Job Cards Grid ───────────────────────────────────────── */
-.sj-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+.sj-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; align-content: start; }
 
 @media (max-width: 1200px) { .sj-grid { grid-template-columns: repeat(2,1fr); } }
 @media (max-width: 800px)  { .sj-grid { grid-template-columns: 1fr; } }
@@ -144,7 +157,7 @@ body { font-family: 'Inter', sans-serif; background: #f8fafc; color: #1e293b; di
 .dot-dang-can-nhac { background: #8b5cf6; }
 
 /* ── Empty State ──────────────────────────────────────────── */
-.sj-empty { text-align: center; padding: 80px 24px; }
+.sj-empty { text-align: center; padding: 40px 24px 80px; }
 .sj-empty i { font-size: 56px; color: #e2e8f0; margin-bottom: 16px; display: block; }
 .sj-empty h3 { font-size: 18px; font-weight: 700; color: #0f172a; margin-bottom: 8px; }
 .sj-empty p { font-size: 14px; color: #64748b; }

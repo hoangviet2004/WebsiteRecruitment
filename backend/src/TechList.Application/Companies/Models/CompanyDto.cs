@@ -9,9 +9,12 @@ public sealed record CompanyDto(
     string Address,
     string? CompanySize,
     string? LogoUrl,
+    string? CoverImageUrl,
     bool IsBlocked,
     DateTime CreatedAt,
     string TaxCode,
     string? ContactEmail,
-    string? ContactPhone
+    string? ContactPhone,
+    bool IsFeatured = false,
+    string? FeaturedLevel = null
 );

@@ -11,62 +11,11 @@ let searchQuery = '';
 // INIT
 // ─────────────────────────────────────────────────────────────
 async function initSavedJobs() {
-  renderUserInfo();
-  setupLogout();
   setupSearch();
   await loadSavedJobs();
 }
 
-async function renderUserInfo() {
-  const name = sessionStorage.getItem('fullName') || 'Ứng viên';
-  const avatarUrl = sessionStorage.getItem('avatarUrl');
-  
-  const el = document.getElementById('pf-header-name');
-  const img = document.getElementById('pf-avatar-img');
-  
-  if (el) el.textContent = name;
-  if (img) {
-      if (avatarUrl && avatarUrl !== 'null') {
-          img.src = avatarUrl;
-      } else {
-          img.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=3b82f6&color=fff&size=150`;
-      }
-  }
 
-  try {
-      const res = await apiFetchAuth('/api/profile/me');
-      if (res && res.ok) {
-          const data = await res.json();
-          const p = data.data;
-          if (p) {
-              if (el) el.textContent = p.displayName || name;
-              if (img) {
-                  img.src = p.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(p.displayName || name)}&background=3b82f6&color=fff&size=150`;
-              }
-              const titleEl = document.getElementById('pf-sidebar-title');
-              if (titleEl) {
-                  let parts = [];
-                  if (p.experience) {
-                      try {
-                          const exps = JSON.parse(p.experience);
-                          if (exps?.length) parts.push(exps[0].position || '');
-                      } catch(e){}
-                  }
-                  if (p.location) parts.push(p.location);
-                  titleEl.textContent = parts.filter(Boolean).join(' • ') || 'Ứng viên';
-              }
-          }
-      }
-  } catch (e) {}
-}
-
-function setupLogout() {
-  document.getElementById('sj-logout-btn')?.addEventListener('click', e => {
-    e.preventDefault();
-    sessionStorage.clear();
-    window.location.href = 'auth.html#login';
-  });
-}
 
 function setupSearch() {
   const input = document.getElementById('sj-search-input');
@@ -131,9 +80,11 @@ function renderCards() {
   grid.innerHTML = '';
 
   if (jobs.length === 0) {
+    grid.style.display = 'none';
     empty.style.display = 'block';
     return;
   }
+  grid.style.display = 'grid';
   empty.style.display = 'none';
 
   jobs.forEach(job => {

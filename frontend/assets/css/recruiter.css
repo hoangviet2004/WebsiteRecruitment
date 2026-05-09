@@ -1591,6 +1591,7 @@
     overflow-y: auto;
     background: #fff;
     min-height: 0;
+    border-left: 1px solid #f1f5f9;
 }
 
 .msg-info-empty {
@@ -1600,14 +1601,15 @@
     color: #94a3b8; font-size: 13px; gap: 4px;
 }
 
-.msg-info-content { padding: 20px 16px; }
+.msg-info-content { padding: 0; }
 
 /* Profile section */
 .msg-info-profile {
     text-align: center;
-    padding-bottom: 16px;
+    padding: 30px 16px 20px;
     border-bottom: 1px solid #f1f5f9;
-    margin-bottom: 16px;
+    margin-bottom: 0;
+    background: linear-gradient(180deg, #f8fafc 0%, #fff 100%);
 }
 
 .msg-info-avatar-lg {
@@ -1625,11 +1627,29 @@
     margin: 0 auto 10px;
 }
 
-.msg-info-name  { font-size: 16px; font-weight: 700; color: #0f172a; margin-bottom: 2px; }
-.msg-info-email { font-size: 12px; color: #64748b; }
+.msg-info-name  { 
+    font-size: 18px; 
+    font-weight: 700; 
+    color: #0f172a; 
+    margin-bottom: 4px;
+    line-height: 1.2;
+    overflow-wrap: break-word;
+}
+.msg-info-email { 
+    font-size: 13px; 
+    color: #64748b; 
+    overflow-wrap: break-word;
+    word-break: break-all;
+}
 
 /* Action buttons cột phải */
-.msg-info-actions { display: flex; flex-direction: column; gap: 8px; margin: 16px 0; }
+.msg-info-actions { 
+    display: flex; 
+    flex-direction: column; 
+    gap: 10px; 
+    padding: 20px 16px;
+    background: #fff;
+}
 
 .msg-info-btn {
     width: 100%;
@@ -1665,8 +1685,8 @@
     background: linear-gradient(135deg, #eff6ff, #f0f9ff);
     border: 1px solid #bfdbfe;
     border-radius: 12px;
-    padding: 14px;
-    margin-bottom: 16px;
+    padding: 16px;
+    margin: 0 16px 16px;
 }
 
 .msg-interview-title {
@@ -1701,13 +1721,14 @@
 
 /* Skills */
 .msg-info-section-title {
-    font-size: 11px; font-weight: 700; color: #94a3b8;
-    text-transform: uppercase; letter-spacing: 0.5px;
-    margin: 16px 0 8px;
+    font-size: 11px; font-weight: 800; color: #94a3b8;
+    text-transform: uppercase; letter-spacing: 0.8px;
+    margin: 24px 16px 12px;
 }
 
 .msg-skills-wrap {
-    display: flex; flex-wrap: wrap; gap: 6px;
+    display: flex; flex-wrap: wrap; gap: 8px;
+    padding: 0 16px;
 }
 
 .msg-skill-tag {
@@ -1718,16 +1739,16 @@
 
 /* CV button */
 .msg-cv-btn {
-    display: flex; align-items: center; gap: 8px;
-    padding: 10px 14px;
+    display: flex; align-items: center; gap: 10px;
+    padding: 12px 14px;
     background: #f8fafc;
     border: 1px solid #e2e8f0;
-    border-radius: 10px;
+    border-radius: 12px;
     color: #475569;
     font-size: 13px; font-weight: 600;
     text-decoration: none;
     transition: all 0.15s;
-    margin-bottom: 16px;
+    margin: 0 16px 16px;
 }
 .msg-cv-btn:hover { background: #eff6ff; color: #3b82f6; border-color: #bfdbfe; }
 

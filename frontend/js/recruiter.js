@@ -65,7 +65,13 @@ async function loadPackages() {
             const jobsText = s.maxJobPosts === -1
                 ? '<span style="color:#22c55e;font-weight:700;">Không giới hạn</span>'
                 : '<strong>' + s.jobPostsUsed + '</strong> / ' + s.maxJobPosts + ' tin đã dùng';
-            const endDateStr = new Date(s.endDate).toLocaleDateString('vi-VN', { day:'2-digit', month:'2-digit', year:'numeric' });
+            
+            const endDate = new Date(s.endDate);
+            const endDateStr = endDate.getFullYear() > 2070 
+                ? '<span style="color:#22c55e;font-weight:700;">Vô thời hạn</span>' 
+                : endDate.toLocaleDateString('vi-VN', { day:'2-digit', month:'2-digit', year:'numeric' });
+            
+            const remainingText = endDate.getFullYear() > 2070 ? '' : ` (còn ${s.daysRemaining} ngày)`;
 
             let subFeaturesHtml = '';
             try {
@@ -75,7 +81,7 @@ async function loadPackages() {
                 }
             } catch(e) {}
 
-            subInfoHtml = '<div class="sub-info-card"><div class="sub-info-header"><i class="fa-solid fa-crown" style="color:#f59e0b;margin-right:8px;"></i>Gói hiện tại: <strong>' + escapeHtmlPkg(s.packageName) + '</strong></div><div class="sub-info-details"><div class="sub-info-item"><i class="fa-solid fa-newspaper"></i><span>Tin đăng: ' + jobsText + '</span></div><div class="sub-info-item"><i class="fa-solid fa-calendar-check"></i><span>Hết hạn: ' + endDateStr + ' (còn ' + s.daysRemaining + ' ngày)</span></div></div>' + subFeaturesHtml + '</div>';
+            subInfoHtml = '<div class="sub-info-card"><div class="sub-info-header"><i class="fa-solid fa-crown" style="color:#f59e0b;margin-right:8px;"></i>Gói hiện tại: <strong>' + escapeHtmlPkg(s.packageName) + '</strong></div><div class="sub-info-details"><div class="sub-info-item"><i class="fa-solid fa-newspaper"></i><span>Tin đăng: ' + jobsText + '</span></div><div class="sub-info-item"><i class="fa-solid fa-calendar-check"></i><span>Hạn dùng: ' + endDateStr + remainingText + '</span></div></div>' + subFeaturesHtml + '</div>';
         }
 
         let cardsHtml = '';
@@ -118,7 +124,7 @@ async function loadPackages() {
             if (isCurrentPkg) {
                 badgeHtml = '<div class="pkg-badge" style="background:linear-gradient(135deg,#22c55e,#16a34a);">Gói hiện tại</div>';
             } else if (pkg.isHighlighted) {
-                badgeHtml = '<div class="pkg-badge">Phổ biến nhất</div>';
+                badgeHtml = '<div class="pkg-badge">Gói phổ biến</div>';
             }
 
             cardsHtml += '<div class="pkg-card' + highlightClass + currentClass + '">' + badgeHtml + '<div class="pkg-name">' + escapeHtmlPkg(pkg.name) + '</div><div class="pkg-price">' + priceStr + '</div><div class="pkg-jobs"><i class="fa-solid fa-briefcase" style="margin-right:6px;"></i>' + maxJobText + '</div><ul class="pkg-features">' + featuresHtml + '</ul>' + btnHtml + '</div>';
@@ -214,6 +220,18 @@ function escapeHtmlPkg(str) {
     return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
+async function loadSubscriptionInfo() {
+    try {
+        const response = await apiFetchAuth('/api/packages/my-subscription', { method: 'GET' });
+        const res = await response.json();
+        if (res.success && res.data) {
+            _currentSubscription = res.data;
+        }
+    } catch (e) {
+        console.error("Lỗi tải thông tin gói dịch vụ:", e);
+    }
+}
+
 // ── 3. Quản lý Hồ sơ Công ty ───────────────────────────────
 async function loadMyCompany() {
     try {
@@ -236,11 +254,134 @@ async function loadMyCompany() {
             // Quy mô công ty
             const sizeEl = document.getElementById('company-size');
             if (sizeEl && res.data.companySize) sizeEl.value = res.data.companySize;
+
+            if (res.data.logoUrl) {
+                document.getElementById('logo-image').src = res.data.logoUrl;
+                document.getElementById('logo-image').style.display = 'block';
+                document.getElementById('logo-placeholder').style.display = 'none';
+            }
+            if (res.data.coverImageUrl) {
+                document.getElementById('cover-image').src = res.data.coverImageUrl;
+                document.getElementById('cover-image').style.display = 'block';
+            }
         }
     } catch (e) {
         // Backend throw 500 or 400 if not found, we ignore or log.
         console.log("Sẽ tạo mới công ty.");
     }
+}
+
+let cropper = null;
+let currentCropType = null; // 'logo' or 'cover'
+
+function handleImageSelect(input, type) {
+    if (!input.files || input.files.length === 0) return;
+    if (!currentCompanyId) {
+        alert("Vui lòng tạo hồ sơ công ty trước khi tải ảnh lên.");
+        input.value = '';
+        return;
+    }
+    
+    currentCropType = type;
+    const file = input.files[0];
+    const reader = new FileReader();
+    
+    reader.onload = function(e) {
+        const cropImage = document.getElementById('crop-image');
+        cropImage.src = e.target.result;
+        
+        // Cập nhật tiêu đề modal
+        const modalTitle = document.querySelector('#crop-modal .modal-header h3');
+        if (modalTitle) {
+            modalTitle.textContent = type === 'logo' ? 'Cắt ảnh đại diện' : 'Cắt ảnh bìa';
+        }
+        
+        document.getElementById('crop-modal').style.display = 'flex';
+        
+        if (cropper) {
+            cropper.destroy();
+        }
+        
+        cropper = new Cropper(cropImage, {
+            aspectRatio: type === 'logo' ? 1 : NaN, // Logo 1:1, Cover tự do
+            viewMode: 2,
+            autoCropArea: 1,
+            responsive: true,
+        });
+    };
+    
+    reader.readAsDataURL(file);
+}
+
+function uploadLogo(input) {
+    handleImageSelect(input, 'logo');
+}
+
+function uploadCover(input) {
+    handleImageSelect(input, 'cover');
+}
+
+function closeCropModal() {
+    document.getElementById('crop-modal').style.display = 'none';
+    if (cropper) {
+        cropper.destroy();
+        cropper = null;
+    }
+    currentCropType = null;
+    document.getElementById('logo-input').value = '';
+    document.getElementById('cover-input').value = '';
+}
+
+async function confirmCrop() {
+    if (!cropper || !currentCompanyId || !currentCropType) return;
+    
+    const btn = document.getElementById('crop-save-btn');
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang lưu...';
+    btn.disabled = true;
+    
+    // Tùy chỉnh độ phân giải khi xuất ảnh
+    const cropOptions = currentCropType === 'logo' 
+        ? { width: 400, height: 400 } 
+        : { maxWidth: 1200 }; // Cover không cố định kích thước nhưng giới hạn chiều rộng
+        
+    cropper.getCroppedCanvas(cropOptions).toBlob(async (blob) => {
+        const formData = new FormData();
+        const fileName = currentCropType === 'logo' ? 'logo.png' : 'cover.png';
+        formData.append('file', blob, fileName);
+
+        const endpoint = currentCropType === 'logo' 
+            ? `/api/companies/${currentCompanyId}/logo` 
+            : `/api/companies/${currentCompanyId}/cover`;
+
+        try {
+            const response = await fetch(`${API_URL}${endpoint}`, {
+                method: 'POST',
+                headers: { 'Authorization': 'Bearer ' + sessionStorage.getItem('token') },
+                body: formData
+            });
+            const res = await response.json();
+            
+            if (response.ok && res.success) {
+                if (currentCropType === 'logo') {
+                    document.getElementById('logo-image').src = res.data;
+                    document.getElementById('logo-image').style.display = 'block';
+                    document.getElementById('logo-placeholder').style.display = 'none';
+                } else {
+                    document.getElementById('cover-image').src = res.data;
+                    document.getElementById('cover-image').style.display = 'block';
+                }
+                closeCropModal();
+            } else {
+                alert(res.message || `Lỗi tải ảnh ${currentCropType === 'logo' ? 'logo' : 'bìa'}`);
+            }
+        } catch (e) {
+            alert("Lỗi kết nối khi tải ảnh");
+        } finally {
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        }
+    }, 'image/png');
 }
 
 document.getElementById('company-form').addEventListener('submit', async function(e) {
@@ -346,11 +487,14 @@ async function openJobModal() {
         var subRes = await apiFetchAuth('/api/packages/my-subscription', { method: 'GET' });
         var subData = await subRes.json();
         if (subData.success && subData.data && subData.data.hasSubscription) {
-            var s = subData.data;
+            _currentSubscription = subData.data;
+            var s = _currentSubscription;
             if (s.maxJobPosts !== -1 && s.jobPostsUsed >= s.maxJobPosts) {
                 alert('Bạn đã vượt quá giới hạn ' + s.maxJobPosts + ' tin đăng của gói "' + s.packageName + '".\nVui lòng đăng ký gói dịch vụ cao hơn để đăng thêm tin.');
                 return;
             }
+        } else {
+            _currentSubscription = null;
         }
     } catch (e) {
         // If check fails, let the backend handle it
@@ -359,6 +503,21 @@ async function openJobModal() {
     document.getElementById('job-form').reset();
     document.getElementById('job-id').value = '';
     document.getElementById('job-modal-title').innerText = 'Đăng tin tuyển dụng mới';
+    
+    // Kiểm tra quyền đăng tin nổi bật
+    const featuredCheckbox = document.getElementById('job-featured');
+    const featuredHint = document.getElementById('featured-hint');
+    const canPostFeatured = _currentSubscription && _currentSubscription.hasSubscription && 
+                           (_currentSubscription.allowFeaturedJob === true);
+    
+    if (!canPostFeatured) {
+        featuredCheckbox.disabled = true;
+        featuredCheckbox.checked = false;
+        featuredHint.textContent = '(Gói dịch vụ hiện tại không hỗ trợ tính năng này)';
+    } else {
+        featuredCheckbox.disabled = false;
+        featuredHint.textContent = 'Tin sẽ hiển thị nổi bật với màu vàng và huy hiệu đặc biệt';
+    }
     
     // Set mặc định ngày hết hạn là 30 ngày sau
     const date = new Date();
@@ -408,6 +567,8 @@ async function submitJobForm() {
         description: document.getElementById('job-desc').value,
         requirements: document.getElementById('job-req').value,
         benefits: document.getElementById('job-ben').value,
+        applicationLimit: parseInt(document.getElementById('job-app-limit').value) || null,
+        isFeatured: document.getElementById('job-featured').checked,
         expiresAt: new Date(document.getElementById('job-expires').value).toISOString(),
         isActive: document.getElementById('job-active').value === 'true'
     };
@@ -466,6 +627,27 @@ async function editJob(jobId) {
             document.getElementById('job-expires').value = localISOTime;
             
             document.getElementById('job-active').value = job.isActive.toString();
+            document.getElementById('job-app-limit').value = job.applicationLimit || '';
+            
+            // Điền lại trạng thái nổi bật + kiểm tra quyền
+            const featuredCheckbox = document.getElementById('job-featured');
+            const featuredHint = document.getElementById('featured-hint');
+            
+            // Đảm bảo có thông tin subscription mới nhất
+            await loadSubscriptionInfo();
+            
+            const canPostFeatured = _currentSubscription && _currentSubscription.hasSubscription && 
+                                   (_currentSubscription.allowFeaturedJob === true);
+            
+            featuredCheckbox.checked = job.isFeatured || false;
+            if (!canPostFeatured) {
+                featuredCheckbox.disabled = true;
+                // Nếu tin đang là nổi bật nhưng gói hiện tại không cho phép (hết hạn hoặc hạ cấp), vẫn giữ checked nhưng disable để họ biết
+                featuredHint.textContent = '(Gói dịch vụ hiện tại không hỗ trợ tính năng này)';
+            } else {
+                featuredCheckbox.disabled = false;
+                featuredHint.textContent = 'Tin sẽ hiển thị nổi bật với màu vàng và huy hiệu đặc biệt';
+            }
 
             document.getElementById('job-modal-title').innerText = 'Chỉnh sửa tin tuyển dụng';
             document.getElementById('job-modal').classList.add('show');
@@ -496,6 +678,7 @@ async function deleteJob(jobId) {
 document.addEventListener('DOMContentLoaded', function() {
     requireRecruiter();
     loadMyCompany();
+    loadSubscriptionInfo();
 
     const urlParams = new URLSearchParams(window.location.search);
     const tab = urlParams.get('tab') || 'company';

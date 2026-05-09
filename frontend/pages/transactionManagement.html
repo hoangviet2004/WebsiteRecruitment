@@ -98,13 +98,16 @@
               <th>Giá (VND)</th>
               <th>Số tin/tháng</th>
               <th>Thời hạn</th>
-              <th>Nổi bật</th>
+              <th>Gói phổ biến</th>
+              <th>Tin nổi bật</th>
+              <th>CT nổi bật</th>
+              <th>Cấp bậc</th>
               <th>Trạng thái</th>
               <th>Thao tác</th>
             </tr>
           </thead>
           <tbody id="pkg-table-body">
-            <tr><td colspan="8" style="text-align:center;padding:32px;color:#64748b;">Đang tải...</td></tr>
+            <tr><td colspan="10" style="text-align:center;padding:32px;color:#64748b;">Đang tải...</td></tr>
           </tbody>
         </table>
       </div>
@@ -288,18 +291,34 @@
             <label class="form-label">Thứ tự hiển thị</label>
             <input type="number" id="pkg-order" class="form-input" value="0" min="0">
           </div>
-          <div style="display:flex;gap:24px;align-items:center;padding-top:22px;">
-            <label class="form-checkbox">
-              <input type="checkbox" id="pkg-highlighted"> Nổi bật
-            </label>
-            <label class="form-checkbox">
-              <input type="checkbox" id="pkg-active" checked> Hoạt động
-            </label>
+          <div class="form-group">
+            <label class="form-label">Cấp bậc hiển thị</label>
+            <select id="pkg-featured-level" class="form-input">
+              <option value="None">Thường</option>
+              <option value="Silver">Bạc</option>
+              <option value="Gold">Vàng</option>
+            </select>
           </div>
         </div>
+
         <div class="form-group" style="margin-top:12px;">
           <label class="form-label">Tính năng (mỗi dòng 1 tính năng)</label>
           <textarea id="pkg-features" class="form-textarea" rows="4" placeholder="VD:&#10;10 tin tuyển dụng/tháng&#10;Hiển thị ưu tiên&#10;Hỗ trợ 24/7"></textarea>
+        </div>
+
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px; padding:16px; background:#f8fafc; border-radius:12px; margin-top:16px; border:1px solid #e2e8f0;">
+          <label class="form-checkbox" style="margin:0;">
+            <input type="checkbox" id="pkg-highlighted"> Gói phổ biến
+          </label>
+          <label class="form-checkbox" style="margin:0;">
+            <input type="checkbox" id="pkg-allow-featured"> Cho phép tin nổi bật
+          </label>
+          <label class="form-checkbox" style="margin:0;">
+            <input type="checkbox" id="pkg-allow-featured-company"> Công ty nổi bật
+          </label>
+          <label class="form-checkbox" style="margin:0;">
+            <input type="checkbox" id="pkg-active" checked> Hoạt động
+          </label>
         </div>
         <div class="modal-actions">
           <button type="button" class="tm-btn-secondary" onclick="closeModal('modal-package')">Hủy</button>

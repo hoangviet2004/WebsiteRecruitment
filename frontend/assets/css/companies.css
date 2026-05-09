@@ -1,0 +1,570 @@
+/* ============================================================
+   companies.css – Trang Danh sách Công ty
+   ============================================================ */
+
+/* Active nav link */
+.homebar .left ul li a.active {
+    color: #3b82f6;
+}
+.homebar .left ul li a.active::after {
+    width: 100%;
+    background: #3b82f6;
+}
+
+/* Card entry animation */
+.co-card-anim {
+    opacity: 0;
+    transform: translateY(20px);
+    animation: co-cardIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+@keyframes co-cardIn {
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Banner ──────────────────────────────────────────────── */
+.co-banner {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    overflow: hidden;
+    min-height: 320px;
+    padding: 60px 80px;
+    background: linear-gradient(135deg, #f0f4ff 0%, #e0e7ff 40%, #c7d2fe 100%);
+}
+
+.co-banner-blob {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.35;
+    pointer-events: none;
+}
+.co-blob-1 {
+    width: 380px; height: 380px;
+    background: #3b82f6;
+    top: -120px; left: -80px;
+    animation: co-float 12s infinite alternate ease-in-out;
+}
+.co-blob-2 {
+    width: 300px; height: 300px;
+    background: #8b5cf6;
+    bottom: -100px; right: 300px;
+    animation: co-float 9s infinite alternate-reverse ease-in-out;
+}
+
+@keyframes co-float {
+    0% { transform: translate(0, 0) scale(1); }
+    100% { transform: translate(30px, 20px) scale(1.08); }
+}
+
+/* Banner content */
+.co-banner-content {
+    position: relative;
+    z-index: 2;
+    max-width: 600px;
+    animation: co-fadeUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes co-fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.co-banner-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    color: #4f46e5;
+    background: rgba(79, 70, 229, 0.08);
+    border: 1px solid rgba(79, 70, 229, 0.2);
+    padding: 6px 14px;
+    border-radius: 100px;
+    margin-bottom: 20px;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+}
+
+.co-banner-title {
+    font-size: 42px;
+    font-weight: 800;
+    color: #0f172a;
+    line-height: 1.2;
+    margin-bottom: 14px;
+    letter-spacing: -0.025em;
+}
+
+.co-highlight {
+    color: transparent;
+    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+    -webkit-background-clip: text;
+    background-clip: text;
+}
+
+.co-banner-sub {
+    font-size: 16px;
+    color: #475569;
+    margin-bottom: 32px;
+    line-height: 1.6;
+}
+
+/* Search bar in banner */
+.co-search-bar {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    background: rgba(255,255,255,0.92);
+    backdrop-filter: blur(12px);
+    border-radius: 100px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+    padding: 8px 8px 8px 22px;
+    max-width: 520px;
+    border: 1.5px solid rgba(255,255,255,0.9);
+    transition: box-shadow 0.3s ease;
+}
+.co-search-bar:focus-within {
+    box-shadow: 0 12px 40px rgba(59, 130, 246, 0.2);
+}
+
+.co-search-icon {
+    color: #3b82f6;
+    font-size: 16px;
+    margin-right: 12px;
+    flex-shrink: 0;
+}
+
+.co-search-bar input {
+    border: none;
+    outline: none;
+    background: transparent;
+    font-size: 15px;
+    font-weight: 500;
+    color: #1e293b;
+    flex: 1;
+    min-width: 0;
+}
+
+.co-search-bar input::placeholder {
+    color: #94a3b8;
+    font-weight: 400;
+}
+
+.co-search-btn {
+    background: linear-gradient(135deg, #3b82f6, #4f46e5);
+    color: #fff;
+    border: none;
+    padding: 12px 28px;
+    border-radius: 100px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    flex-shrink: 0;
+    box-shadow: 0 4px 14px rgba(59, 130, 246, 0.4);
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.co-search-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(59, 130, 246, 0.5);
+}
+
+/* Illustration */
+.co-banner-illustration {
+    position: relative;
+    flex-shrink: 0;
+    width: 280px;
+    height: 220px;
+    z-index: 2;
+}
+
+.co-illustration-graphic {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: flex-end;
+    gap: 12px;
+    padding: 20px;
+}
+
+.co-graphic-bars {
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+    height: 100%;
+    padding-bottom: 30px;
+}
+
+.co-bar {
+    width: 28px;
+    border-radius: 6px 6px 0 0;
+    background: linear-gradient(180deg, #3b82f6, #1d4ed8);
+    opacity: 0.7;
+    animation: co-grow 1.2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    transform-origin: bottom;
+}
+.co-bar-1 { height: 60%; animation-delay: 0.1s; }
+.co-bar-2 { height: 85%; animation-delay: 0.2s; }
+.co-bar-3 { height: 50%; animation-delay: 0.3s; }
+.co-bar-4 { height: 100%; animation-delay: 0.4s; background: linear-gradient(180deg, #6366f1, #4f46e5); opacity: 1; }
+
+@keyframes co-grow {
+    from { transform: scaleY(0); }
+    to   { transform: scaleY(1); }
+}
+
+.co-graphic-circle {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(59, 130, 246, 0.12);
+    border: 2px solid rgba(59, 130, 246, 0.2);
+}
+.co-gc-1 { width: 80px; height: 80px; top: 10px; right: 20px; animation: co-float 8s infinite alternate ease-in-out; }
+.co-gc-2 { width: 45px; height: 45px; top: 60px; right: 80px; animation: co-float 6s infinite alternate-reverse ease-in-out; background: rgba(99, 102, 241, 0.15); }
+.co-gc-3 { width: 30px; height: 30px; top: 20px; right: 110px; animation: co-float 10s infinite alternate ease-in-out; }
+
+.co-graphic-stat {
+    position: absolute;
+    bottom: 20px;
+    right: 10px;
+    background: #fff;
+    border-radius: 12px;
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    color: #4f46e5;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+    animation: co-fadeUp 1s 0.5s both;
+}
+.co-graphic-stat i { font-size: 16px; }
+
+/* ── Main Content ─────────────────────────────────────────── */
+.co-main {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 60px 40px 80px;
+}
+
+.co-section-header {
+    text-align: center;
+    margin-bottom: 48px;
+}
+
+.co-section-title {
+    font-size: 22px;
+    font-weight: 800;
+    color: #0f172a;
+    letter-spacing: 0.06em;
+    margin-bottom: 8px;
+    position: relative;
+    display: inline-block;
+}
+.co-section-title::after {
+    content: '';
+    display: block;
+    width: 56px;
+    height: 3px;
+    background: linear-gradient(135deg, #3b82f6, #4f46e5);
+    border-radius: 2px;
+    margin: 10px auto 0;
+}
+
+.co-section-sub {
+    font-size: 14px;
+    color: #64748b;
+    margin-top: 10px;
+}
+
+/* ── Company Grid ──────────────────────────────────────────── */
+.co-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 28px;
+}
+
+@media (max-width: 1024px) { .co-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 640px) { .co-grid { grid-template-columns: 1fr; } }
+
+/* Skeleton */
+.co-skeleton {
+    border-radius: 16px;
+    height: 320px;
+    background: #fff;
+    border: 1px solid #e8eef4;
+    position: relative;
+    overflow: hidden;
+}
+.co-skeleton::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent);
+    animation: shimmer 1.5s infinite;
+}
+
+/* ── Company Card ──────────────────────────────────────────── */
+.co-card {
+    background: #fff;
+    border-radius: 16px;
+    border: 1.5px solid #e8eef4;
+    cursor: pointer;
+    transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden; /* clip card radius */
+}
+.co-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 16px 40px rgba(59, 130, 246, 0.12);
+    border-color: #bfdbfe;
+}
+.co-card.featured-gold {
+    border: 2px solid #f59e0b !important;
+    background: linear-gradient(to bottom, #fffcf0, #ffffff) !important;
+}
+.co-card.featured-gold:hover {
+    box-shadow: 0 16px 40px rgba(245, 158, 11, 0.15) !important;
+}
+
+.co-card.featured-silver {
+    border: 2px solid #94a3b8 !important;
+    background: linear-gradient(to bottom, #f8fafc, #ffffff) !important;
+}
+.co-card.featured-silver:hover {
+    box-shadow: 0 16px 40px rgba(148, 163, 184, 0.1) !important;
+}
+
+.co-badge-featured {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    color: #fff;
+    padding: 4px 10px;
+    border-radius: 8px;
+    font-size: 11px;
+    font-weight: 800;
+    z-index: 5;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    animation: co-badgePulse 2s infinite;
+}
+
+.co-badge-featured-gold {
+    background: linear-gradient(135deg, #f59e0b, #fbbf24);
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4);
+}
+
+.co-badge-featured-silver {
+    background: linear-gradient(135deg, #64748b, #94a3b8);
+    box-shadow: 0 4px 12px rgba(100, 116, 139, 0.3);
+}
+
+@keyframes co-badgePulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+/* Cover image — sits at the top of the card */
+.co-card-cover {
+    width: 100%;
+    height: 130px;
+    background: linear-gradient(135deg, #e0e7ff, #c7d2fe);
+    flex-shrink: 0;
+    position: relative;
+    overflow: hidden;
+}
+.co-card-cover img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+    display: block;
+}
+.co-card:hover .co-card-cover img {
+    transform: scale(1.05);
+}
+.co-cover-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 40px;
+    color: rgba(59,130,246,0.2);
+}
+
+/* Card body — logo overlaps the cover via negative margin */
+.co-card-body {
+    padding: 0 20px 20px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.co-card-logo-wrap {
+    display: flex;
+    justify-content: flex-start;
+    /* Pull the logo up so it overlaps the bottom edge of the cover */
+    margin-top: -28px;
+    margin-bottom: 10px;
+    position: relative;
+    z-index: 2; /* render above the cover */
+}
+
+.co-card-logo {
+    width: 56px;
+    height: 56px;
+    border-radius: 12px;
+    border: 3px solid #fff;
+    background: #f8fafc;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    font-weight: 700;
+    color: #3b82f6;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+.co-card-logo img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.co-card-name {
+    font-size: 15px;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 6px;
+    line-height: 1.35;
+    transition: color 0.2s;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+.co-card:hover .co-card-name { color: #2563eb; }
+
+.co-card-desc {
+    font-size: 13px;
+    color: #64748b;
+    line-height: 1.6;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    flex: 1;
+    margin-bottom: 14px;
+}
+
+.co-card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 12px;
+    border-top: 1px dashed #e2e8f0;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.co-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 100px;
+    white-space: nowrap;
+}
+.co-tag-industry {
+    background: rgba(79, 70, 229, 0.08);
+    color: #4f46e5;
+    border: 1px solid rgba(79, 70, 229, 0.2);
+}
+.co-tag-size {
+    background: rgba(59, 130, 246, 0.07);
+    color: #2563eb;
+    border: 1px solid rgba(59, 130, 246, 0.18);
+}
+
+.co-card-location {
+    font-size: 12px;
+    color: #94a3b8;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 140px;
+}
+
+/* ── Empty State ───────────────────────────────────────────── */
+.co-empty {
+    text-align: center;
+    padding: 80px 20px;
+    color: #94a3b8;
+}
+.co-empty i {
+    font-size: 56px;
+    margin-bottom: 20px;
+    display: block;
+    opacity: 0.4;
+}
+.co-empty p {
+    font-size: 17px;
+    margin-bottom: 24px;
+    color: #64748b;
+}
+.co-reset-btn {
+    display: inline-block;
+    padding: 10px 28px;
+    background: linear-gradient(135deg, #3b82f6, #4f46e5);
+    color: #fff;
+    border: none;
+    border-radius: 100px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 14px rgba(59, 130, 246, 0.3);
+}
+.co-reset-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4);
+}
+
+/* ── Footer ────────────────────────────────────────────────── */
+.co-footer {
+    text-align: center;
+    padding: 24px;
+    background: #f8fafc;
+    border-top: 1px solid #e2e8f0;
+    font-size: 13px;
+    color: #94a3b8;
+}
+
+/* ── Responsive Banner ─────────────────────────────────────── */
+@media (max-width: 900px) {
+    .co-banner { padding: 50px 30px; flex-direction: column; text-align: center; }
+    .co-banner-content { max-width: 100%; }
+    .co-search-bar { max-width: 100%; }
+    .co-banner-illustration { display: none; }
+    .co-banner-title { font-size: 32px; }
+    .co-main { padding: 40px 20px 60px; }
+}

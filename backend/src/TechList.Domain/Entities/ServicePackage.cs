@@ -26,6 +26,15 @@ public class ServicePackage
     /// <summary>Trạng thái hoạt động (active/inactive).</summary>
     public bool IsActive { get; set; } = true;
 
+    /// <summary>Cho phép nhà tuyển dụng đăng tin nổi bật.</summary>
+    public bool AllowFeaturedJob { get; set; } = false;
+
+    /// <summary>Cho phép công ty hiển thị nổi bật.</summary>
+    public bool AllowFeaturedCompany { get; set; } = false;
+
+    /// <summary>Cấp bậc hiển thị (None, Silver, Gold).</summary>
+    public string FeaturedLevel { get; set; } = "None";
+
     /// <summary>Thứ tự hiển thị.</summary>
     public int DisplayOrder { get; set; }
 

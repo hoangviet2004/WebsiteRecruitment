@@ -23,6 +23,9 @@ public class Company
     public string? LogoUrl { get; set; }
     public string? LogoPublicId { get; set; }
 
+    public string? CoverImageUrl { get; set; }
+    public string? CoverImagePublicId { get; set; }
+
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
     

@@ -28,12 +28,21 @@ async function loadFeaturedCompanies() {
 
         list.innerHTML = '';
         
-        if (!response.ok || !res.success || !res.data || res.data.length === 0) {
-            list.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: #64748b;">Chưa có công ty nổi bật nào.</p>';
+        // Lọc: Chỉ lấy các công ty cấp Bạc (Silver) trở lên
+        const companies = res.data.filter(c => {
+            const lvl = (c.featuredLevel || '').toLowerCase();
+            return lvl === 'gold' || lvl === 'silver';
+        }).sort((a, b) => {
+            const lvlA = (a.featuredLevel || '').toLowerCase();
+            const lvlB = (b.featuredLevel || '').toLowerCase();
+            if (lvlA === lvlB) return 0;
+            return lvlA === 'gold' ? -1 : 1;
+        });
+
+        if (companies.length === 0) {
+            list.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: #64748b;">Hiện chưa có đối tác tiêu biểu nào.</p>';
             return;
         }
-
-        const companies = res.data;
         
         companies.forEach(company => {
             const logoHtml = company.logoUrl
@@ -78,38 +87,78 @@ async function loadJobs() {
             return;
         }
 
-        const jobs = res.data;
+        const getPriority = (job) => {
+            const lvl = (job.featuredLevel || job.FeaturedLevel || '').toLowerCase();
+            if (lvl === 'gold') return 3;
+            if (lvl === 'silver') return 2;
+            if (job.isFeatured || job.IsFeatured) return 1;
+            return 0;
+        };
+
+        // Sắp xếp: Tin nổi bật (Gold > Silver > Nổi bật thường) lên đầu, sau đó theo thời gian mới nhất
+        const sortedJobs = res.data.sort((a, b) => {
+            const pA = getPriority(a);
+            const pB = getPriority(b);
+            
+            if (pA !== pB) return pB - pA;
+            
+            // Nếu cùng cấp bậc, tin mới hơn lên trên
+            return new Date(b.createdAt || b.CreatedAt) - new Date(a.createdAt || a.CreatedAt);
+        });
+
+        // Lấy tối đa 12 tin tuyển dụng cho trang chủ
+        const jobs = sortedJobs.slice(0, 12);
         
         jobs.forEach(job => {
+            // Casing fallback cho API
+            const title = job.title || job.Title;
+            const companyName = job.companyName || job.CompanyName;
+            const companyLogo = job.companyLogo || job.CompanyLogo;
+            const location = job.location || job.Location;
+            const minSalary = job.minSalary || job.MinSalary;
+            const maxSalary = job.maxSalary || job.MaxSalary;
+            const createdAt = job.createdAt || job.CreatedAt;
+            const isFeatured = job.isFeatured || job.IsFeatured;
+            const featuredLevel = (job.featuredLevel || job.FeaturedLevel || '').toLowerCase();
+
             // Logo: wrapper div luôn có class, bên trong là <img> hoặc chữ cái
-            const logoHtml = job.companyLogo
-                ? `<div class="company-logo"><img src="${job.companyLogo}" alt="${job.companyName}"></div>`
-                : `<div class="company-logo">${getInitials(job.companyName)}</div>`;
+            const logoHtml = companyLogo
+                ? `<div class="company-logo"><img src="${companyLogo}" alt="${companyName}"></div>`
+                : `<div class="company-logo">${getInitials(companyName)}</div>`;
 
             // Lương — format VNĐ
             let salaryStr = 'Thỏa thuận';
-            if (job.minSalary && job.maxSalary) {
-                salaryStr = `${job.minSalary.toLocaleString('vi-VN')} - ${job.maxSalary.toLocaleString('vi-VN')} VNĐ`;
-            } else if (job.minSalary) {
-                salaryStr = `Từ ${job.minSalary.toLocaleString('vi-VN')} VNĐ`;
-            } else if (job.maxSalary) {
-                salaryStr = `Lên đến ${job.maxSalary.toLocaleString('vi-VN')} VNĐ`;
+            if (minSalary && maxSalary) {
+                salaryStr = `${minSalary.toLocaleString('vi-VN')} - ${maxSalary.toLocaleString('vi-VN')} VNĐ`;
+            } else if (minSalary) {
+                salaryStr = `Từ ${minSalary.toLocaleString('vi-VN')} VNĐ`;
+            } else if (maxSalary) {
+                salaryStr = `Lên đến ${maxSalary.toLocaleString('vi-VN')} VNĐ`;
             }
 
-            const timeAgo = getTimeAgo(new Date(job.createdAt));
+            const timeAgo = getTimeAgo(new Date(createdAt));
+            
+            // Xử lý cấp bậc hiển thị
+            let featuredClass = '';
+            if (featuredLevel === 'gold' || featuredLevel === 'silver') {
+                featuredClass = ` featured-${featuredLevel}`;
+            } else if (isFeatured) {
+                // Fallback cho trường hợp isFeatured=true nhưng không có level cụ thể
+                featuredClass = ' featured';
+            }
 
             const cardHtml = `
-                <div class="job-card" onclick="window.location.href='job-detail.html?id=${job.id}'">
+                <div class="job-card${featuredClass}" onclick="window.location.href='job-detail.html?id=${job.id || job.Id}'">
                     <div class="job-card-header">
                         ${logoHtml}
                         <div class="job-info">
-                            <h3>${job.title}</h3>
-                            <div class="company-name">${job.companyName}</div>
+                            <h3>${title}</h3>
+                            <div class="company-name">${companyName}</div>
                         </div>
                     </div>
                     <div class="job-tags">
                         <span class="tag tag-salary"><i class="fa-solid fa-money-bill-wave"></i> ${salaryStr}</span>
-                        <span class="tag tag-location"><i class="fa-solid fa-location-dot"></i> ${job.location}</span>
+                        <span class="tag tag-location"><i class="fa-solid fa-location-dot"></i> ${location}</span>
                     </div>
                     <div class="job-card-footer">
                         <span class="post-time"><i class="fa-regular fa-clock"></i> ${timeAgo}</span>

@@ -18,5 +18,7 @@ public sealed record JobDto(
     DateTime ExpiresAt,
     bool IsActive,
     bool IsApproved,
-    DateTime CreatedAt
+    DateTime CreatedAt,
+    bool IsFeatured = false,
+    string? FeaturedLevel = null
 );

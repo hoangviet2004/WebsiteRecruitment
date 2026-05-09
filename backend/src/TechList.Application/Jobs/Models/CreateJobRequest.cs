@@ -38,4 +38,5 @@ public sealed class CreateJobRequest
     public DateTime ExpiresAt { get; set; }
     
     public bool IsActive { get; set; } = true;
+    public bool IsFeatured { get; set; } = false;
 }

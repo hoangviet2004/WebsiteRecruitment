@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TechList.Infrastructure.Persistence;
 
@@ -11,9 +12,11 @@ using TechList.Infrastructure.Persistence;
 namespace TechList.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260508094712_AddCompanyCoverImage")]
+    partial class AddCompanyCoverImage
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -416,9 +419,6 @@ namespace TechList.Infrastructure.Persistence.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<int?>("ApplicationLimit")
-                        .HasColumnType("int");
-
                     b.Property<string>("Benefits")
                         .IsRequired()
                         .HasMaxLength(4000)
@@ -444,16 +444,10 @@ namespace TechList.Infrastructure.Persistence.Migrations
                     b.Property<DateTime>("ExpiresAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("FeaturedLevel")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
                     b.Property<bool>("IsApproved")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsFeatured")
                         .HasColumnType("bit");
 
                     b.Property<string>("JobType")
@@ -672,12 +666,6 @@ namespace TechList.Infrastructure.Persistence.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<bool>("AllowFeaturedCompany")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("AllowFeaturedJob")
-                        .HasColumnType("bit");
-
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
@@ -686,10 +674,6 @@ namespace TechList.Infrastructure.Persistence.Migrations
 
                     b.Property<int>("DurationDays")
                         .HasColumnType("int");
-
-                    b.Property<string>("FeaturedLevel")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Features")
                         .IsRequired()
@@ -724,12 +708,9 @@ namespace TechList.Infrastructure.Persistence.Migrations
                         new
                         {
                             Id = new Guid("11111111-1111-1111-1111-111111111111"),
-                            AllowFeaturedCompany = false,
-                            AllowFeaturedJob = false,
                             CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             DisplayOrder = 1,
                             DurationDays = 30,
-                            FeaturedLevel = "None",
                             Features = "[\"3 tin tuyển dụng/tháng\",\"Hiển thị cơ bản\",\"Hỗ trợ qua email\"]",
                             IsActive = true,
                             IsHighlighted = false,
@@ -741,12 +722,9 @@ namespace TechList.Infrastructure.Persistence.Migrations
                         new
                         {
                             Id = new Guid("22222222-2222-2222-2222-222222222222"),
-                            AllowFeaturedCompany = false,
-                            AllowFeaturedJob = false,
                             CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             DisplayOrder = 2,
                             DurationDays = 30,
-                            FeaturedLevel = "None",
                             Features = "[\"10 tin tuyển dụng/tháng\",\"Hiển thị ưu tiên\",\"Xem hồ sơ ứng viên\",\"Hỗ trợ qua email và chat\"]",
                             IsActive = true,
                             IsHighlighted = false,
@@ -758,12 +736,9 @@ namespace TechList.Infrastructure.Persistence.Migrations
                         new
                         {
                             Id = new Guid("33333333-3333-3333-3333-333333333333"),
-                            AllowFeaturedCompany = true,
-                            AllowFeaturedJob = true,
                             CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             DisplayOrder = 3,
                             DurationDays = 30,
-                            FeaturedLevel = "None",
                             Features = "[\"30 tin tuyển dụng/tháng\",\"Hiển thị nổi bật\",\"Xem & tải hồ sơ ứng viên\",\"Thống kê chi tiết\",\"Hỗ trợ ưu tiên 24/7\"]",
                             IsActive = true,
                             IsHighlighted = true,
@@ -775,12 +750,9 @@ namespace TechList.Infrastructure.Persistence.Migrations
                         new
                         {
                             Id = new Guid("44444444-4444-4444-4444-444444444444"),
-                            AllowFeaturedCompany = true,
-                            AllowFeaturedJob = true,
                             CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             DisplayOrder = 4,
                             DurationDays = 30,
-                            FeaturedLevel = "None",
                             Features = "[\"Không giới hạn tin tuyển dụng\",\"Hiển thị VIP trên trang chủ\",\"Toàn quyền xem hồ sơ ứng viên\",\"Thống kê nâng cao\",\"Tài khoản quản lý đa người dùng\",\"Hỗ trợ chuyên viên riêng\"]",
                             IsActive = true,
                             IsHighlighted = false,

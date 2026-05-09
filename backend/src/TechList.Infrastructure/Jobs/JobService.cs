@@ -65,7 +65,9 @@ public sealed class JobService : IJobService
         var subscription = await _db.Subscriptions
             .Include(s => s.Package)
             .Where(s => s.UserId == userId && s.Status == TechList.Domain.Enums.SubscriptionStatus.Active)
-            .OrderByDescending(s => s.CreatedAt)
+            .OrderByDescending(s => s.IsSelected) // Ưu tiên gói đang được chọn sử dụng
+            .ThenByDescending(s => s.Package.Price) // Ưu tiên gói có giá trị cao nhất (nhiều quyền lợi nhất)
+            .ThenByDescending(s => s.CreatedAt)
             .FirstOrDefaultAsync(ct);
 
         // Auto-create Free subscription if none exists
@@ -123,6 +125,8 @@ public sealed class JobService : IJobService
             ExpiresAt = request.ExpiresAt,
             IsActive = request.IsActive,
             IsApproved = false,
+            IsFeatured = request.IsFeatured,
+            FeaturedLevel = request.IsFeatured ? subscription.Package.FeaturedLevel : null,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
         };
@@ -183,6 +187,22 @@ public sealed class JobService : IJobService
         job.Education = request.Education;
         job.ExpiresAt = request.ExpiresAt;
         job.IsActive = request.IsActive;
+        job.IsFeatured = request.IsFeatured;
+        if (job.IsFeatured)
+        {
+            var subscription = await _db.Subscriptions
+                .Include(s => s.Package)
+                .Where(s => s.UserId == userId && s.Status == TechList.Domain.Enums.SubscriptionStatus.Active)
+                .OrderByDescending(s => s.IsSelected)
+                .ThenByDescending(s => s.Package.Price)
+                .ThenByDescending(s => s.CreatedAt)
+                .FirstOrDefaultAsync(ct);
+            job.FeaturedLevel = subscription?.Package.FeaturedLevel ?? "Silver";
+        }
+        else
+        {
+            job.FeaturedLevel = null;
+        }
         job.UpdatedAt = DateTime.UtcNow;
 
         await _db.SaveChangesAsync(ct);
@@ -238,6 +258,8 @@ public sealed class JobService : IJobService
         x.ExpiresAt,
         x.IsActive,
         x.IsApproved,
-        x.CreatedAt
+        x.CreatedAt,
+        x.IsFeatured,
+        x.FeaturedLevel
     );
 }

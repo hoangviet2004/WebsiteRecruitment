@@ -114,25 +114,36 @@ function renderPackages() {
     let filtered = packages.filter(p => p.name.toLowerCase().includes(search));
 
     if (filtered.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;">Không tìm thấy gói nào.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="11" style="text-align:center;">Không tìm thấy gói nào.</td></tr>';
         return;
     }
 
-    tbody.innerHTML = filtered.map(p => `
-        <tr>
-            <td>${p.displayOrder}</td>
-            <td><strong>${p.name}</strong></td>
-            <td style="color:#10b981;font-weight:600;">${formatMoney(p.price)}</td>
-            <td>${p.maxJobPosts === -1 ? 'Không giới hạn' : p.maxJobPosts}</td>
-            <td>${p.durationDays} ngày</td>
-            <td>${p.isHighlighted ? '<span class="badge badge-active">Có</span>' : '<span class="badge" style="background:#e2e8f0;">Không</span>'}</td>
-            <td>${p.isActive ? '<span class="badge badge-active">Hoạt động</span>' : '<span class="badge badge-blocked">Ngừng</span>'}</td>
-            <td>
-                <button class="btn-action text-primary" onclick="editPackage('${p.id}')"><i class="fa-solid fa-pen"></i></button>
-                <button class="btn-action text-danger" onclick="deletePackage('${p.id}')"><i class="fa-solid fa-trash"></i></button>
-            </td>
-        </tr>
-    `).join('');
+    tbody.innerHTML = filtered.map(p => {
+        const featuredLevel = p.featuredLevel || p.FeaturedLevel || 'None';
+        let levelBadge = '';
+        if (featuredLevel === 'Gold') levelBadge = '<span class="badge" style="background:#fffcf0;color:#92400e;border:1px solid #f59e0b;font-weight:700;">Vàng</span>';
+        else if (featuredLevel === 'Silver') levelBadge = '<span class="badge" style="background:#f8fafc;color:#475569;border:1px solid #94a3b8;font-weight:700;">Bạc</span>';
+        else levelBadge = '<span class="badge" style="background:#e2e8f0;color:#64748b;">Thường</span>';
+
+        return `
+            <tr>
+                <td>${p.displayOrder}</td>
+                <td><strong>${p.name}</strong></td>
+                <td style="color:#10b981;font-weight:600;">${formatMoney(p.price)}</td>
+                <td>${p.maxJobPosts === -1 ? 'Không giới hạn' : p.maxJobPosts}</td>
+                <td>${p.durationDays} ngày</td>
+                <td>${p.isHighlighted ? '<span class="badge badge-active">Có</span>' : '<span class="badge" style="background:#e2e8f0;">Không</span>'}</td>
+                <td>${p.allowFeaturedJob ? '<span class="badge badge-active">Có</span>' : '<span class="badge" style="background:#e2e8f0;">Không</span>'}</td>
+                <td>${p.allowFeaturedCompany ? '<span class="badge badge-active">Có</span>' : '<span class="badge" style="background:#e2e8f0;">Không</span>'}</td>
+                <td>${levelBadge}</td>
+                <td>${p.isActive ? '<span class="badge badge-active">Hoạt động</span>' : '<span class="badge badge-blocked">Ngừng</span>'}</td>
+                <td>
+                    <button class="btn-action text-primary" onclick="editPackage('${p.id}')"><i class="fa-solid fa-pen"></i></button>
+                    <button class="btn-action text-danger" onclick="deletePackage('${p.id}')"><i class="fa-solid fa-trash"></i></button>
+                </td>
+            </tr>
+        `;
+    }).join('');
 }
 
 function openPackageModal() {
@@ -150,10 +161,22 @@ function editPackage(id) {
     document.getElementById('pkg-name').value = p.name;
     document.getElementById('pkg-price').value = p.price;
     document.getElementById('pkg-max-jobs').value = p.maxJobPosts;
-    document.getElementById('pkg-duration').value = p.durationDays;
-    document.getElementById('pkg-order').value = p.displayOrder;
-    document.getElementById('pkg-highlighted').checked = p.isHighlighted;
-    document.getElementById('pkg-active').checked = p.isActive;
+    document.getElementById('pkg-duration').value = p.durationDays || p.DurationDays;
+    document.getElementById('pkg-order').value = p.displayOrder || p.DisplayOrder;
+    
+    // Đảm bảo đọc đúng giá trị nổi bật (thử cả camelCase và PascalCase)
+    const highlighted = p.isHighlighted !== undefined ? p.isHighlighted : p.IsHighlighted;
+    const allowFeatured = p.allowFeaturedJob !== undefined ? p.allowFeaturedJob : p.AllowFeaturedJob;
+    const allowFeaturedCompany = p.allowFeaturedCompany !== undefined ? p.allowFeaturedCompany : p.AllowFeaturedCompany;
+    const active = p.isActive !== undefined ? p.isActive : p.IsActive;
+    
+    document.getElementById('pkg-highlighted').checked = !!highlighted;
+    document.getElementById('pkg-allow-featured').checked = !!allowFeatured;
+    document.getElementById('pkg-allow-featured-company').checked = !!allowFeaturedCompany;
+    document.getElementById('pkg-active').checked = !!active;
+
+    const featuredLevel = p.featuredLevel !== undefined ? p.featuredLevel : p.FeaturedLevel;
+    document.getElementById('pkg-featured-level').value = featuredLevel || 'None';
     
     let features = [];
     try { features = JSON.parse(p.features); } catch(e) {}
@@ -172,14 +195,25 @@ async function savePackage(e) {
     const duration = parseInt(document.getElementById('pkg-duration').value) || 30;
     const order = parseInt(document.getElementById('pkg-order').value) || 0;
     const isHighlighted = document.getElementById('pkg-highlighted').checked;
+    const allowFeaturedJob = document.getElementById('pkg-allow-featured').checked;
+    const allowFeaturedCompany = document.getElementById('pkg-allow-featured-company').checked;
+    const featuredLevel = document.getElementById('pkg-featured-level').value;
     const isActive = document.getElementById('pkg-active').checked;
     
     const featuresStr = document.getElementById('pkg-features').value;
     const features = featuresStr.split('\n').map(x => x.trim()).filter(x => x);
 
     const payload = {
-        name, price, maxJobPosts: maxJobs, durationDays: duration,
-        displayOrder: order, isHighlighted, isActive,
+        name: name,
+        price: price,
+        maxJobPosts: maxJobs,
+        durationDays: duration,
+        displayOrder: order,
+        isHighlighted: isHighlighted,
+        allowFeaturedJob: allowFeaturedJob,
+        allowFeaturedCompany: allowFeaturedCompany,
+        featuredLevel: featuredLevel,
+        isActive: isActive,
         features: JSON.stringify(features)
     };
 

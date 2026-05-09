@@ -22,6 +22,9 @@ public sealed record PackageDto(
     int DurationDays,
     string Features,       // JSON array
     bool IsHighlighted,
+    bool AllowFeaturedJob,
+    bool AllowFeaturedCompany,
+    string FeaturedLevel,
     bool IsActive,
     int DisplayOrder,
     DateTime CreatedAt,
@@ -35,6 +38,9 @@ public sealed record CreatePackageRequest(
     int DurationDays,
     string? Features,
     bool IsHighlighted,
+    bool AllowFeaturedJob,
+    bool AllowFeaturedCompany,
+    string FeaturedLevel,
     bool IsActive,
     int DisplayOrder
 );
@@ -46,6 +52,9 @@ public sealed record UpdatePackageRequest(
     int DurationDays,
     string? Features,
     bool IsHighlighted,
+    bool AllowFeaturedJob,
+    bool AllowFeaturedCompany,
+    string FeaturedLevel,
     bool IsActive,
     int DisplayOrder
 );

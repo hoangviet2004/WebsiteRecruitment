@@ -70,6 +70,12 @@ async function loadJobDetail(id) {
         document.getElementById('detail-education').innerText = job.education || "Không yêu cầu";
         document.getElementById('detail-experience').innerText = job.experience || "Không yêu cầu";
 
+        // Gán Giới hạn ứng tuyển
+        if (job.applicationLimit) {
+            document.getElementById('detail-app-limit').innerText = job.applicationLimit + " hồ sơ";
+            document.getElementById('limit-row').style.display = 'flex';
+        }
+
         // Gán Địa điểm & Loại hình
         document.getElementById('detail-location').innerText = job.location || "Đang cập nhật";
         document.getElementById('detail-type').innerText = job.jobType || "Đang cập nhật";

@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chi tiết Công ty – TechList</title>
+    <meta name="description" content="Xem thông tin chi tiết, tin tuyển dụng và văn hóa của công ty trên TechList.">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="../assets/css/home.css">
+    <link rel="stylesheet" href="../assets/css/company-detail.css">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="homebar">
+        <div class="left">
+            <a href="home.html" class="logo-svg"><img src="../assets/logo.svg" alt="Logo">TechList</a>
+            <ul>
+                <li><a href="jobs.html">Tìm việc</a></li>
+                <li><a href="companies.html">Công ty</a></li>
+                <li><a href="blog.html">Blog</a></li>
+            </ul>
+        </div>
+        <div class="right" id="nav-right"></div>
+    </nav>
+
+    <!-- Skeleton / Error states -->
+    <div id="cd-skeleton">
+        <div class="cd-cover-skeleton"></div>
+        <div class="cd-header-skeleton">
+            <div class="cd-logo-skeleton"></div>
+            <div class="cd-info-skeleton">
+                <div class="cd-sk-line cd-sk-w60"></div>
+                <div class="cd-sk-line cd-sk-w40"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="cd-error" style="display:none;" class="cd-error-state">
+        <i class="fa-regular fa-building"></i>
+        <h2>Không tìm thấy công ty</h2>
+        <p>Công ty này không tồn tại hoặc đã bị xóa.</p>
+        <a href="companies.html" class="cd-btn-back"><i class="fa-solid fa-arrow-left"></i> Quay lại danh sách</a>
+    </div>
+
+    <!-- Main content (hidden until data loaded) -->
+    <div id="cd-main" style="display:none;">
+        <!-- Cover Banner -->
+        <div class="cd-cover-wrap">
+            <div class="cd-cover" id="cd-cover">
+                <div class="cd-cover-overlay"></div>
+            </div>
+        </div>
+
+        <!-- Company Header Card -->
+        <div class="cd-header-card">
+            <div class="cd-header-inner">
+                <div class="cd-header-left">
+                    <div class="cd-logo-box" id="cd-logo-box">
+                        <span id="cd-logo-initials"></span>
+                        <img id="cd-logo-img" src="" alt="" style="display:none;">
+                    </div>
+                    <div class="cd-header-info">
+                        <h1 class="cd-company-name" id="cd-company-name">–</h1>
+                        <div class="cd-header-meta">
+                            <span id="cd-industry-tag" class="cd-meta-chip" style="display:none;">
+                                <i class="fa-solid fa-microchip"></i>
+                                <span id="cd-industry-text"></span>
+                            </span>
+                            <span id="cd-location-tag" class="cd-meta-chip" style="display:none;">
+                                <i class="fa-solid fa-location-dot"></i>
+                                <span id="cd-location-text"></span>
+                            </span>
+                            <span id="cd-size-tag" class="cd-meta-chip" style="display:none;">
+                                <i class="fa-solid fa-users"></i>
+                                <span id="cd-size-text"></span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="cd-header-actions">
+                    <a id="cd-website-btn" href="#" target="_blank" rel="noopener" class="cd-btn-outline" style="display:none;">
+                        <i class="fa-solid fa-globe"></i> Website
+                    </a>
+                    <button class="cd-btn-primary" onclick="shareCompany()">
+                        <i class="fa-solid fa-share-nodes"></i> Chia sẻ
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab Bar -->
+        <div class="cd-tab-bar">
+            <div class="cd-tabs-inner">
+                <button class="cd-tab active" id="tab-about" onclick="switchTab('about')">Giới thiệu</button>
+                <button class="cd-tab" id="tab-jobs" onclick="switchTab('jobs')">
+                    Việc làm <span class="cd-tab-count" id="cd-job-count">0</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Content Area -->
+        <div class="cd-content-area">
+            <!-- Left: About -->
+            <div id="panel-about" class="cd-panel active">
+                <div class="cd-about-card">
+                    <h2 class="cd-card-title"><i class="fa-solid fa-building"></i> Giới thiệu công ty</h2>
+                    <div class="cd-about-text" id="cd-about-text">
+                        <p class="cd-no-data">Chưa có thông tin giới thiệu.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Left: Jobs -->
+            <div id="panel-jobs" class="cd-panel" style="display:none;">
+                <div class="cd-jobs-header">
+                    <h2 class="cd-card-title"><i class="fa-solid fa-briefcase"></i> Việc làm đang tuyển</h2>
+                </div>
+                <div class="cd-jobs-list" id="cd-jobs-list">
+                    <div class="cd-loading-jobs"><i class="fa-solid fa-spinner fa-spin"></i> Đang tải...</div>
+                </div>
+            </div>
+
+            <!-- Right: Sidebar Key Information -->
+            <aside class="cd-sidebar">
+                <div class="cd-sidebar-card">
+                    <h3 class="cd-sidebar-title">Thông tin chính</h3>
+                    <ul class="cd-info-list">
+                        <li id="si-size" style="display:none;">
+                            <span class="cd-info-icon"><i class="fa-solid fa-building-user"></i></span>
+                            <div>
+                                <div class="cd-info-label">Quy mô công ty</div>
+                                <div class="cd-info-value" id="si-size-val">–</div>
+                            </div>
+                        </li>
+                        <li id="si-tax" style="display:none;">
+                            <span class="cd-info-icon"><i class="fa-solid fa-receipt"></i></span>
+                            <div>
+                                <div class="cd-info-label">Mã số thuế</div>
+                                <div class="cd-info-value" id="si-tax-val">–</div>
+                            </div>
+                        </li>
+                        <li id="si-email" style="display:none;">
+                            <span class="cd-info-icon"><i class="fa-regular fa-envelope"></i></span>
+                            <div>
+                                <div class="cd-info-label">Email liên hệ</div>
+                                <div class="cd-info-value" id="si-email-val">–</div>
+                            </div>
+                        </li>
+                        <li id="si-phone" style="display:none;">
+                            <span class="cd-info-icon"><i class="fa-solid fa-phone"></i></span>
+                            <div>
+                                <div class="cd-info-label">Số điện thoại</div>
+                                <div class="cd-info-value" id="si-phone-val">–</div>
+                            </div>
+                        </li>
+                        <li id="si-address" style="display:none;">
+                            <span class="cd-info-icon"><i class="fa-solid fa-map-pin"></i></span>
+                            <div>
+                                <div class="cd-info-label">Địa chỉ</div>
+                                <div class="cd-info-value" id="si-address-val">–</div>
+                            </div>
+                        </li>
+                        <li id="si-website" style="display:none;">
+                            <span class="cd-info-icon"><i class="fa-solid fa-globe"></i></span>
+                            <div>
+                                <div class="cd-info-label">Website</div>
+                                <div class="cd-info-value"><a id="si-website-val" href="#" target="_blank" rel="noopener">–</a></div>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </aside>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="cd-footer">
+        <p>© 2026 TechList. Nền tảng tuyển dụng công nghệ hàng đầu Việt Nam.</p>
+    </footer>
+
+    <script src="../js/api.js"></script>
+    <script src="../js/navbar.js"></script>
+    <script src="../js/company-detail.js"></script>
+</body>
+</html>
