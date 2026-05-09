@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Tin nhắn hỗ trợ</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/css/sidebar.css">
+    <link rel="stylesheet" href="../assets/css/admin.css">
+    <link rel="stylesheet" href="../assets/css/recruiter.css">
+    <style>
+        .msg-layout { height: calc(100vh - 120px); margin-top: 20px; }
+        .admin-content { padding: 20px 40px; }
+    </style>
+</head>
+<body>
+
+<div id="sidebar-container"></div>
+
+<main class="admin-content">
+    <div class="admin-header">
+        <h1><i class="fa-solid fa-comments"></i> Tin nhắn hỗ trợ</h1>
+        <p class="subtitle">Phản hồi thắc mắc từ Nhà tuyển dụng và Ứng viên.</p>
+    </div>
+
+    <div class="msg-layout" id="msg-layout">
+        <!-- Cột trái: Danh sách hội thoại -->
+        <div class="msg-conv-col">
+            <div class="msg-conv-header">
+                <h3>Hội thoại</h3>
+                <div class="msg-search-wrap">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input type="text" id="msg-search" placeholder="Tìm người dùng..." oninput="filterConversations(this.value)">
+                </div>
+            </div>
+            <div class="msg-conv-list" id="msg-conv-list">
+                <div class="msg-empty-state">
+                    <i class="fa-solid fa-spinner fa-spin"></i> Đang tải...
+                </div>
+            </div>
+        </div>
+
+        <!-- Cột giữa: Chat thread -->
+        <div class="msg-thread-col" id="msg-thread-col">
+            <div class="msg-thread-empty" id="msg-thread-empty">
+                <i class="fa-regular fa-comments" style="font-size:48px;color:#cbd5e1;margin-bottom:16px;"></i>
+                <p>Chọn một cuộc hội thoại để phản hồi</p>
+            </div>
+            <div class="msg-thread-header" id="msg-thread-header" style="display:none;">
+                <div class="msg-thread-candidate" id="msg-thread-candidate"></div>
+            </div>
+            <div class="msg-bubbles" id="msg-bubbles"></div>
+            <div class="msg-input-wrap" id="msg-input-wrap" style="display:none;">
+                <div class="msg-input-row">
+                    <textarea id="msg-input" class="msg-textarea" placeholder="Nhập phản hồi tại đây... (Ctrl+Enter để gửi)" rows="3"
+                        onkeydown="handleMsgKey(event)"></textarea>
+                    <button class="msg-send-btn" onclick="sendMessage()">
+                        <i class="fa-solid fa-paper-plane"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cột phải: Thông tin người dùng -->
+        <div class="msg-info-col" id="msg-info-col">
+            <div class="msg-info-empty" id="msg-info-empty">
+                <i class="fa-solid fa-user-circle" style="font-size:40px;color:#cbd5e1;margin-bottom:12px;"></i>
+                <p>Thông tin người dùng</p>
+            </div>
+            <div id="msg-info-content" style="display:none;">
+                <!-- Fill by JS -->
+            </div>
+        </div>
+    </div>
+</main>
+
+<script src="../js/api.js"></script>
+<script src="../js/guard.js"></script>
+<script src="../js/sidebar.js"></script>
+<script src="../js/admin-messages.js"></script>
+
+<script>
+    requireAdmin();
+    loadSidebar();
+    loadAdminMessages();
+</script>
+
+</body>
+</html>

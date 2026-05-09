@@ -101,6 +101,18 @@ async function fetchConversations(){
         const data = await safeJsonMsg(res);
         if(!res?.ok) throw new Error(data?.message||'Lỗi tải danh sách');
         _convList = data?.data || [];
+        
+        // --- ADDED: Load Admin Support ---
+        try {
+            const adminRes = await apiFetchAuth('/api/support-messaging/conversation-info');
+            const adminData = await safeJsonMsg(adminRes);
+            if(adminRes?.ok && adminData?.data){
+                // Luôn ở đầu
+                _convList = [adminData.data, ..._convList];
+            }
+        } catch(e){ console.error('Lỗi tải support:', e); }
+        // ---------------------------------
+
         renderConversations(_convList);
     } catch(e) {
         document.getElementById('msg-conv-list').innerHTML=
@@ -127,6 +139,7 @@ function renderConversations(list){
 
         return `<div class="msg-conv-item${isActive?' active':''}${c.hasUnread?' has-unread':''}"
                     data-app-id="${c.applicationId}"
+                    data-is-support="${c.applicationId === '00000000-0000-0000-0000-000000000000'}"
                     onclick="openConversation('${c.applicationId}')">
             ${avatarHtml}
             <div class="msg-conv-body">
@@ -176,7 +189,12 @@ async function openConversation(appId){
     ]);
 
     // Mark read
-    apiFetchAuth(`/api/messaging/thread/${appId}/read`, {method:'POST'}).catch(()=>{});
+    if(appId === '00000000-0000-0000-0000-000000000000'){
+        apiFetchAuth('/api/support-messaging/read', {method:'POST'}).catch(()=>{});
+    } else {
+        apiFetchAuth(`/api/messaging/thread/${appId}/read`, {method:'POST'}).catch(()=>{});
+    }
+    
     // Cập nhật badge unread
     fetchConversations();
 
@@ -190,7 +208,10 @@ async function loadThread(appId){
         '<div class="msg-empty-state"><i class="fa-solid fa-spinner fa-spin" style="color:#3b82f6;"></i></div>';
 
     try {
-        const res  = await apiFetchAuth(`/api/messaging/thread/${appId}`);
+        const isSupport = appId === '00000000-0000-0000-0000-000000000000';
+        const url = isSupport ? '/api/support-messaging/thread' : `/api/messaging/thread/${appId}`;
+        
+        const res  = await apiFetchAuth(url);
         const data = await safeJsonMsg(res);
         if(!res?.ok) throw new Error(data?.message||'Lỗi tải tin nhắn');
         renderThread(data?.data || []);
@@ -251,27 +272,59 @@ async function loadCandidateInfo(appId){
     content.innerHTML='<div class="msg-empty-state"><i class="fa-solid fa-spinner fa-spin" style="color:#3b82f6;"></i></div>';
 
     try {
+        const isSupport = appId === '00000000-0000-0000-0000-000000000000';
+        if(isSupport){
+            const adminConv = _convList.find(c => c.applicationId === appId);
+            renderAdminInfo(adminConv);
+            updateThreadHeader(adminConv);
+            return;
+        }
+
         const res  = await apiFetchAuth(`/api/messaging/candidate-info/${appId}`);
         const data = await safeJsonMsg(res);
         if(!res?.ok) throw new Error(data?.message||'Lỗi');
         renderCandidateInfo(data?.data);
 
         // Cập nhật thread header
-        const d = data?.data;
-        if(d){
-            const avatarHtml = d.candidateAvatar
-                ? `<img src="${d.candidateAvatar}" class="msg-thread-avatar" alt="">`
-                : `<span class="msg-thread-initials" style="background:${_color(d.candidateName)}">${_init(d.candidateName)}</span>`;
-            document.getElementById('msg-thread-candidate').innerHTML=`
-                ${avatarHtml}
-                <div>
-                    <div class="msg-thread-name">${_esc(d.candidateName)}</div>
-                    <div class="msg-thread-job">${_esc(d.jobTitle)}</div>
-                </div>`;
-        }
+        updateThreadHeader(data?.data);
     } catch(e){
         content.innerHTML=`<p style="padding:16px;color:#ef4444;font-size:13px;">${e.message}</p>`;
     }
+}
+
+function updateThreadHeader(d){
+    if(!d) return;
+    const avatarHtml = (d.candidateAvatar || d.avatarUrl)
+        ? `<img src="${d.candidateAvatar || d.avatarUrl}" class="msg-thread-avatar" alt="">`
+        : `<span class="msg-thread-initials" style="background:${_color(d.candidateName)}">${_init(d.candidateName)}</span>`;
+    
+    document.getElementById('msg-thread-candidate').innerHTML=`
+        ${avatarHtml}
+        <div>
+            <div class="msg-thread-name">${_esc(d.candidateName)}</div>
+            <div class="msg-thread-job">${_esc(d.jobTitle)}</div>
+        </div>`;
+}
+
+function renderAdminInfo(d){
+    if(!d) return;
+    const content = document.getElementById('msg-info-content');
+
+    const avatarHtml = d.candidateAvatar
+        ? `<img src="${d.candidateAvatar}" class="msg-info-avatar-lg" alt="">`
+        : `<div class="msg-info-initials-lg" style="background:${_color(d.candidateName)}">${_init(d.candidateName)}</div>`;
+
+    content.innerHTML = `
+        <div class="msg-info-profile">
+            ${avatarHtml}
+            <div class="msg-info-name">${_esc(d.candidateName)}</div>
+            <div class="msg-info-email">${_esc(d.candidateEmail)}</div>
+            <div style="margin-top:8px;"><span class="msg-conv-tag" style="background:#eff6ff;color:#3b82f6;">Hỗ trợ viên</span></div>
+        </div>
+        <div style="padding:16px; font-size:13px; color:#64748b; line-height:1.6;">
+            Chào bạn! Đây là kênh hỗ trợ trực tiếp từ đội ngũ Quản trị viên TechList. 
+            Nếu bạn gặp bất kỳ vấn đề gì về tài khoản, tin tuyển dụng hoặc thanh toán, hãy để lại tin nhắn tại đây.
+        </div>`;
 }
 
 function renderCandidateInfo(d){
@@ -349,9 +402,13 @@ async function sendMessage(){
     btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
 
     try {
-        const res  = await apiFetchAuth('/api/messaging/send', {
+        const isSupport = _activeAppId === '00000000-0000-0000-0000-000000000000';
+        const url = isSupport ? '/api/support-messaging/send' : '/api/messaging/send';
+        const body = isSupport ? { content } : { applicationId: _activeAppId, content, type: _msgType };
+
+        const res  = await apiFetchAuth(url, {
             method: 'POST',
-            body: JSON.stringify({ applicationId: _activeAppId, content, type: _msgType })
+            body: JSON.stringify(body)
         });
         const data = await safeJsonMsg(res);
         if(!res?.ok) throw new Error(data?.message||'Lỗi gửi tin');
@@ -485,7 +542,10 @@ function startMsgPolling(appId){
     _pollTimer = setInterval(async ()=>{
         if(!_activeAppId) return;
         try {
-            const res  = await apiFetchAuth(`/api/messaging/thread/${_activeAppId}`);
+            const isSupport = _activeAppId === '00000000-0000-0000-0000-000000000000';
+            const url = isSupport ? '/api/support-messaging/thread' : `/api/messaging/thread/${_activeAppId}`;
+            
+            const res  = await apiFetchAuth(url);
             const data = await safeJsonMsg(res);
             if(!res?.ok) return;
             const msgs = data?.data || [];
@@ -507,9 +567,15 @@ function startPollingUnread(){
     setInterval(async ()=>{
         if(!currentCompanyId) return;
         try {
-            const res  = await apiFetchAuth(`/api/messaging/unread-count?companyId=${currentCompanyId}`);
-            const data = await safeJsonMsg(res);
-            const count = data?.data ?? 0;
+            const [res, supportRes] = await Promise.all([
+                apiFetchAuth(`/api/messaging/unread-count?companyId=${currentCompanyId}`),
+                apiFetchAuth('/api/support-messaging/unread-count')
+            ]);
+            const [data, supportData] = await Promise.all([
+                safeJsonMsg(res),
+                safeJsonMsg(supportRes)
+            ]);
+            const count = (data?.data ?? 0) + (supportData?.data ?? 0);
             const badge = document.getElementById('msg-unread-badge');
             if(badge) badge.style.display = count>0?'inline-block':'none';
         } catch(_){}

@@ -73,6 +73,7 @@ public static class DependencyInjection
         services.AddScoped<ICandidateMessagingService, CandidateMessagingService>();
         services.AddScoped<IInterviewService, InterviewService>();
         services.AddScoped<ISavedJobService, SavedJobService>();
+        services.AddScoped<ISupportMessagingService, SupportMessagingService>();
         services.AddMemoryCache();
 
         return services;

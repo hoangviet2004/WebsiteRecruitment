@@ -35,6 +35,7 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<SavedJob> SavedJobs => Set<SavedJob>();
     public DbSet<Offer> Offers => Set<Offer>();
     public DbSet<InterviewSchedule> InterviewSchedules => Set<InterviewSchedule>();
+    public DbSet<SupportMessage> SupportMessages => Set<SupportMessage>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -347,6 +348,17 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
              .WithMany()
              .HasForeignKey(x => x.JobPostId)
              .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // ── SupportMessage ──────────────────────────────────
+        builder.Entity<SupportMessage>(e =>
+        {
+            e.ToTable("SupportMessages");
+            e.HasKey(x => x.Id);
+            e.Property(x => x.UserId).HasMaxLength(450).IsRequired();
+            e.Property(x => x.SenderId).HasMaxLength(450).IsRequired();
+            e.Property(x => x.Content).HasMaxLength(4000).IsRequired();
+            e.HasIndex(x => new { x.UserId, x.SentAt });
         });
     }
 }
