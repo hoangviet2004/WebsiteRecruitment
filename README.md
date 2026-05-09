@@ -131,7 +131,7 @@ Dự án được chia thành 4 lớp chính nhằm tách biệt logic và tăng
 ---
 
 ## 🤝 Thông tin liên hệ
-Nếu bạn gặp khó khăn trong quá trình cài đặt hoặc phát hiện lỗi, vui lòng tạo **Issue** trên GitHub hoặc liên hệ qua email: `hoangviet2004@example.com`.
+Nếu bạn gặp khó khăn trong quá trình cài đặt hoặc phát hiện lỗi, vui lòng tạo **Issue** trên GitHub hoặc liên hệ qua email: `viet16092004@gmail.com`.
 
 ---
 *TechList - Kiến tạo tương lai cho sinh viên IT Việt Nam.*
