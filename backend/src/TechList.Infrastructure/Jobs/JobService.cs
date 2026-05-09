@@ -65,7 +65,9 @@ public sealed class JobService : IJobService
         var subscription = await _db.Subscriptions
             .Include(s => s.Package)
             .Where(s => s.UserId == userId && s.Status == TechList.Domain.Enums.SubscriptionStatus.Active)
-            .OrderByDescending(s => s.CreatedAt)
+            .OrderByDescending(s => s.IsSelected) // Ưu tiên gói đang được chọn sử dụng
+            .ThenByDescending(s => s.Package.Price) // Ưu tiên gói có giá trị cao nhất (nhiều quyền lợi nhất)
+            .ThenByDescending(s => s.CreatedAt)
             .FirstOrDefaultAsync(ct);
 
         // Auto-create Free subscription if none exists
@@ -191,7 +193,9 @@ public sealed class JobService : IJobService
             var subscription = await _db.Subscriptions
                 .Include(s => s.Package)
                 .Where(s => s.UserId == userId && s.Status == TechList.Domain.Enums.SubscriptionStatus.Active)
-                .OrderByDescending(s => s.CreatedAt)
+                .OrderByDescending(s => s.IsSelected)
+                .ThenByDescending(s => s.Package.Price)
+                .ThenByDescending(s => s.CreatedAt)
                 .FirstOrDefaultAsync(ct);
             job.FeaturedLevel = subscription?.Package.FeaturedLevel ?? "Silver";
         }

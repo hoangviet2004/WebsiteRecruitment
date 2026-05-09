@@ -96,17 +96,18 @@ function applyFilters() {
     
     // Sort logic
     filteredJobs.sort((a, b) => {
-        const getPriority = (lvl) => {
-            const l = (lvl || '').toLowerCase();
-            if (l === 'gold') return 2;
-            if (l === 'silver') return 1;
+        const getPriority = (job) => {
+            const lvl = (job.featuredLevel || job.FeaturedLevel || '').toLowerCase();
+            if (lvl === 'gold') return 3;
+            if (lvl === 'silver') return 2;
+            if (job.isFeatured || job.IsFeatured) return 1;
             return 0;
         };
 
         if (sortOrder === 'featured') {
-            // 1. Ưu tiên cấp bậc hiển thị (Gold > Silver > None)
-            const pA = getPriority(a.featuredLevel);
-            const pB = getPriority(b.featuredLevel);
+            // 1. Ưu tiên cấp bậc hiển thị (Gold > Silver > Nổi bật thường > None)
+            const pA = getPriority(a);
+            const pB = getPriority(b);
             if (pA !== pB) return pB - pA;
         } else if (sortOrder === 'salary_desc') {
             // 2. Ưu tiên lương cao nhất tuyệt đối
@@ -179,11 +180,13 @@ function renderJobs() {
         
         let featuredClass = '';
         let featuredBadge = '';
-        if (job.isFeatured && job.featuredLevel && job.featuredLevel.toLowerCase() !== 'none') {
-            const level = job.featuredLevel.toLowerCase();
+        const level = (job.featuredLevel || job.FeaturedLevel || '').toLowerCase();
+        const isFeatured = job.isFeatured || job.IsFeatured;
+        
+        if (level === 'gold' || level === 'silver') {
             featuredClass = ` job-featured-${level}`;
-            const label = level === 'gold' ? 'Gold Featured' : 'Silver Featured';
-            featuredBadge = `<span class="badge-featured badge-featured-${level}" style="position:absolute;top:16px;right:52px;z-index:2;"><i class="fa-solid fa-star"></i> ${label}</span>`;
+        } else if (isFeatured) {
+            featuredClass = ' job-featured';
         }
 
         const isSaved = window._jobsBookmarkMap?.[job.id];

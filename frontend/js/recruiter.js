@@ -220,6 +220,18 @@ function escapeHtmlPkg(str) {
     return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
+async function loadSubscriptionInfo() {
+    try {
+        const response = await apiFetchAuth('/api/packages/my-subscription', { method: 'GET' });
+        const res = await response.json();
+        if (res.success && res.data) {
+            _currentSubscription = res.data;
+        }
+    } catch (e) {
+        console.error("Lỗi tải thông tin gói dịch vụ:", e);
+    }
+}
+
 // ── 3. Quản lý Hồ sơ Công ty ───────────────────────────────
 async function loadMyCompany() {
     try {
@@ -475,11 +487,14 @@ async function openJobModal() {
         var subRes = await apiFetchAuth('/api/packages/my-subscription', { method: 'GET' });
         var subData = await subRes.json();
         if (subData.success && subData.data && subData.data.hasSubscription) {
-            var s = subData.data;
+            _currentSubscription = subData.data;
+            var s = _currentSubscription;
             if (s.maxJobPosts !== -1 && s.jobPostsUsed >= s.maxJobPosts) {
                 alert('Bạn đã vượt quá giới hạn ' + s.maxJobPosts + ' tin đăng của gói "' + s.packageName + '".\nVui lòng đăng ký gói dịch vụ cao hơn để đăng thêm tin.');
                 return;
             }
+        } else {
+            _currentSubscription = null;
         }
     } catch (e) {
         // If check fails, let the backend handle it
@@ -489,7 +504,7 @@ async function openJobModal() {
     document.getElementById('job-id').value = '';
     document.getElementById('job-modal-title').innerText = 'Đăng tin tuyển dụng mới';
     
-    // Kiểm tra gói dịch vụ: Cho phép đăng tin nổi bật nếu gói có quyền
+    // Kiểm tra quyền đăng tin nổi bật
     const featuredCheckbox = document.getElementById('job-featured');
     const featuredHint = document.getElementById('featured-hint');
     const canPostFeatured = _currentSubscription && _currentSubscription.hasSubscription && 
@@ -617,12 +632,18 @@ async function editJob(jobId) {
             // Điền lại trạng thái nổi bật + kiểm tra quyền
             const featuredCheckbox = document.getElementById('job-featured');
             const featuredHint = document.getElementById('featured-hint');
-            const isFreePackage = !_currentSubscription || !_currentSubscription.hasSubscription ||
-                                   (_currentSubscription.packagePrice === 0);
+            
+            // Đảm bảo có thông tin subscription mới nhất
+            await loadSubscriptionInfo();
+            
+            const canPostFeatured = _currentSubscription && _currentSubscription.hasSubscription && 
+                                   (_currentSubscription.allowFeaturedJob === true);
+            
             featuredCheckbox.checked = job.isFeatured || false;
-            if (isFreePackage) {
+            if (!canPostFeatured) {
                 featuredCheckbox.disabled = true;
-                featuredHint.textContent = '(Nâng cấp lên gói trả phí để sử dụng tính năng này)';
+                // Nếu tin đang là nổi bật nhưng gói hiện tại không cho phép (hết hạn hoặc hạ cấp), vẫn giữ checked nhưng disable để họ biết
+                featuredHint.textContent = '(Gói dịch vụ hiện tại không hỗ trợ tính năng này)';
             } else {
                 featuredCheckbox.disabled = false;
                 featuredHint.textContent = 'Tin sẽ hiển thị nổi bật với màu vàng và huy hiệu đặc biệt';
@@ -657,6 +678,7 @@ async function deleteJob(jobId) {
 document.addEventListener('DOMContentLoaded', function() {
     requireRecruiter();
     loadMyCompany();
+    loadSubscriptionInfo();
 
     const urlParams = new URLSearchParams(window.location.search);
     const tab = urlParams.get('tab') || 'company';
