@@ -125,6 +125,60 @@ public sealed class InterviewService : IInterviewService
         }).ToList();
     }
 
+    public async Task<List<InterviewScheduleDto>> GetAllByCompanyAsync(
+        string recruiterId, Guid companyId, CancellationToken ct)
+    {
+        var jobIds = await _db.JobPosts.AsNoTracking()
+            .Where(j => j.CompanyId == companyId)
+            .Select(j => j.Id).ToListAsync(ct);
+
+        var appInfos = await _db.JobApplications.AsNoTracking()
+            .Where(a => jobIds.Contains(a.JobPostId))
+            .Select(a => new { a.Id, a.CandidateId, a.JobPostId })
+            .ToListAsync(ct);
+
+        if (!appInfos.Any()) return new();
+
+        var appIds      = appInfos.Select(a => a.Id).ToHashSet();
+        var appMap      = appInfos.ToDictionary(a => a.Id);
+        var jobTitleMap = (await _db.JobPosts.AsNoTracking()
+            .Where(j => jobIds.Contains(j.Id))
+            .Select(j => new { j.Id, j.Title })
+            .ToListAsync(ct)).ToDictionary(j => j.Id, j => j.Title);
+
+        var schedules = await _db.InterviewSchedules.AsNoTracking()
+            .Where(s => appIds.Contains(s.ApplicationId) && s.Status != "Cancelled")
+            .OrderBy(s => s.ScheduledAt)
+            .ToListAsync(ct);
+
+        if (!schedules.Any()) return new();
+
+        var candidateIds = appInfos
+            .Where(a => schedules.Any(s => s.ApplicationId == a.Id))
+            .Select(a => a.CandidateId).Distinct().ToList();
+
+        var users      = await _userManager.Users.AsNoTracking()
+            .Where(u => candidateIds.Contains(u.Id)).ToListAsync(ct);
+        var profiles   = await _db.UserProfiles.AsNoTracking()
+            .Where(p => candidateIds.Contains(p.UserId)).ToListAsync(ct);
+        var userMap    = users.ToDictionary(u => u.Id);
+        var profileMap = profiles.ToDictionary(p => p.UserId);
+
+        return schedules.Select(s =>
+        {
+            var app = appMap.GetValueOrDefault(s.ApplicationId);
+            var u   = app is null ? null : userMap.GetValueOrDefault(app.CandidateId);
+            var p   = app is null ? null : profileMap.GetValueOrDefault(app.CandidateId);
+            return new InterviewScheduleDto(
+                s.Id, s.ApplicationId,
+                app is null ? "" : jobTitleMap.GetValueOrDefault(app.JobPostId, ""),
+                p?.DisplayName ?? u?.FullName ?? "Ứng viên",
+                s.ScheduledAt, s.DurationMinutes,
+                s.MeetingLink, s.Location, s.Notes, s.Status
+            );
+        }).ToList();
+    }
+
     public async Task<InterviewScheduleDto> CancelAsync(
         string recruiterId, Guid scheduleId, CancellationToken ct)
     {

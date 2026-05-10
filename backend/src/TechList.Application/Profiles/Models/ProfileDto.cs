@@ -12,5 +12,6 @@ public sealed record ProfileDto(
     string? SocialLinks,  // JSON object
     string? Phone,
     string? Location,
-    string? JobStatus
+    string? JobStatus,
+    bool HasPassword = true
 );

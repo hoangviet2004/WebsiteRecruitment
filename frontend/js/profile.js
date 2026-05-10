@@ -5,6 +5,7 @@
 
 // ── In-memory state ──────────────────────────────────────────
 let _skills = [];   // [{name, level}]
+let _hasPassword = true;
 let _exp    = [];   // [{id,position,company,from,to,current,desc}]
 let _edu    = [];   // [{id,degree,school,from,to,gpa}]
 
@@ -62,6 +63,7 @@ async function loadProfile() {
 
         // Basic info
         setVal('pf-fullname', p.displayName || '');
+        updateNameCounter(document.getElementById('pf-fullname'));
         setVal('pf-phone',    p.phone || '');
         setVal('pf-location', p.location || '');
         setVal('pf-bio',      p.bio || '');
@@ -74,7 +76,6 @@ async function loadProfile() {
         const name  = p.displayName || getCurrentUser().fullName || 'Ứng viên';
         const title = buildSubtitle(p);
         setText('pf-header-name', name);
-        setText('pf-sidebar-title', title);
         setText('pf-banner-name', name);
         setText('pf-banner-title', title);
 
@@ -106,6 +107,9 @@ async function loadProfile() {
 
         // CV
         if (p.cvUrl) showCurrentCv(p.cvUrl);
+
+        // Trạng thái mật khẩu (OAuth vs email)
+        _hasPassword = p.hasPassword !== false;
 
     } catch (e) {
         console.error('Lỗi load profile:', e);
@@ -167,8 +171,7 @@ async function saveProfile() {
             setText('pf-header-name', name);
             setText('pf-banner-name', name);
             setText('pf-banner-title', title);
-            setText('pf-sidebar-title', title);
-
+    
             if (typeof renderNavRight === 'function') renderNavRight();
         } else {
             showToast('Lỗi: ' + (data?.message || 'Không thể lưu hồ sơ'), 'error');
@@ -313,6 +316,7 @@ function openExpModal(editIndex) {
     setVal('exp-from',     e?.from     || '');
     setVal('exp-to',       e?.to       || '');
     setVal('exp-desc',     e?.desc     || '');
+    updateCounter(document.getElementById('exp-desc'), 'exp-desc-count');
     const cur = document.getElementById('exp-current');
     if (cur) { cur.checked = !!e?.current; toggleExpCurrent(cur); }
 
@@ -574,7 +578,7 @@ function showCurrentCv(url, filename) {
 }
 
 // ── Navigation scroll ─────────────────────────────────────────
-function scrollToSection(id, linkEl) {
+function scrollToSection(id) {
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     return false;
 }
@@ -592,6 +596,120 @@ function copyPublicLink() {
     navigator.clipboard?.writeText(url)
         .then(() => showToast('Đã sao chép liên kết hồ sơ công khai!', 'success'))
         .catch(() => showToast('Không thể sao chép!', 'error'));
+}
+
+// ── Đổi mật khẩu ─────────────────────────────────────────────
+function updateNameCounter(input) {
+    const counter = document.getElementById('pf-name-counter');
+    if (!counter) return;
+    const len = input.value.length;
+    counter.textContent = `${len}/50`;
+    counter.style.color = len >= 45 ? '#ef4444' : '#94a3b8';
+}
+
+function updateCounter(input, counterId) {
+    const el  = document.getElementById(counterId);
+    if (!el) return;
+    const max = parseInt(input.maxLength) || 0;
+    const len = input.value.length;
+    el.textContent = len;
+    el.style.color = len >= max * 0.9 ? '#ef4444' : '';
+}
+
+function togglePasswordForm() {
+    const card = document.getElementById('pf-chpw-card');
+    const isHidden = card.style.display === 'none';
+
+    if (isHidden && !_hasPassword) {
+        // Tài khoản OAuth — chỉ hiện thông báo, không hiện form
+        card.innerHTML = `
+            <div class="pf-chpw-oauth-notice">
+                <div class="pf-chpw-oauth-icon"><i class="fa-brands fa-google"></i><i class="fa-brands fa-github"></i></div>
+                <div>
+                    <div class="pf-chpw-oauth-title">Không thể đổi mật khẩu</div>
+                    <div class="pf-chpw-oauth-desc">Tài khoản của bạn đang đăng nhập qua <strong>Google</strong> hoặc <strong>GitHub</strong> và không có mật khẩu riêng. Vui lòng quản lý bảo mật trực tiếp trên nền tảng đó.</div>
+                </div>
+                <button class="pf-chpw-oauth-close" onclick="togglePasswordForm()" title="Đóng"><i class="fa-solid fa-xmark"></i></button>
+            </div>`;
+        card.style.display = 'block';
+        card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        return;
+    }
+
+    card.style.display = isHidden ? 'block' : 'none';
+    if (isHidden) {
+        card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        document.getElementById('pf-pw-current').focus();
+    } else {
+        document.getElementById('pf-pw-current').value = '';
+        document.getElementById('pf-pw-new').value = '';
+        document.getElementById('pf-pw-confirm').value = '';
+        document.getElementById('pf-pw-strength').style.display = 'none';
+    }
+}
+
+function togglePwVisibility(inputId, btn) {
+    const input = document.getElementById(inputId);
+    const isText = input.type === 'text';
+    input.type = isText ? 'password' : 'text';
+    btn.innerHTML = isText ? '<i class="fa-regular fa-eye"></i>' : '<i class="fa-regular fa-eye-slash"></i>';
+}
+
+function checkPwStrength(val) {
+    const bar   = document.getElementById('pf-pw-strength-bar');
+    const label = document.getElementById('pf-pw-strength-label');
+    const wrap  = document.getElementById('pf-pw-strength');
+    if (!val) { wrap.style.display = 'none'; return; }
+    wrap.style.display = 'flex';
+    let score = 0;
+    if (val.length >= 6)  score++;
+    if (val.length >= 10) score++;
+    if (/[A-Z]/.test(val)) score++;
+    if (/[0-9]/.test(val)) score++;
+    if (/[^A-Za-z0-9]/.test(val)) score++;
+    const levels = [
+        { cls: 'weak',   text: 'Yếu' },
+        { cls: 'weak',   text: 'Yếu' },
+        { cls: 'fair',   text: 'Trung bình' },
+        { cls: 'good',   text: 'Khá' },
+        { cls: 'strong', text: 'Mạnh' },
+        { cls: 'strong', text: 'Rất mạnh' },
+    ];
+    const lv = levels[score];
+    bar.className = `pf-pw-strength-bar ${lv.cls}`;
+    label.textContent = lv.text;
+    label.className = lv.cls;
+}
+
+async function changePassword() {
+    const current  = document.getElementById('pf-pw-current').value.trim();
+    const newPw    = document.getElementById('pf-pw-new').value;
+    const confirm  = document.getElementById('pf-pw-confirm').value;
+
+    if (!current || !newPw || !confirm) { showToast('Vui lòng điền đầy đủ thông tin.', 'error'); return; }
+    if (newPw.length < 6)               { showToast('Mật khẩu mới phải có ít nhất 6 ký tự.', 'error'); return; }
+    if (newPw !== confirm)              { showToast('Mật khẩu xác nhận không khớp.', 'error'); return; }
+
+    const btn = document.getElementById('pf-chpw-btn');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang xử lý...';
+
+    try {
+        const res  = await apiFetchAuth('/api/profile/change-password', {
+            method: 'POST',
+            body: JSON.stringify({ currentPassword: current, newPassword: newPw })
+        });
+        const data = await res.json();
+        if (!res.ok || !data.success) throw new Error(data.message || 'Lỗi đổi mật khẩu');
+
+        showToast('Đổi mật khẩu thành công!', 'success');
+        togglePasswordForm();
+    } catch (e) {
+        showToast(e.message, 'error');
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-lock"></i> Xác nhận đổi mật khẩu';
+    }
 }
 
 // ── Modal helpers ─────────────────────────────────────────────

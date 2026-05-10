@@ -28,7 +28,7 @@
                 <i class="fa-solid fa-comments"></i> Tin nhắn
                 <span class="cm-nav-badge" id="cm-unread-badge" style="display:none;"></span>
             </a>
-            <a class="cm-nav-item" href="#" id="cm-nav-interviews">
+            <a class="cm-nav-item" href="#" id="cm-nav-interviews" onclick="showCalendarView(); return false;">
                 <i class="fa-regular fa-calendar-check"></i> Lịch phỏng vấn
             </a>
             <a class="cm-nav-item" href="profile.html">
@@ -114,6 +114,38 @@
     <!-- ── Right panel ── -->
     <div class="cm-panel-col" id="cm-panel-col" style="display:none;">
         <!-- Filled by JS -->
+    </div>
+
+    <!-- ── Calendar view ── -->
+    <div class="cm-calendar-section" id="cm-calendar-section" style="display:none;">
+        <div class="cm-cal-topbar">
+            <h2 id="cm-cal-month-label">Interview Calendar</h2>
+            <div class="cm-cal-nav-btns">
+                <button onclick="calPrevMonth()"><i class="fa-solid fa-chevron-left"></i></button>
+                <span class="cm-cal-nav-label" id="cm-cal-nav-label"></span>
+                <button onclick="calNextMonth()"><i class="fa-solid fa-chevron-right"></i></button>
+            </div>
+        </div>
+        <div class="cm-cal-body">
+            <div class="cm-cal-main">
+                <div class="cm-cal-weekdays">
+                    <span class="cm-cal-weekday">Sun</span>
+                    <span class="cm-cal-weekday">Mon</span>
+                    <span class="cm-cal-weekday">Tue</span>
+                    <span class="cm-cal-weekday">Wed</span>
+                    <span class="cm-cal-weekday">Thu</span>
+                    <span class="cm-cal-weekday">Fri</span>
+                    <span class="cm-cal-weekday">Sat</span>
+                </div>
+                <div class="cm-cal-grid" id="cm-cal-grid"></div>
+            </div>
+            <div class="cm-cal-upcoming">
+                <h3>Upcoming Interviews</h3>
+                <div id="cm-cal-upcoming-list">
+                    <div class="cm-upcoming-empty"><i class="fa-solid fa-spinner fa-spin"></i></div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 

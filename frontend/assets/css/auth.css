@@ -89,3 +89,78 @@ button[type="submit"]:active { transform: scale(0.97); box-shadow: 0 4px 10px -4
 
 input[type="password"]::-ms-reveal, input[type="password"]::-ms-clear { display: none; }
 input::-webkit-credentials-auto-fill-button { display: none; }
+
+/* Auth field groups */
+.auth-field { margin-top: 14px; }
+.auth-field label { margin-top: 0; margin-bottom: 6px; }
+.auth-field input, .auth-field select { margin-top: 0; }
+.auth-field input.err, .auth-field select.err { border-color: #ef4444; background: #fff5f5; }
+.auth-field input.err:focus { box-shadow: 0 0 0 4px rgba(239,68,68,0.12); }
+
+.auth-err {
+    display: block;
+    font-size: 12px;
+    color: #ef4444;
+    font-weight: 500;
+    margin-top: 5px;
+    min-height: 16px;
+}
+
+.auth-global-err {
+    margin-top: 12px;
+    padding: 10px 14px;
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: 10px;
+    font-size: 13px;
+    color: #dc2626;
+    font-weight: 500;
+    text-align: left;
+}
+
+/* Password strength */
+.auth-strength {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 7px;
+}
+.auth-strength-bar {
+    height: 4px;
+    border-radius: 4px;
+    flex: 1;
+    transition: all 0.3s;
+    background: #e2e8f0;
+}
+.auth-strength-bar.weak   { background: #ef4444; width: 30%; }
+.auth-strength-bar.fair   { background: #f59e0b; }
+.auth-strength-bar.good   { background: #3b82f6; }
+.auth-strength-bar.strong { background: #22c55e; }
+.auth-strength-label { font-size: 11px; font-weight: 700; white-space: nowrap; }
+.auth-strength-label.weak   { color: #ef4444; }
+.auth-strength-label.fair   { color: #f59e0b; }
+.auth-strength-label.good   { color: #3b82f6; }
+.auth-strength-label.strong { color: #22c55e; }
+
+/* Eye icon with FA */
+.password-wrapper span { display: flex; align-items: center; }
+.password-wrapper span i { font-size: 14px; }
+
+/* Success banner after register */
+.auth-success-banner {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px;
+    background: #f0fdf4;
+    border: 1px solid #86efac;
+    border-radius: 10px;
+    font-size: 13px;
+    color: #16a34a;
+    font-weight: 600;
+    margin-bottom: 12px;
+    text-align: left;
+}
+
+/* Remove default margin-top on first auth-field */
+.auth-field:first-child { margin-top: 0; }

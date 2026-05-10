@@ -98,6 +98,14 @@ public sealed class MessagingController : ControllerBase
         return Ok(ApiResponse<List<InterviewScheduleDto>>.Ok(result));
     }
 
+    [HttpGet("interviews/all")]
+    public async Task<ActionResult<ApiResponse<List<InterviewScheduleDto>>>> GetAll(
+        [FromQuery] Guid companyId, CancellationToken ct)
+    {
+        var result = await _interview.GetAllByCompanyAsync(Me, companyId, ct);
+        return Ok(ApiResponse<List<InterviewScheduleDto>>.Ok(result));
+    }
+
     [HttpPost("interviews/{scheduleId:guid}/cancel")]
     public async Task<ActionResult<ApiResponse<InterviewScheduleDto>>> Cancel(
         Guid scheduleId, CancellationToken ct)

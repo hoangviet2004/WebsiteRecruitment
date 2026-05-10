@@ -77,6 +77,20 @@ public record RecruiterPanelDto(
     OfferCardDto? PendingOffer
 );
 
+// ── Danh sách lịch phỏng vấn (calendar view) ───────────────
+public record CandidateInterviewListDto(
+    Guid ScheduleId,
+    string JobTitle,
+    string CompanyName,
+    string? CompanyLogo,
+    DateTime ScheduledAt,
+    int DurationMinutes,
+    string? MeetingLink,
+    string? Location,
+    string ScheduleStatus,
+    string CandidateResponse
+);
+
 // ── Requests ────────────────────────────────────────────────
 public class SendCandidateMessageRequest
 {

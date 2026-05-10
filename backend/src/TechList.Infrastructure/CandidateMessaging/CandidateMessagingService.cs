@@ -260,7 +260,34 @@ public sealed class CandidateMessagingService : ICandidateMessagingService
             .CountAsync(ct);
     }
 
-    // ── 7. Phản hồi lời mời phỏng vấn ─────────────────────────────────────
+    // ── 7. Lấy tất cả lịch phỏng vấn của candidate ────────────────────────
+    public async Task<List<CandidateInterviewListDto>> GetAllInterviewsAsync(string candidateId, CancellationToken ct)
+    {
+        var appIds = await _db.JobApplications.AsNoTracking()
+            .Where(a => a.CandidateId == candidateId)
+            .Select(a => a.Id).ToListAsync(ct);
+
+        var schedules = await _db.InterviewSchedules.AsNoTracking()
+            .Where(s => appIds.Contains(s.ApplicationId) && s.Status != "Cancelled")
+            .Include(s => s.Application).ThenInclude(a => a.JobPost).ThenInclude(j => j.Company)
+            .OrderBy(s => s.ScheduledAt)
+            .ToListAsync(ct);
+
+        return schedules.Select(s => new CandidateInterviewListDto(
+            s.Id,
+            s.Application.JobPost.Title,
+            s.Application.JobPost.Company.Name,
+            s.Application.JobPost.Company.LogoUrl,
+            s.ScheduledAt,
+            s.DurationMinutes,
+            s.MeetingLink,
+            s.Location,
+            s.Status,
+            s.CandidateResponse
+        )).ToList();
+    }
+
+    // ── 8. Phản hồi lời mời phỏng vấn ─────────────────────────────────────
     public async Task<InterviewCardDto> RespondToInterviewAsync(
         string candidateId, Guid scheduleId, InterviewResponseRequest req, CancellationToken ct)
     {

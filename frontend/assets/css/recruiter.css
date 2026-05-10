@@ -1881,3 +1881,298 @@
     .msg-conv-col { height: 300px; }
 }
 
+
+/* ── Recruiter Calendar ──────────────────────────────────────── */
+.rcal-topbar {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.rcal-title {
+    font-size: 22px;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0 0 4px;
+}
+
+.rcal-sub {
+    font-size: 14px;
+    color: #64748b;
+    margin: 0;
+}
+
+.rcal-nav-btns {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.rcal-nav-btns button {
+    width: 34px; height: 34px;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    background: #fff;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    color: #64748b; font-size: 13px;
+    transition: all 0.15s;
+}
+.rcal-nav-btns button:hover { background: #f1f5f9; color: #0f172a; }
+
+.rcal-nav-label {
+    font-size: 15px;
+    font-weight: 700;
+    color: #0f172a;
+    min-width: 64px;
+    text-align: center;
+}
+
+.rcal-body {
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    gap: 20px;
+    align-items: start;
+}
+
+.rcal-main {
+    background: #fff;
+    border-radius: 14px;
+    border: 1px solid #e2e8f0;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+
+.rcal-weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    background: #f8fafc;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.rcal-weekdays span {
+    text-align: center;
+    font-size: 11px;
+    font-weight: 700;
+    color: #94a3b8;
+    padding: 10px 0;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+}
+
+.rcal-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+}
+
+.rcal-cell {
+    min-height: 90px;
+    padding: 6px 8px;
+    border-right: 1px solid #f1f5f9;
+    border-bottom: 1px solid #f1f5f9;
+}
+.rcal-cell:nth-child(7n) { border-right: none; }
+.rcal-cell.other-month   { background: #f8fafc; }
+.rcal-cell.today         { background: #eff6ff; }
+
+.rcal-day {
+    font-size: 13px;
+    font-weight: 600;
+    color: #0f172a;
+    width: 28px; height: 28px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 50%;
+    margin-bottom: 4px;
+}
+.rcal-cell.other-month .rcal-day { color: #cbd5e1; }
+.rcal-cell.today .rcal-day {
+    background: #2563eb;
+    color: #fff;
+}
+
+.rcal-event {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    background: #2563eb;
+    color: #fff;
+    border-radius: 4px;
+    padding: 2px 6px;
+    font-size: 11px;
+    font-weight: 600;
+    margin-bottom: 2px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    cursor: default;
+}
+.rcal-event i { font-size: 9px; flex-shrink: 0; }
+
+/* Upcoming panel */
+.rcal-upcoming {
+    background: #fff;
+    border-radius: 14px;
+    border: 1px solid #e2e8f0;
+    padding: 20px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+
+.rcal-upcoming h3 {
+    font-size: 15px;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 14px;
+}
+
+.rcal-upcoming-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 12px 0;
+    border-bottom: 1px solid #f1f5f9;
+}
+.rcal-upcoming-item:last-child { border-bottom: none; }
+
+.rcal-upcoming-icon {
+    width: 36px; height: 36px;
+    border-radius: 9px;
+    background: #eff6ff;
+    color: #2563eb;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px;
+    flex-shrink: 0;
+}
+
+.rcal-upcoming-info { flex: 1; min-width: 0; }
+.rcal-upcoming-name { font-size: 13px; font-weight: 700; color: #0f172a; }
+.rcal-upcoming-job  { font-size: 12px; color: #64748b; margin: 2px 0 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rcal-upcoming-time { font-size: 11px; color: #94a3b8; display: flex; align-items: center; gap: 4px; }
+
+.rcal-join-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 6px 10px;
+    background: #2563eb;
+    color: #fff;
+    border: none;
+    border-radius: 7px;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    white-space: nowrap;
+    flex-shrink: 0;
+    transition: background 0.15s;
+}
+.rcal-join-btn:hover { background: #1d4ed8; }
+.rcal-join-btn.disabled {
+    background: #e2e8f0;
+    color: #94a3b8;
+    cursor: default;
+    pointer-events: none;
+    font-size: 10px;
+}
+
+.rcal-empty {
+    text-align: center;
+    padding: 40px 16px;
+    color: #94a3b8;
+    font-size: 13px;
+}
+.rcal-empty i { font-size: 28px; display: block; margin-bottom: 10px; }
+.rcal-empty p { margin: 4px 0 0; }
+
+.rcal-more {
+    font-size: 11px;
+    font-weight: 600;
+    color: #2563eb;
+    padding: 1px 6px;
+    border-radius: 4px;
+    cursor: pointer;
+    display: inline-block;
+    margin-top: 1px;
+}
+.rcal-more:hover { background: #eff6ff; }
+
+/* Popover ngày */
+.rcal-pop-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15,23,42,0.2);
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.rcal-popover {
+    background: #fff;
+    border-radius: 14px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.16);
+    width: 340px;
+    max-width: 95vw;
+    overflow: hidden;
+}
+
+.rcal-pop-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 18px;
+    font-size: 13px;
+    font-weight: 700;
+    color: #0f172a;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.rcal-pop-header button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #94a3b8;
+    font-size: 16px;
+    padding: 2px 6px;
+    border-radius: 6px;
+    line-height: 1;
+}
+.rcal-pop-header button:hover { background: #f1f5f9; color: #0f172a; }
+
+.rcal-pop-list { padding: 8px 0; max-height: 320px; overflow-y: auto; }
+
+.rcal-pop-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 18px;
+    border-bottom: 1px solid #f8fafc;
+}
+.rcal-pop-item:last-child { border-bottom: none; }
+
+.rcal-pop-time {
+    font-size: 12px;
+    font-weight: 700;
+    color: #2563eb;
+    min-width: 38px;
+    flex-shrink: 0;
+}
+
+.rcal-pop-info { flex: 1; min-width: 0; }
+.rcal-pop-name { font-size: 13px; font-weight: 600; color: #0f172a; }
+.rcal-pop-job  { font-size: 12px; color: #64748b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.rcal-pop-join {
+    width: 30px; height: 30px;
+    border-radius: 8px;
+    background: #eff6ff;
+    color: #2563eb;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px;
+    text-decoration: none;
+    flex-shrink: 0;
+    transition: background 0.15s;
+}
+.rcal-pop-join:hover { background: #dbeafe; }

@@ -23,8 +23,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (!token || role !== 'Candidate') { window.location.href = 'auth.html#login'; return; }
 
     renderUserCard();
-    loadConversations();
+    await loadConversations();
     pollUnread();
+
+    const targetAppId = new URLSearchParams(window.location.search).get('appId');
+    if (targetAppId) openConv(targetAppId);
 });
 
 function renderUserCard() {
@@ -535,6 +538,137 @@ async function safeJson(res) {
     if (!res) return null;
     const t = await res.text();
     try { return JSON.parse(t); } catch { return null; }
+}
+
+// ── Calendar view ────────────────────────────────────────────────
+let _calYear, _calMonth, _calInterviews = [];
+
+const _CAL_MONTHS     = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const _CAL_MONTHS_SHT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+function showCalendarView() {
+    document.querySelectorAll('.cm-nav-item').forEach(el => el.classList.remove('active'));
+    document.getElementById('cm-nav-interviews').classList.add('active');
+
+    document.querySelector('.cm-conv-col').style.display  = 'none';
+    document.getElementById('cm-thread-col').style.display = 'none';
+    document.getElementById('cm-panel-col').style.display  = 'none';
+    document.getElementById('cm-calendar-section').style.display = 'flex';
+
+    const now = new Date();
+    _calYear  = now.getFullYear();
+    _calMonth = now.getMonth();
+    _loadCalendarInterviews();
+}
+
+function showMessagesView() {
+    document.querySelectorAll('.cm-nav-item').forEach(el => el.classList.remove('active'));
+    document.querySelector('.cm-nav-item[href="candidate-messages.html"]').classList.add('active');
+
+    document.querySelector('.cm-conv-col').style.display   = '';
+    document.getElementById('cm-thread-col').style.display  = '';
+    document.getElementById('cm-calendar-section').style.display = 'none';
+}
+
+async function _loadCalendarInterviews() {
+    try {
+        const res  = await apiFetchAuth('/api/candidate/messages/interviews');
+        const data = await res?.json();
+        if (data?.success) {
+            _calInterviews = data.data || [];
+            _renderCalendar();
+            _renderUpcoming();
+        }
+    } catch {
+        document.getElementById('cm-cal-upcoming-list').innerHTML =
+            '<div class="cm-upcoming-empty"><i class="fa-solid fa-circle-exclamation"></i><p>Không thể tải dữ liệu.</p></div>';
+    }
+}
+
+function _renderCalendar() {
+    document.getElementById('cm-cal-month-label').textContent = `${_CAL_MONTHS[_calMonth]} ${_calYear}`;
+    document.getElementById('cm-cal-nav-label').textContent   = `${_CAL_MONTHS_SHT[_calMonth]} ${_calYear}`;
+
+    const today       = new Date();
+    const firstDay    = new Date(_calYear, _calMonth, 1).getDay();
+    const daysInMonth = new Date(_calYear, _calMonth + 1, 0).getDate();
+    const daysInPrev  = new Date(_calYear, _calMonth, 0).getDate();
+
+    // Group interviews by day
+    const ivByDay = {};
+    _calInterviews.forEach(iv => {
+        const d = new Date(iv.scheduledAt);
+        if (d.getFullYear() === _calYear && d.getMonth() === _calMonth) {
+            (ivByDay[d.getDate()] = ivByDay[d.getDate()] || []).push(iv);
+        }
+    });
+
+    let html = '';
+
+    for (let i = firstDay - 1; i >= 0; i--)
+        html += `<div class="cm-cal-cell other-month"><div class="cm-cal-day">${daysInPrev - i}</div></div>`;
+
+    for (let d = 1; d <= daysInMonth; d++) {
+        const isToday = today.getDate() === d && today.getMonth() === _calMonth && today.getFullYear() === _calYear;
+        const events  = ivByDay[d] || [];
+        html += `<div class="cm-cal-cell${isToday ? ' today' : ''}${events.length ? ' has-event' : ''}">
+            <div class="cm-cal-day">${d}</div>
+            ${events.map(() => `<div class="cm-cal-event"><i class="fa-solid fa-user-tie"></i> Interview</div>`).join('')}
+        </div>`;
+    }
+
+    const total = Math.ceil((firstDay + daysInMonth) / 7) * 7;
+    for (let d = 1; d <= total - firstDay - daysInMonth; d++)
+        html += `<div class="cm-cal-cell other-month"><div class="cm-cal-day">${d}</div></div>`;
+
+    document.getElementById('cm-cal-grid').innerHTML = html;
+}
+
+function _renderUpcoming() {
+    const now      = new Date();
+    const upcoming = _calInterviews
+        .filter(iv => new Date(iv.scheduledAt) >= now && iv.scheduleStatus !== 'Cancelled')
+        .sort((a, b) => new Date(a.scheduledAt) - new Date(b.scheduledAt))
+        .slice(0, 10);
+
+    const list = document.getElementById('cm-cal-upcoming-list');
+
+    if (!upcoming.length) {
+        list.innerHTML = '<div class="cm-upcoming-empty"><i class="fa-regular fa-calendar-xmark"></i><p>Không có lịch phỏng vấn sắp tới.</p></div>';
+        return;
+    }
+
+    list.innerHTML = upcoming.map(iv => {
+        const d       = new Date(iv.scheduledAt);
+        const dateStr = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        const timeStr = d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+        const logo    = iv.companyLogo
+            ? `<img src="${iv.companyLogo}" alt="">`
+            : `<i class="fa-solid fa-building"></i>`;
+        const joinBtn = iv.meetingLink
+            ? `<a href="${esc(iv.meetingLink)}" target="_blank" class="cm-upcoming-join"><i class="fa-solid fa-video"></i> Join Meeting</a>`
+            : `<span class="cm-upcoming-join disabled"><i class="fa-solid fa-video"></i> No Link</span>`;
+        return `
+            <div class="cm-upcoming-item">
+                <div class="cm-upcoming-logo">${logo}</div>
+                <div class="cm-upcoming-info">
+                    <div class="cm-upcoming-company">${esc(iv.companyName)}</div>
+                    <div class="cm-upcoming-job">${esc(iv.jobTitle)}</div>
+                    <div class="cm-upcoming-time">${dateStr}, ${timeStr}</div>
+                </div>
+                ${joinBtn}
+            </div>`;
+    }).join('');
+}
+
+function calPrevMonth() {
+    if (--_calMonth < 0) { _calMonth = 11; _calYear--; }
+    _renderCalendar();
+}
+
+function calNextMonth() {
+    if (++_calMonth > 11) { _calMonth = 0; _calYear++; }
+    _renderCalendar();
 }
 
 let _toastT;

@@ -21,30 +21,62 @@
 
             <!-- ĐĂNG KÝ -->
             <div id="panel-register">
-                <form id="registerForm">
-                    <label>Họ và tên</label>
-                    <input type="text" id="reg-fullname" required>
-
-                    <label>Email</label>
-                    <input type="email" id="reg-email" required>
-
-                    <label>Bạn là</label>
-                    <select id="reg-role">
-                        <option value="Candidate">Ứng viên</option>
-                        <option value="Recruiter">Nhà tuyển dụng</option>
-                    </select>
-                    <br>
-                    <label>Mật khẩu</label>
-                    <div class="password-wrapper">
-                        <input type="password" id="reg-password" required>
-                        <span onclick="togglePassword('reg-password')">👁</span>
+                <form id="registerForm" novalidate>
+                    <div class="auth-field">
+                        <label for="reg-fullname">Họ và tên</label>
+                        <input type="text" id="reg-fullname" placeholder="Nguyễn Văn A"
+                               maxlength="50" autocomplete="name"
+                               oninput="clearErr('reg-fullname-err')">
+                        <span class="auth-err" id="reg-fullname-err"></span>
                     </div>
 
-                    <label>Xác nhận mật khẩu</label>
-                    <div class="password-wrapper">
-                        <input type="password" id="reg-confirm" required>
-                        <span onclick="togglePassword('reg-confirm')">👁</span>
+                    <div class="auth-field">
+                        <label for="reg-email">Email</label>
+                        <input type="email" id="reg-email" placeholder="example@email.com"
+                               maxlength="100" autocomplete="email"
+                               oninput="clearErr('reg-email-err')">
+                        <span class="auth-err" id="reg-email-err"></span>
                     </div>
+
+                    <div class="auth-field">
+                        <label for="reg-role">Bạn là</label>
+                        <select id="reg-role">
+                            <option value="Candidate">🎯 Ứng viên đang tìm việc</option>
+                            <option value="Recruiter">🏢 Nhà tuyển dụng</option>
+                        </select>
+                    </div>
+
+                    <div class="auth-field">
+                        <label for="reg-password">Mật khẩu</label>
+                        <div class="password-wrapper">
+                            <input type="password" id="reg-password" placeholder="Tối thiểu 6 ký tự"
+                                   maxlength="100" autocomplete="new-password"
+                                   oninput="onRegPassInput(this.value); clearErr('reg-password-err')">
+                            <span onclick="togglePassword('reg-password', this)">
+                                <i class="fa-regular fa-eye"></i>
+                            </span>
+                        </div>
+                        <div class="auth-strength" id="reg-strength" style="display:none;">
+                            <div class="auth-strength-bar" id="reg-strength-bar"></div>
+                            <span class="auth-strength-label" id="reg-strength-label"></span>
+                        </div>
+                        <span class="auth-err" id="reg-password-err"></span>
+                    </div>
+
+                    <div class="auth-field">
+                        <label for="reg-confirm">Xác nhận mật khẩu</label>
+                        <div class="password-wrapper">
+                            <input type="password" id="reg-confirm" placeholder="Nhập lại mật khẩu"
+                                   maxlength="100" autocomplete="new-password"
+                                   oninput="clearErr('reg-confirm-err')">
+                            <span onclick="togglePassword('reg-confirm', this)">
+                                <i class="fa-regular fa-eye"></i>
+                            </span>
+                        </div>
+                        <span class="auth-err" id="reg-confirm-err"></span>
+                    </div>
+
+                    <div class="auth-global-err" id="reg-global-err" style="display:none;"></div>
 
                     <button type="submit" id="btn-register">Đăng ký</button>
                 </form>
@@ -63,21 +95,35 @@
 
             <!-- ĐĂNG NHẬP -->
             <div id="panel-login" style="display: none;">
-                <form id="loginForm">
-                    <label>Email</label>
-                    <input type="email" id="login-email" placeholder="example@email.com" required>
+                <form id="loginForm" novalidate>
+                    <div class="auth-field">
+                        <label for="login-email">Email</label>
+                        <input type="email" id="login-email" placeholder="example@email.com"
+                               maxlength="100" autocomplete="email"
+                               oninput="clearErr('login-email-err')">
+                        <span class="auth-err" id="login-email-err"></span>
+                    </div>
 
-                    <label>Mật khẩu</label>
-                    <div class="password-wrapper">
-                        <input type="password" id="login-password" required>
-                        <span onclick="togglePassword('login-password')">👁</span>
+                    <div class="auth-field">
+                        <label for="login-password">Mật khẩu</label>
+                        <div class="password-wrapper">
+                            <input type="password" id="login-password" placeholder="Nhập mật khẩu"
+                                   maxlength="100" autocomplete="current-password"
+                                   oninput="clearErr('login-password-err')">
+                            <span onclick="togglePassword('login-password', this)">
+                                <i class="fa-regular fa-eye"></i>
+                            </span>
+                        </div>
+                        <span class="auth-err" id="login-password-err"></span>
                     </div>
 
                     <div class="forgot-row">
                         <a href="#" onclick="showPanel('forgot')">Quên mật khẩu?</a>
                     </div>
 
-                    <button type="submit">Đăng nhập</button>
+                    <div class="auth-global-err" id="login-global-err" style="display:none;"></div>
+
+                    <button type="submit" id="btn-login">Đăng nhập</button>
                 </form>
 
                 <div class="divider">Tiếp tục với</div>

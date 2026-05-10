@@ -44,6 +44,9 @@
                     <i class="fa-solid fa-comments"></i> Tin nhắn
                     <span class="msg-badge-dot" id="msg-unread-badge" style="display:none;"></span>
                 </a>
+                <a href="#" class="menu-item" onclick="switchTab('calendar', this)">
+                    <i class="fa-regular fa-calendar-check"></i> Lịch phỏng vấn
+                </a>
                 <a href="#" class="menu-item" onclick="switchTab('transactions', this)">
                     <i class="fa-solid fa-receipt"></i> Lịch sử giao dịch
                 </a>
@@ -504,7 +507,36 @@
                 </div>
             </section>
 
-            <!-- TAB 7: Lịch sử giao dịch -->
+            <!-- TAB 7: Lịch phỏng vấn -->
+            <section id="tab-calendar" class="tab-pane">
+                <div class="rcal-topbar">
+                    <div>
+                        <h2 class="rcal-title"><i class="fa-regular fa-calendar-check" style="color:#3b82f6;margin-right:10px;"></i>Lịch phỏng vấn</h2>
+                        <p class="rcal-sub">Theo dõi toàn bộ lịch phỏng vấn ứng viên của công ty.</p>
+                    </div>
+                    <div class="rcal-nav-btns">
+                        <button onclick="rcalPrev()"><i class="fa-solid fa-chevron-left"></i></button>
+                        <span class="rcal-nav-label" id="rcal-nav-label"></span>
+                        <button onclick="rcalNext()"><i class="fa-solid fa-chevron-right"></i></button>
+                    </div>
+                </div>
+                <div class="rcal-body">
+                    <div class="rcal-main">
+                        <div class="rcal-weekdays">
+                            <span>CN</span><span>T2</span><span>T3</span><span>T4</span><span>T5</span><span>T6</span><span>T7</span>
+                        </div>
+                        <div class="rcal-grid" id="rcal-grid"></div>
+                    </div>
+                    <div class="rcal-upcoming">
+                        <h3>Sắp diễn ra</h3>
+                        <div id="rcal-upcoming-list">
+                            <div class="rcal-empty"><i class="fa-solid fa-spinner fa-spin"></i></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 8: Lịch sử giao dịch -->
             <section id="tab-transactions" class="tab-pane">
                 <div class="card">
                     <div class="card-header">
@@ -885,6 +917,7 @@
     <script src="../js/recruiterAnalytics.js"></script>
     <script src="../js/recruiterMessaging.js"></script>
     <script src="../js/recruiterTransactions.js"></script>
+    <script src="../js/recruiterCalendar.js"></script>
 </body>
 
 </html>

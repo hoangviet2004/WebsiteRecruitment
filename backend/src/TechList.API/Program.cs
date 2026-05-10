@@ -188,7 +188,18 @@ using (var scope = app.Services.CreateScope())
              "Công ty An ninh mạng DigiWave", "0302233445", "security@digiwave.vn", "0283844556", "https://digiwave.vn", "80-150", "Tân Bình, TP. Hồ Chí Minh", 
              "DigiWave cung cấp các giải pháp bảo mật toàn diện cho hạ tầng số của doanh nghiệp, từ phòng chống tấn công mạng đến ứng cứu sự cố an ninh thông tin. Trong bối cảnh các mối đe dọa kỹ thuật số ngày càng phức tạp, chúng tôi đóng vai trò là lá chắn vững chắc bảo vệ tài sản số và dữ liệu nhạy cảm của khách hàng. DigiWave kết hợp giữa công nghệ giám sát 24/7 và tư vấn chiến lược để đảm bảo sự vận hành liên tục và an toàn của hệ thống."),
 
-            ("candidate@techlist.com", "Candidate@123", AppRole.Candidate, "Nguyễn Văn A", "Software Engineer", "Lập trình viên", "", "", "", "", "", "", "", "")
+            ("candidate@techlist.com", "Candidate@123", AppRole.Candidate, "Nguyễn Văn A", "Software Engineer", "Lập trình viên", "", "", "", "", "", "", "", ""),
+
+            ("ungvien1@gmail.com",  "Ungvien@123", AppRole.Candidate, "Nguyễn Minh Khoa",   "Minh Khoa",   "Frontend Developer với 2 năm kinh nghiệm ReactJS và TypeScript.", "", "", "", "", "", "", "", ""),
+            ("ungvien2@gmail.com",  "Ungvien@123", AppRole.Candidate, "Trần Thị Lan Anh",   "Lan Anh",     "UI/UX Designer đam mê thiết kế sản phẩm số lấy người dùng làm trung tâm.", "", "", "", "", "", "", "", ""),
+            ("ungvien3@gmail.com",  "Ungvien@123", AppRole.Candidate, "Lê Hoàng Phúc",      "Hoàng Phúc",  "Backend Developer chuyên .NET Core và microservices, 3 năm kinh nghiệm.", "", "", "", "", "", "", "", ""),
+            ("ungvien4@gmail.com",  "Ungvien@123", AppRole.Candidate, "Phạm Ngọc Huyền",    "Ngọc Huyền",  "Data Analyst với kỹ năng Python, SQL và Power BI, đang tìm cơ hội mới.", "", "", "", "", "", "", "", ""),
+            ("ungvien5@gmail.com",  "Ungvien@123", AppRole.Candidate, "Võ Tuấn Kiệt",       "Tuấn Kiệt",   "Mobile Developer iOS/Android, có kinh nghiệm Flutter và Swift.", "", "", "", "", "", "", "", ""),
+            ("ungvien6@gmail.com",  "Ungvien@123", AppRole.Candidate, "Ngô Thị Thu Trang",  "Thu Trang",   "QA Engineer chuyên kiểm thử tự động với Selenium và Cypress.", "", "", "", "", "", "", "", ""),
+            ("ungvien7@gmail.com",  "Ungvien@123", AppRole.Candidate, "Đặng Quốc Bảo",      "Quốc Bảo",    "DevOps Engineer, thành thạo Docker, Kubernetes và CI/CD pipeline.", "", "", "", "", "", "", "", ""),
+            ("ungvien8@gmail.com",  "Ungvien@123", AppRole.Candidate, "Bùi Khánh Linh",     "Khánh Linh",  "Fullstack Developer MERN stack, đã tham gia 5 dự án startup.", "", "", "", "", "", "", "", ""),
+            ("ungvien9@gmail.com",  "Ungvien@123", AppRole.Candidate, "Hoàng Đức Mạnh",     "Đức Mạnh",    "AI/ML Engineer với kinh nghiệm TensorFlow và PyTorch, nghiên cứu NLP.", "", "", "", "", "", "", "", ""),
+            ("ungvien10@gmail.com", "Ungvien@123", AppRole.Candidate, "Phan Thị Mỹ Duyên",  "Mỹ Duyên",   "Business Analyst, cầu nối giữa kỹ thuật và nghiệp vụ, thành thạo BPMN.", "", "", "", "", "", "", "", "")
         };
 
         foreach (var (email, password, role, fullName, displayName, bio, compName, compTax, compEmail, compPhone, compWeb, compSize, compAddr, compDesc) in seedUsers)
