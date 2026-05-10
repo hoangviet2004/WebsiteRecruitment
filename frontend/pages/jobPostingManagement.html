@@ -37,6 +37,9 @@
           <option value="blocked">Bị từ chối</option>
         </select>
       </div>
+      <button class="jm-quick-reject-btn" onclick="openQuickRejectJobModal()">
+        <i class="fa-solid fa-ban"></i> Từ chối nhanh
+      </button>
     </div>
 
     <div class="data-card">
@@ -57,6 +60,106 @@
         </div>
     </div>
 </main>
+
+<!-- ═══════════════════════════════════════════════════════════
+     MODAL: TỪ CHỐI NHANH
+     ═══════════════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="modal-quick-reject-job">
+  <div class="modal-card" style="max-width:520px;">
+    <div class="modal-header">
+      <h2><i class="fa-solid fa-ban" style="color:#ef4444;margin-right:6px;"></i> Từ chối nhanh</h2>
+      <button class="modal-close-btn" onclick="closeQuickRejectJobModal()"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal-body">
+      <p style="margin:0 0 20px;color:#64748b;font-size:14px;">Chọn tiêu chí để từ chối hàng loạt tin tuyển dụng không phù hợp.</p>
+
+      <div style="margin-bottom:20px;">
+        <label style="font-size:13px;font-weight:600;color:#1e293b;margin-bottom:10px;display:block;">
+          <i class="fa-solid fa-filter" style="color:#64748b;margin-right:6px;"></i>Áp dụng cho tin có trạng thái
+        </label>
+        <div class="qr-status-checkboxes">
+          <label class="qr-checkbox-item">
+            <input type="checkbox" name="jqr-status" value="pending" onchange="updateQuickRejectJobCount()" checked>
+            <span class="badge badge-inactive">Chờ duyệt</span>
+          </label>
+          <label class="qr-checkbox-item">
+            <input type="checkbox" name="jqr-status" value="active" onchange="updateQuickRejectJobCount()">
+            <span class="badge badge-active">Đã duyệt & Hiện</span>
+          </label>
+          <label class="qr-checkbox-item">
+            <input type="checkbox" name="jqr-status" value="hidden" onchange="updateQuickRejectJobCount()">
+            <span class="badge" style="background:#e2e8f0;color:#475569;">Đang ẩn</span>
+          </label>
+        </div>
+      </div>
+
+      <div style="margin-bottom:20px;">
+        <label style="font-size:13px;font-weight:600;color:#1e293b;margin-bottom:10px;display:block;">
+          <i class="fa-solid fa-triangle-exclamation" style="color:#64748b;margin-right:6px;"></i>Thiếu thông tin <span style="font-weight:400;color:#94a3b8;">(lọc thêm)</span>
+        </label>
+        <div class="qr-status-checkboxes">
+          <label class="qr-checkbox-item">
+            <input type="checkbox" name="jqr-missing" value="no-location" onchange="updateQuickRejectJobCount()">
+            <span class="qr-profile-tag"><i class="fa-solid fa-location-dot"></i> Thiếu địa điểm</span>
+          </label>
+          <label class="qr-checkbox-item">
+            <input type="checkbox" name="jqr-missing" value="no-min-salary" onchange="updateQuickRejectJobCount()">
+            <span class="qr-profile-tag"><i class="fa-solid fa-money-bill"></i> Thiếu lương tối thiểu</span>
+          </label>
+          <label class="qr-checkbox-item">
+            <input type="checkbox" name="jqr-missing" value="no-max-salary" onchange="updateQuickRejectJobCount()">
+            <span class="qr-profile-tag"><i class="fa-solid fa-money-bills"></i> Thiếu lương tối đa</span>
+          </label>
+          <label class="qr-checkbox-item">
+            <input type="checkbox" name="jqr-missing" value="no-description" onchange="updateQuickRejectJobCount()">
+            <span class="qr-profile-tag"><i class="fa-solid fa-file-lines"></i> Thiếu mô tả công việc</span>
+          </label>
+          <label class="qr-checkbox-item">
+            <input type="checkbox" name="jqr-missing" value="no-requirements" onchange="updateQuickRejectJobCount()">
+            <span class="qr-profile-tag"><i class="fa-solid fa-list-check"></i> Thiếu yêu cầu kỹ năng</span>
+          </label>
+        </div>
+      </div>
+
+      <div style="margin-bottom:20px;">
+        <label style="font-size:13px;font-weight:600;color:#1e293b;margin-bottom:8px;display:block;">
+          <i class="fa-solid fa-building" style="color:#64748b;margin-right:6px;"></i>Doanh nghiệp <span style="font-weight:400;color:#94a3b8;">(tuỳ chọn)</span>
+        </label>
+        <select id="jqr-company-filter" onchange="updateQuickRejectJobCount()" style="width:100%;padding:9px 12px;border:1px solid #e2e8f0;border-radius:8px;font-size:14px;font-family:inherit;outline:none;">
+          <option value="">Tất cả doanh nghiệp</option>
+        </select>
+      </div>
+
+      <div style="margin-bottom:20px;">
+        <label style="font-size:13px;font-weight:600;color:#1e293b;margin-bottom:8px;display:block;">
+          <i class="fa-solid fa-comment-slash" style="color:#64748b;margin-right:6px;"></i>Lý do từ chối
+        </label>
+        <select id="jqr-reason-select" onchange="onJqrReasonChange()" style="width:100%;padding:9px 12px;border:1px solid #e2e8f0;border-radius:8px;font-size:14px;font-family:inherit;outline:none;">
+          <option value="Nội dung tin tuyển dụng không rõ ràng hoặc thiếu thông tin">Nội dung không rõ ràng hoặc thiếu thông tin</option>
+          <option value="Tin tuyển dụng có dấu hiệu lừa đảo">Có dấu hiệu lừa đảo</option>
+          <option value="Mức lương hoặc quyền lợi không thực tế">Mức lương / quyền lợi không thực tế</option>
+          <option value="Vi phạm quy định của nền tảng">Vi phạm quy định của nền tảng</option>
+          <option value="Tin trùng lặp hoặc spam">Tin trùng lặp hoặc spam</option>
+          <option value="other">Lý do khác...</option>
+        </select>
+        <textarea id="jqr-reason-input" rows="2"
+          style="display:none;width:100%;margin-top:8px;padding:10px 12px;border:1px solid #e2e8f0;border-radius:8px;font-size:14px;font-family:inherit;resize:vertical;outline:none;box-sizing:border-box;"
+          placeholder="Nhập lý do khác..."></textarea>
+      </div>
+
+      <div class="qr-preview-box" id="jqr-preview-box">
+        <i class="fa-solid fa-circle-info" style="flex-shrink:0;"></i>
+        <span id="jqr-count-text">Chọn tiêu chí để xem số lượng tin bị ảnh hưởng.</span>
+      </div>
+    </div>
+    <div class="modal-footer" style="display:flex;justify-content:flex-end;gap:10px;padding:16px 24px;border-top:1px solid #e2e8f0;">
+      <button onclick="closeQuickRejectJobModal()" style="padding:9px 20px;border:1px solid #e2e8f0;border-radius:8px;background:#fff;color:#475569;font-size:14px;font-weight:600;cursor:pointer;">Hủy</button>
+      <button class="btn-danger" id="jqr-confirm-btn" onclick="executeQuickRejectJob()" disabled>
+        <i class="fa-solid fa-ban"></i> Từ chối <span id="jqr-confirm-count"></span>
+      </button>
+    </div>
+  </div>
+</div>
 
 <!-- ═══════════════════════════════════════════════════════════
      MODAL: TỪ CHỐI TIN TUYỂN DỤNG

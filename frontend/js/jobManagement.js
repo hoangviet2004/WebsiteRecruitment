@@ -322,8 +322,150 @@ async function _sendBlockRequest(id, reason) {
 }
 
 document.addEventListener('keydown', e => {
-    if (e.key === 'Escape') closeBlockModal();
+    if (e.key === 'Escape') { closeBlockModal(); closeQuickRejectJobModal(); }
 });
+
+// ── Từ chối nhanh ────────────────────────────────────────────
+function openQuickRejectJobModal() {
+    // Populate company dropdown
+    const sel = document.getElementById('jqr-company-filter');
+    sel.innerHTML = '<option value="">Tất cả doanh nghiệp</option>';
+    const seen = new Set();
+    allJobs.forEach(j => {
+        if (!seen.has(j.companyId)) {
+            seen.add(j.companyId);
+            const opt = document.createElement('option');
+            opt.value = j.companyId;
+            opt.textContent = j.companyName;
+            sel.appendChild(opt);
+        }
+    });
+
+    // Reset
+    document.querySelectorAll('input[name="jqr-status"]').forEach(cb => {
+        cb.checked = cb.value === 'pending';
+    });
+    document.querySelectorAll('input[name="jqr-missing"]').forEach(cb => {
+        cb.checked = false;
+    });
+    document.getElementById('jqr-company-filter').value = '';
+    document.getElementById('jqr-reason-select').value = document.getElementById('jqr-reason-select').options[0].value;
+    document.getElementById('jqr-reason-input').style.display = 'none';
+    document.getElementById('jqr-reason-input').value = '';
+
+    updateQuickRejectJobCount();
+    document.getElementById('modal-quick-reject-job').classList.add('open');
+}
+
+function closeQuickRejectJobModal() {
+    document.getElementById('modal-quick-reject-job').classList.remove('open');
+}
+
+function onJqrReasonChange() {
+    const isOther = document.getElementById('jqr-reason-select').value === 'other';
+    document.getElementById('jqr-reason-input').style.display = isOther ? 'block' : 'none';
+    if (isOther) document.getElementById('jqr-reason-input').focus();
+}
+
+function _matchesMissingFilter(j, missingFilters) {
+    if (missingFilters.length === 0) return true;
+    for (const f of missingFilters) {
+        if (f === 'no-location'     && (j.location    || '').trim()) return false;
+        if (f === 'no-min-salary'   && j.minSalary != null)          return false;
+        if (f === 'no-max-salary'   && j.maxSalary != null)          return false;
+        if (f === 'no-description'  && (j.description  || '').trim()) return false;
+        if (f === 'no-requirements' && (j.requirements || '').trim()) return false;
+    }
+    return true;
+}
+
+function _getQuickRejectJobTargets() {
+    const selectedStatuses = [...document.querySelectorAll('input[name="jqr-status"]:checked')].map(cb => cb.value);
+    const missingFilters   = [...document.querySelectorAll('input[name="jqr-missing"]:checked')].map(cb => cb.value);
+    const companyId = document.getElementById('jqr-company-filter').value;
+
+    return allJobs.filter(j => {
+        if (j.isBlocked) return false;
+        let status = '';
+        if (!j.isApproved) status = 'pending';
+        else if (j.isActive) status = 'active';
+        else status = 'hidden';
+        if (!selectedStatuses.includes(status)) return false;
+        if (companyId && j.companyId !== companyId) return false;
+        if (!_matchesMissingFilter(j, missingFilters)) return false;
+        return true;
+    });
+}
+
+function updateQuickRejectJobCount() {
+    const selectedStatuses = [...document.querySelectorAll('input[name="jqr-status"]:checked')];
+    const affected = _getQuickRejectJobTargets();
+    const count = affected.length;
+    const btn = document.getElementById('jqr-confirm-btn');
+    const countEl = document.getElementById('jqr-confirm-count');
+    const textEl = document.getElementById('jqr-count-text');
+    const box = document.getElementById('jqr-preview-box');
+
+    if (selectedStatuses.length === 0) {
+        textEl.textContent = 'Vui lòng chọn ít nhất một trạng thái.';
+        btn.disabled = true;
+        countEl.textContent = '';
+        box.className = 'qr-preview-box';
+        return;
+    }
+    if (count === 0) {
+        textEl.textContent = 'Không có tin tuyển dụng nào phù hợp với tiêu chí đã chọn.';
+        btn.disabled = true;
+        countEl.textContent = '';
+        box.className = 'qr-preview-box warning';
+    } else {
+        textEl.textContent = `Sẽ từ chối ${count} tin tuyển dụng phù hợp với tiêu chí đã chọn.`;
+        btn.disabled = false;
+        countEl.textContent = `(${count})`;
+        box.className = 'qr-preview-box danger';
+    }
+}
+
+async function executeQuickRejectJob() {
+    const reasonSelect = document.getElementById('jqr-reason-select').value;
+    let reason = reasonSelect === 'other'
+        ? document.getElementById('jqr-reason-input').value.trim()
+        : reasonSelect;
+
+    if (!reason) {
+        document.getElementById('jqr-reason-input').style.borderColor = '#ef4444';
+        document.getElementById('jqr-reason-input').focus();
+        return;
+    }
+
+    const toReject = _getQuickRejectJobTargets();
+    if (toReject.length === 0) return;
+    if (!confirm(`Xác nhận từ chối ${toReject.length} tin tuyển dụng?\nLý do: "${reason}"\n\nHành động này không thể hoàn tác.`)) return;
+
+    const btn = document.getElementById('jqr-confirm-btn');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang xử lý...';
+
+    let success = 0, failed = 0;
+    for (const job of toReject) {
+        try {
+            const res = await apiFetchAuth(`/api/admin/jobs/${job.id}/toggle-block`, {
+                method: 'PUT',
+                body: JSON.stringify({ reason })
+            });
+            if (res.ok) success++;
+            else failed++;
+        } catch { failed++; }
+    }
+
+    closeQuickRejectJobModal();
+    await loadJobs();
+
+    const msg = failed > 0
+        ? `Đã từ chối ${success} tin. Thất bại: ${failed} tin.`
+        : `Đã từ chối thành công ${success} tin tuyển dụng.`;
+    alert(msg);
+}
 
 document.getElementById('modal-block-job')?.addEventListener('click', e => {
     if (e.target === document.getElementById('modal-block-job')) closeBlockModal();
