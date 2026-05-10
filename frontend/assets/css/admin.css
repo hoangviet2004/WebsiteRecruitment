@@ -897,6 +897,41 @@ tbody tr:hover {
 }
 
 /* ── Quick Reject Job ─────────────────────────────────────── */
+.jm-quick-approve-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 18px;
+    border-radius: 8px;
+    border: 1.5px solid #86efac;
+    background: #f0fdf4;
+    color: #16a34a;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.18s;
+    flex-shrink: 0;
+}
+.jm-quick-approve-btn:hover {
+    background: #dcfce7;
+    border-color: #22c55e;
+}
+.btn-approve {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    background: #16a34a;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.18s;
+}
+.btn-approve:hover:not(:disabled) { background: #15803d; }
+.btn-approve:disabled { background: #86efac; cursor: not-allowed; }
 .jm-quick-reject-btn {
     display: inline-flex;
     align-items: center;

@@ -37,6 +37,9 @@
           <option value="blocked">Bị từ chối</option>
         </select>
       </div>
+      <button class="jm-quick-approve-btn" onclick="openQuickApproveJobModal()">
+        <i class="fa-solid fa-check"></i> Duyệt nhanh
+      </button>
       <button class="jm-quick-reject-btn" onclick="openQuickRejectJobModal()">
         <i class="fa-solid fa-ban"></i> Từ chối nhanh
       </button>
@@ -60,6 +63,69 @@
         </div>
     </div>
 </main>
+
+<!-- ═══════════════════════════════════════════════════════════
+     MODAL: DUYỆT NHANH
+     ═══════════════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="modal-quick-approve-job">
+  <div class="modal-card" style="max-width:520px;">
+    <div class="modal-header">
+      <h2><i class="fa-solid fa-check-circle" style="color:#16a34a;margin-right:6px;"></i> Duyệt nhanh</h2>
+      <button class="modal-close-btn" onclick="closeQuickApproveJobModal()"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal-body">
+      <p style="margin:0 0 20px;color:#64748b;font-size:14px;">Chọn tiêu chí để duyệt hàng loạt tin tuyển dụng đang chờ.</p>
+
+      <div style="margin-bottom:20px;">
+        <label style="font-size:13px;font-weight:600;color:#1e293b;margin-bottom:8px;display:block;">
+          <i class="fa-solid fa-building" style="color:#64748b;margin-right:6px;"></i>Doanh nghiệp <span style="font-weight:400;color:#94a3b8;">(tuỳ chọn)</span>
+        </label>
+        <select id="jqa-company-filter" onchange="updateQuickApproveJobCount()" style="width:100%;padding:9px 12px;border:1px solid #e2e8f0;border-radius:8px;font-size:14px;font-family:inherit;outline:none;">
+          <option value="">Tất cả doanh nghiệp</option>
+        </select>
+      </div>
+
+      <div style="margin-bottom:20px;">
+        <label style="font-size:13px;font-weight:600;color:#1e293b;margin-bottom:10px;display:block;">
+          <i class="fa-solid fa-triangle-exclamation" style="color:#64748b;margin-right:6px;"></i>Bỏ qua tin thiếu thông tin <span style="font-weight:400;color:#94a3b8;">(lọc thêm)</span>
+        </label>
+        <div class="qr-status-checkboxes">
+          <label class="qr-checkbox-item">
+            <input type="checkbox" name="jqa-missing" value="no-location" onchange="updateQuickApproveJobCount()">
+            <span class="qr-profile-tag"><i class="fa-solid fa-location-dot"></i> Thiếu địa điểm</span>
+          </label>
+          <label class="qr-checkbox-item">
+            <input type="checkbox" name="jqa-missing" value="no-min-salary" onchange="updateQuickApproveJobCount()">
+            <span class="qr-profile-tag"><i class="fa-solid fa-money-bill"></i> Thiếu lương tối thiểu</span>
+          </label>
+          <label class="qr-checkbox-item">
+            <input type="checkbox" name="jqa-missing" value="no-max-salary" onchange="updateQuickApproveJobCount()">
+            <span class="qr-profile-tag"><i class="fa-solid fa-money-bills"></i> Thiếu lương tối đa</span>
+          </label>
+          <label class="qr-checkbox-item">
+            <input type="checkbox" name="jqa-missing" value="no-description" onchange="updateQuickApproveJobCount()">
+            <span class="qr-profile-tag"><i class="fa-solid fa-file-lines"></i> Thiếu mô tả công việc</span>
+          </label>
+          <label class="qr-checkbox-item">
+            <input type="checkbox" name="jqa-missing" value="no-requirements" onchange="updateQuickApproveJobCount()">
+            <span class="qr-profile-tag"><i class="fa-solid fa-list-check"></i> Thiếu yêu cầu kỹ năng</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="qr-preview-box" id="jqa-preview-box">
+        <i class="fa-solid fa-circle-info" style="flex-shrink:0;"></i>
+        <span id="jqa-count-text">Chọn tiêu chí để xem số lượng tin sẽ được duyệt.</span>
+      </div>
+    </div>
+    <div class="modal-footer" style="display:flex;justify-content:flex-end;gap:10px;padding:16px 24px;border-top:1px solid #e2e8f0;">
+      <button onclick="closeQuickApproveJobModal()" style="padding:9px 20px;border:1px solid #e2e8f0;border-radius:8px;background:#fff;color:#475569;font-size:14px;font-weight:600;cursor:pointer;">Hủy</button>
+      <button class="btn-approve" id="jqa-confirm-btn" onclick="executeQuickApproveJob()" disabled>
+        <i class="fa-solid fa-check"></i> Duyệt <span id="jqa-confirm-count"></span>
+      </button>
+    </div>
+  </div>
+</div>
 
 <!-- ═══════════════════════════════════════════════════════════
      MODAL: TỪ CHỐI NHANH

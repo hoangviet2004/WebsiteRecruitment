@@ -322,8 +322,102 @@ async function _sendBlockRequest(id, reason) {
 }
 
 document.addEventListener('keydown', e => {
-    if (e.key === 'Escape') { closeBlockModal(); closeQuickRejectJobModal(); }
+    if (e.key === 'Escape') { closeBlockModal(); closeQuickRejectJobModal(); closeQuickApproveJobModal(); }
 });
+
+// ── Duyệt nhanh ──────────────────────────────────────────────
+function openQuickApproveJobModal() {
+    const sel = document.getElementById('jqa-company-filter');
+    sel.innerHTML = '<option value="">Tất cả doanh nghiệp</option>';
+    const seen = new Set();
+    allJobs.filter(j => !j.isApproved && !j.isBlocked).forEach(j => {
+        if (!seen.has(j.companyId)) {
+            seen.add(j.companyId);
+            const opt = document.createElement('option');
+            opt.value = j.companyId;
+            opt.textContent = j.companyName;
+            sel.appendChild(opt);
+        }
+    });
+    document.getElementById('jqa-company-filter').value = '';
+    document.querySelectorAll('input[name="jqa-missing"]').forEach(cb => cb.checked = false);
+    updateQuickApproveJobCount();
+    document.getElementById('modal-quick-approve-job').classList.add('open');
+}
+
+function closeQuickApproveJobModal() {
+    document.getElementById('modal-quick-approve-job').classList.remove('open');
+}
+
+function _getQuickApproveJobTargets() {
+    const missingFilters = [...document.querySelectorAll('input[name="jqa-missing"]:checked')].map(cb => cb.value);
+    const companyId = document.getElementById('jqa-company-filter').value;
+
+    return allJobs.filter(j => {
+        if (j.isApproved || j.isBlocked) return false;
+        if (companyId && j.companyId !== companyId) return false;
+        // Bỏ qua tin thiếu thông tin đã tick (ngược với từ chối nhanh)
+        for (const f of missingFilters) {
+            if (f === 'no-location'     && !(j.location    || '').trim()) return false;
+            if (f === 'no-min-salary'   && j.minSalary == null)           return false;
+            if (f === 'no-max-salary'   && j.maxSalary == null)           return false;
+            if (f === 'no-description'  && !(j.description  || '').trim()) return false;
+            if (f === 'no-requirements' && !(j.requirements || '').trim()) return false;
+        }
+        return true;
+    });
+}
+
+function updateQuickApproveJobCount() {
+    const affected = _getQuickApproveJobTargets();
+    const count = affected.length;
+    const btn = document.getElementById('jqa-confirm-btn');
+    const countEl = document.getElementById('jqa-confirm-count');
+    const textEl = document.getElementById('jqa-count-text');
+    const box = document.getElementById('jqa-preview-box');
+
+    if (count === 0) {
+        textEl.textContent = 'Không có tin tuyển dụng chờ duyệt nào phù hợp với tiêu chí đã chọn.';
+        btn.disabled = true;
+        countEl.textContent = '';
+        box.className = 'qr-preview-box warning';
+    } else {
+        textEl.textContent = `Sẽ duyệt ${count} tin tuyển dụng phù hợp với tiêu chí đã chọn.`;
+        btn.disabled = false;
+        countEl.textContent = `(${count})`;
+        box.className = 'qr-preview-box';
+        box.style.background = '#f0fdf4';
+        box.style.color = '#15803d';
+        box.style.borderColor = '#86efac';
+    }
+}
+
+async function executeQuickApproveJob() {
+    const toApprove = _getQuickApproveJobTargets();
+    if (toApprove.length === 0) return;
+    if (!confirm(`Xác nhận duyệt ${toApprove.length} tin tuyển dụng?\n\nHành động này không thể hoàn tác.`)) return;
+
+    const btn = document.getElementById('jqa-confirm-btn');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang xử lý...';
+
+    let success = 0, failed = 0;
+    for (const job of toApprove) {
+        try {
+            const res = await apiFetchAuth(`/api/admin/jobs/${job.id}/approve`, { method: 'PUT' });
+            if (res.ok) success++;
+            else failed++;
+        } catch { failed++; }
+    }
+
+    closeQuickApproveJobModal();
+    await loadJobs();
+
+    const msg = failed > 0
+        ? `Đã duyệt ${success} tin. Thất bại: ${failed} tin.`
+        : `Đã duyệt thành công ${success} tin tuyển dụng.`;
+    alert(msg);
+}
 
 // ── Từ chối nhanh ────────────────────────────────────────────
 function openQuickRejectJobModal() {
