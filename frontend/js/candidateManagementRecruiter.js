@@ -233,8 +233,12 @@ function openCandModal(appId) {
         day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'
     });
 
-    const skillsHtml = app.skills
-        ? app.skills.split(',').map(s => `<span style="background:#eff6ff;color:#3b82f6;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600;">${escHtml(s.trim())}</span>`).join(' ')
+    const _parsedSkills = (() => {
+        if (!app.skills) return [];
+        try { return JSON.parse(app.skills); } catch { return []; }
+    })();
+    const skillsHtml = _parsedSkills.length
+        ? _parsedSkills.map(s => `<span style="background:#eff6ff;color:#3b82f6;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600;">${escHtml(s.name || s)}</span>`).join(' ')
         : '<span style="color:#94a3b8;font-size:13px;">Chưa cập nhật</span>';
 
     const cvHtml = app.cvUrl
@@ -368,7 +372,8 @@ function closeQuickRejectModal() {
 function _isEmptyJson(val) {
     if (!val) return true;
     const s = val.trim();
-    return s === '' || s === '[]' || s === 'null';
+    if (s === '' || s === '[]' || s === 'null') return true;
+    try { const arr = JSON.parse(s); return Array.isArray(arr) && arr.length === 0; } catch { return false; }
 }
 
 function _matchesProfileFilter(a, profileFilters) {
