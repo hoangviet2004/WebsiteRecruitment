@@ -86,6 +86,13 @@ public sealed class CompanyService : ICompanyService
         if (existing)
             throw new InvalidOperationException("You already have a company. Please update your existing company instead of creating a new one.");
 
+        if (!string.IsNullOrWhiteSpace(request.TaxCode))
+        {
+            var taxDuplicate = await _db.Companies.AnyAsync(x => x.TaxCode == request.TaxCode.Trim(), ct);
+            if (taxDuplicate)
+                throw new InvalidOperationException("Mã số thuế này đã được đăng ký bởi một công ty khác.");
+        }
+
         var company = new Company
         {
             Id = Guid.NewGuid(),
@@ -138,6 +145,13 @@ public sealed class CompanyService : ICompanyService
 
         if (company.OwnerId != userId)
             throw new UnauthorizedAccessException("You can only update your own company.");
+
+        if (!string.IsNullOrWhiteSpace(request.TaxCode))
+        {
+            var taxDuplicate = await _db.Companies.AnyAsync(x => x.TaxCode == request.TaxCode.Trim() && x.Id != companyId, ct);
+            if (taxDuplicate)
+                throw new InvalidOperationException("Mã số thuế này đã được đăng ký bởi một công ty khác.");
+        }
 
         company.Name = request.Name;
         company.Description = request.Description ?? string.Empty;
