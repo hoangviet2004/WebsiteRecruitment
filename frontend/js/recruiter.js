@@ -467,7 +467,8 @@ async function loadMyJobs(companyId) {
                 <td><strong>${job.title}</strong><br><small style="color:#64748b">${job.jobType} • ${job.location}</small></td>
                 <td>${statusHtml}</td>
                 <td>${expDate}</td>
-                <td>
+                <td style="white-space:nowrap;">
+                    ${job.isBlocked && job.blockReason ? `<button style="border:none;background:transparent;color:#dc2626;cursor:pointer;margin-right:8px;font-size:15px;" onclick="showBlockReason('${escapeJs(job.blockReason)}')"><i class="fa-solid fa-circle-info"></i></button>` : ''}
                     <button style="border:none; background:transparent; color:#3b82f6; cursor:pointer; margin-right:10px;" onclick="editJob('${job.id}')"><i class="fa-solid fa-pen-to-square"></i></button>
                     <button style="border:none; background:transparent; color:#ef4444; cursor:pointer;" onclick="deleteJob('${job.id}')"><i class="fa-solid fa-trash"></i></button>
                 </td>
@@ -681,10 +682,46 @@ async function deleteJob(jobId) {
     }
 }
 
+// ── Lý do từ chối ──────────────────────────────────────────
+function escapeJs(str) {
+    return (str || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+}
+
+function showBlockReason(reason) {
+    let modal = document.getElementById('block-reason-modal');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'block-reason-modal';
+        modal.style.cssText = 'position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.4);';
+        modal.innerHTML = `
+            <div style="background:#fff;border-radius:14px;padding:28px;max-width:440px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,0.2);">
+                <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
+                    <div style="width:36px;height:36px;border-radius:50%;background:#fee2e2;display:flex;align-items:center;justify-content:center;">
+                        <i class="fa-solid fa-ban" style="color:#dc2626;font-size:16px;"></i>
+                    </div>
+                    <h3 style="margin:0;font-size:16px;font-weight:700;color:#0f172a;">Lý do từ chối</h3>
+                </div>
+                <p id="block-reason-text" style="margin:0 0 20px;font-size:14px;color:#475569;line-height:1.6;background:#fef2f2;padding:14px;border-radius:8px;border:1px solid #fecaca;word-break:break-word;"></p>
+                <div style="display:flex;justify-content:flex-end;">
+                    <button onclick="closeBlockReasonModal()" style="padding:9px 22px;border:none;border-radius:8px;background:#0f172a;color:#fff;font-size:14px;font-weight:600;cursor:pointer;">Đóng</button>
+                </div>
+            </div>`;
+        modal.addEventListener('click', e => { if (e.target === modal) closeBlockReasonModal(); });
+        document.body.appendChild(modal);
+    }
+    document.getElementById('block-reason-text').textContent = reason;
+    modal.style.display = 'flex';
+}
+
+function closeBlockReasonModal() {
+    const modal = document.getElementById('block-reason-modal');
+    if (modal) modal.style.display = 'none';
+}
+
 // ── Khởi tạo ───────────────────────────────────────────────
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', async function() {
     requireRecruiter();
-    loadMyCompany();
+    await loadMyCompany();
     loadSubscriptionInfo();
 
     const urlParams = new URLSearchParams(window.location.search);

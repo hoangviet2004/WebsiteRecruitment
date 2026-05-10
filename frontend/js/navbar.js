@@ -167,6 +167,14 @@ const _RECRUITER_NOTIF_CFG = {
     Shown:     { icon: 'fa-eye',           color: '#0891b2' },
 };
 
+function _goToRecruiterJobs() {
+    closeNotifPanel();
+    const base = window.location.pathname.includes('/pages/')
+        ? 'recruiter.html'
+        : 'pages/recruiter.html';
+    window.location.href = `${base}?tab=jobs`;
+}
+
 function _renderRecruiterNotifItems(notifications) {
     const body = document.getElementById('notif-body');
     if (!notifications.length) {
@@ -177,7 +185,7 @@ function _renderRecruiterNotifItems(notifications) {
         const cfg = _RECRUITER_NOTIF_CFG[n.type] || { icon: 'fa-bell', color: '#64748b' };
         const date = new Date(n.createdAt).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
         return `
-            <div class="notif-item${n.isRead ? '' : ' unread'}">
+            <div class="notif-item${n.isRead ? '' : ' unread'}" onclick="_goToRecruiterJobs()" style="cursor:pointer;">
                 <div class="notif-icon" style="background:${cfg.color}18;color:${cfg.color};">
                     <i class="fa-solid ${cfg.icon}"></i>
                 </div>
@@ -186,6 +194,7 @@ function _renderRecruiterNotifItems(notifications) {
                     <div class="notif-msg">${_escHtmlNav(n.message)}</div>
                     <div class="notif-date">${date}</div>
                 </div>
+                <div class="notif-arrow"><i class="fa-solid fa-chevron-right"></i></div>
             </div>`;
     }).join('');
 }
