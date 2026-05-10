@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
 // ── Load data from API ────────────────────────────────────────
 async function loadUsers() {
     const tbody = document.getElementById('user-table-body');
-    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:32px;"><i class="fa-solid fa-spinner fa-spin" style="font-size:20px;color:#3b82f6;"></i><br><span style="margin-top:8px;display:block;color:#64748b;">Đang tải dữ liệu...</span></td></tr>';
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:32px;"><i class="fa-solid fa-spinner fa-spin" style="font-size:20px;color:#3b82f6;"></i><br><span style="margin-top:8px;display:block;color:#64748b;">Đang tải dữ liệu...</span></td></tr>';
     const amCount = document.getElementById('am-count');
     if (amCount) amCount.textContent = '';
 
@@ -34,7 +34,7 @@ async function loadUsers() {
         _currentPage = 1;
         applyFilters();
     } catch (e) {
-        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:#ef4444;padding:32px;">
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:#ef4444;padding:32px;">
             <i class="fa-solid fa-circle-exclamation" style="font-size:24px;"></i><br>
             <span style="display:block;margin-top:8px;">Lỗi: ${e.message}</span>
         </td></tr>`;
@@ -171,7 +171,7 @@ function renderTable(users, isEmpty) {
     const keyword      = (document.getElementById('am-search')?.value || '').trim();
 
     if (isEmpty) {
-        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:40px;color:#64748b;">
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:40px;color:#64748b;">
             <i class="fa-solid fa-inbox" style="font-size:28px;display:block;margin-bottom:8px;color:#cbd5e1;"></i>
             Không tìm thấy tài khoản phù hợp.
         </td></tr>`;
@@ -231,7 +231,6 @@ function renderTable(users, isEmpty) {
 
         html += `
             <tr ${rowBg}>
-                <td><small style="font-family:monospace;font-size:11px;color:#94a3b8;">${u.id.substring(0,8)}…</small></td>
                 <td>
                     <strong>${highlight(emailText, keyword)}</strong>
                     ${!isApproved ? '<i class="fa-solid fa-ban text-danger" style="margin-left:4px;"></i>' : ''}

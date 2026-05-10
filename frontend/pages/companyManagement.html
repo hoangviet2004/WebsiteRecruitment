@@ -43,10 +43,12 @@
             <i class="fa-solid fa-users-line am-select-icon"></i>
             <select id="cm-filter-size" class="am-select" onchange="applyFilters()">
                 <option value="">Tất cả quy mô</option>
-                <option value="1-50">1 – 50</option>
-                <option value="50-150">50 – 150</option>
-                <option value="150-500">150 – 500</option>
-                <option value="500+">500+</option>
+                <option value="1-50 nhân viên">1 - 50 nhân viên</option>
+                <option value="50-150 nhân viên">50 - 150 nhân viên</option>
+                <option value="150-300 nhân viên">150 - 300 nhân viên</option>
+                <option value="300-500 nhân viên">300 - 500 nhân viên</option>
+                <option value="500-1000 nhân viên">500 - 1.000 nhân viên</option>
+                <option value="1000+ nhân viên">Trên 1.000 nhân viên</option>
             </select>
         </div>
 
@@ -83,20 +85,12 @@
                 <thead>
                     <tr>
                         <th style="width:56px;">Logo</th>
-                        <th class="am-th-sort" onclick="sortByCol('name')" data-col="name">
-                            Tên Công Ty <i class="fa-solid fa-sort am-sort-icon"></i>
-                        </th>
-                        <th class="am-th-sort" onclick="sortByCol('address')" data-col="address">
-                            Địa chỉ <i class="fa-solid fa-sort am-sort-icon"></i>
-                        </th>
+                        <th>Tên Công Ty</th>
+                        <th>Địa chỉ</th>
                         <th>Website</th>
-                        <th class="am-th-sort" onclick="sortByCol('size')" data-col="size">
-                            Quy mô <i class="fa-solid fa-sort am-sort-icon"></i>
-                        </th>
+                        <th>Quy mô</th>
                         <th>Trạng thái</th>
-                        <th class="am-th-sort" onclick="sortByCol('createdAt')" data-col="createdAt">
-                            Ngày tạo <i class="fa-solid fa-sort-down am-sort-icon active-sort"></i>
-                        </th>
+                        <th>Ngày tạo</th>
                         <th>Thao tác</th>
                     </tr>
                 </thead>

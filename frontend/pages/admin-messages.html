@@ -12,8 +12,17 @@
     <link rel="stylesheet" href="../assets/css/admin.css">
     <link rel="stylesheet" href="../assets/css/recruiter.css">
     <style>
-        .msg-layout { height: calc(100vh - 120px); margin-top: 20px; }
-        .admin-content { padding: 20px 40px; }
+        body { overflow: hidden; }
+        .admin-content {
+            padding: 20px 40px;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-sizing: border-box;
+        }
+        .admin-header { flex-shrink: 0; margin-bottom: 12px; }
+        .msg-layout   { flex: 1; min-height: 0; margin-top: 0; }
     </style>
 </head>
 <body>
