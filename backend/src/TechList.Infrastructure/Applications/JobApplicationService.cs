@@ -182,6 +182,8 @@ public sealed class JobApplicationService : IJobApplicationService
             profile?.AvatarUrl,
             profile?.CvUrl,
             profile?.Skills,
+            profile?.Experience,
+            profile?.Education,
             app.Status,
             app.CoverLetter,
             app.AppliedAt,

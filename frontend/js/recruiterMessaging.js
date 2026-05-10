@@ -345,7 +345,7 @@ function renderCandidateInfo(d){
         : '';
 
     const cvHtml = d.cvUrl
-        ? `<a href="${d.cvUrl}" target="_blank" class="msg-cv-btn" style="margin-top:16px;">
+        ? `<a href="javascript:void(0)" onclick="openSignedCvView('${d.candidateId}')" class="msg-cv-btn" style="margin-top:16px;cursor:pointer;">
                <i class="fa-solid fa-file-pdf" style="color:#ef4444;"></i> Xem / Tải CV
            </a>` : '';
 

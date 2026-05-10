@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,10 +11,13 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
+
 <body class="recruiter-body">
     <nav class="homebar">
         <div class="left">
-            <a href="home.html" class="logo-svg"><img src="../assets/logo.svg" alt="Logo">TechList <span style="color: #64748b; font-size: 14px; font-weight: 500; margin-left: 10px; border-left: 1px solid #cbd5e1; padding-left: 10px;">Employer Center</span></a>
+            <a href="home.html" class="logo-svg"><img src="../assets/logo.svg" alt="Logo">TechList <span
+                    style="color: #64748b; font-size: 14px; font-weight: 500; margin-left: 10px; border-left: 1px solid #cbd5e1; padding-left: 10px;">Employer
+                    Center</span></a>
         </div>
         <div class="right" id="nav-right"></div>
     </nav>
@@ -51,61 +55,88 @@
             <section id="tab-company" class="tab-pane active">
                 <div class="card" style="padding: 0; overflow: hidden; position: relative;">
                     <!-- Cover Image Banner -->
-                    <div id="cover-upload-container" style="background: #cbd5e1; height: 160px; position: relative; display: flex; align-items: center; justify-content: center; color: #475569; flex-direction: column; cursor: pointer; transition: background 0.2s; overflow: hidden;" onclick="document.getElementById('cover-input').click()" onmouseover="this.style.background='#94a3b8'" onmouseout="this.style.background='#cbd5e1'">
-                        <img id="cover-image" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; display: none;">
-                        <div style="z-index: 1; text-align: center; background: rgba(255,255,255,0.7); padding: 8px 16px; border-radius: 8px;">
+                    <div id="cover-upload-container"
+                        style="background: #cbd5e1; height: 160px; position: relative; display: flex; align-items: center; justify-content: center; color: #475569; flex-direction: column; cursor: pointer; transition: background 0.2s; overflow: hidden;"
+                        onclick="document.getElementById('cover-input').click()"
+                        onmouseover="this.style.background='#94a3b8'" onmouseout="this.style.background='#cbd5e1'">
+                        <img id="cover-image"
+                            style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; display: none;">
+                        <div
+                            style="z-index: 1; text-align: center; background: rgba(255,255,255,0.7); padding: 8px 16px; border-radius: 8px;">
                             <i class="fa-solid fa-camera" style="font-size: 24px; margin-bottom: 8px;"></i>
                             <div style="font-size: 13px; font-weight: 600;">Tải lên ảnh bìa</div>
                         </div>
                     </div>
-                    <input type="file" id="cover-input" accept="image/*" style="display:none;" onchange="uploadCover(this)">
-                    
+                    <input type="file" id="cover-input" accept="image/*" style="display:none;"
+                        onchange="uploadCover(this)">
+
                     <div style="padding: 60px 40px 40px; position: relative;">
                         <!-- Logo Upload Box -->
-                        <div id="logo-upload-container" style="width: 80px; height: 80px; background: #e2e8f0; border-radius: 8px; border: 4px solid #fff; position: absolute; top: -40px; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.05);" onclick="document.getElementById('logo-input').click()">
-                            <img id="logo-image" style="width: 100%; height: 100%; object-fit: contain; display: none; background: #fff; border-radius: 4px;">
-                            <i id="logo-placeholder" class="fa-solid fa-building" style="font-size: 28px; color: #64748b;"></i>
-                            <div style="position: absolute; bottom: -6px; right: -6px; width: 24px; height: 24px; background: #0056d2; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; border: 2px solid #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                        <div id="logo-upload-container"
+                            style="width: 80px; height: 80px; background: #e2e8f0; border-radius: 8px; border: 4px solid #fff; position: absolute; top: -40px; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.05);"
+                            onclick="document.getElementById('logo-input').click()">
+                            <img id="logo-image"
+                                style="width: 100%; height: 100%; object-fit: contain; display: none; background: #fff; border-radius: 4px;">
+                            <i id="logo-placeholder" class="fa-solid fa-building"
+                                style="font-size: 28px; color: #64748b;"></i>
+                            <div
+                                style="position: absolute; bottom: -6px; right: -6px; width: 24px; height: 24px; background: #0056d2; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; border: 2px solid #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
                                 <i class="fa-solid fa-pen"></i>
                             </div>
                         </div>
-                        <input type="file" id="logo-input" accept="image/*" style="display:none;" onchange="uploadLogo(this)">
-                        
-                        <h2 style="font-size: 24px; color: #0f172a; margin-top: 0; margin-bottom: 6px; font-weight: 700;">Tạo hồ sơ công ty</h2>
-                        <p style="color: #475569; font-size: 14px; margin-bottom: 32px;">Vui lòng cung cấp thông tin chính xác để thu hút ứng viên tiềm năng.</p>
-                        
+                        <input type="file" id="logo-input" accept="image/*" style="display:none;"
+                            onchange="uploadLogo(this)">
+
+                        <h2
+                            style="font-size: 24px; color: #0f172a; margin-top: 0; margin-bottom: 6px; font-weight: 700;">
+                            Tạo hồ sơ công ty</h2>
+                        <p style="color: #475569; font-size: 14px; margin-bottom: 32px;">Vui lòng cung cấp thông tin
+                            chính xác để thu hút ứng viên tiềm năng.</p>
+
                         <form id="company-form">
                             <input type="hidden" id="company-id">
-                            
+
                             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px;">
                                 <div class="form-group" style="margin: 0;">
-                                    <label style="font-size: 13px; font-weight: 600; color: #1e293b;">Tên công ty <span class="required" style="color: #ef4444;">*</span></label>
-                                    <input type="text" id="company-name" required placeholder="Nhập tên công ty" style="margin-top: 8px; font-size: 14px; padding: 12px 14px; border-radius: 6px; width: 100%; box-sizing: border-box; display: block; border: 1px solid #cbd5e1;">
+                                    <label style="font-size: 13px; font-weight: 600; color: #1e293b;">Tên công ty <span
+                                            class="required" style="color: #ef4444;">*</span></label>
+                                    <input type="text" id="company-name" required placeholder="Nhập tên công ty"
+                                        style="margin-top: 8px; font-size: 14px; padding: 12px 14px; border-radius: 6px; width: 100%; box-sizing: border-box; display: block; border: 1px solid #cbd5e1;">
                                 </div>
                                 <div class="form-group" style="margin: 0;">
-                                    <label style="font-size: 13px; font-weight: 600; color: #1e293b;">Mã số thuế <span class="required" style="color: #ef4444;">*</span></label>
-                                    <input type="text" id="company-taxcode" required placeholder="Nhập mã số thuế" style="margin-top: 8px; font-size: 14px; padding: 12px 14px; border-radius: 6px; width: 100%; box-sizing: border-box; display: block; border: 1px solid #cbd5e1;">
+                                    <label style="font-size: 13px; font-weight: 600; color: #1e293b;">Mã số thuế <span
+                                            class="required" style="color: #ef4444;">*</span></label>
+                                    <input type="text" id="company-taxcode" required placeholder="Nhập mã số thuế"
+                                        style="margin-top: 8px; font-size: 14px; padding: 12px 14px; border-radius: 6px; width: 100%; box-sizing: border-box; display: block; border: 1px solid #cbd5e1;">
                                 </div>
-                                
+
                                 <div class="form-group" style="margin: 0;">
-                                    <label style="font-size: 13px; font-weight: 600; color: #1e293b;">Email liên hệ</label>
-                                    <input type="email" id="company-email" placeholder="contact@company.com" style="margin-top: 8px; font-size: 14px; padding: 12px 14px; border-radius: 6px; width: 100%; box-sizing: border-box; display: block; border: 1px solid #cbd5e1;">
+                                    <label style="font-size: 13px; font-weight: 600; color: #1e293b;">Email liên
+                                        hệ</label>
+                                    <input type="email" id="company-email" placeholder="contact@company.com"
+                                        style="margin-top: 8px; font-size: 14px; padding: 12px 14px; border-radius: 6px; width: 100%; box-sizing: border-box; display: block; border: 1px solid #cbd5e1;">
                                 </div>
                                 <div class="form-group" style="margin: 0;">
-                                    <label style="font-size: 13px; font-weight: 600; color: #1e293b;">Số điện thoại</label>
-                                    <input type="tel" id="company-phone" placeholder="Nhập số điện thoại" style="margin-top: 8px; font-size: 14px; padding: 12px 14px; border-radius: 6px; width: 100%; box-sizing: border-box; display: block; border: 1px solid #cbd5e1;">
+                                    <label style="font-size: 13px; font-weight: 600; color: #1e293b;">Số điện
+                                        thoại</label>
+                                    <input type="tel" id="company-phone" placeholder="Nhập số điện thoại"
+                                        style="margin-top: 8px; font-size: 14px; padding: 12px 14px; border-radius: 6px; width: 100%; box-sizing: border-box; display: block; border: 1px solid #cbd5e1;">
                                 </div>
-                                
+
                                 <div class="form-group" style="margin: 0;">
                                     <label style="font-size: 13px; font-weight: 600; color: #1e293b;">Website</label>
                                     <div style="position: relative; margin-top: 8px;">
-                                        <i class="fa-solid fa-globe" style="position: absolute; left: 14px; top: 14px; color: #94a3b8; font-size: 14px;"></i>
-                                        <input type="url" id="company-website" placeholder="https://www.company.com" style="padding-left: 38px; font-size: 14px; padding-top: 12px; padding-bottom: 12px; border-radius: 6px; width: 100%; box-sizing: border-box; display: block; border: 1px solid #cbd5e1;">
+                                        <i class="fa-solid fa-globe"
+                                            style="position: absolute; left: 14px; top: 14px; color: #94a3b8; font-size: 14px;"></i>
+                                        <input type="url" id="company-website" placeholder="https://www.company.com"
+                                            style="padding-left: 38px; font-size: 14px; padding-top: 12px; padding-bottom: 12px; border-radius: 6px; width: 100%; box-sizing: border-box; display: block; border: 1px solid #cbd5e1;">
                                     </div>
                                 </div>
                                 <div class="form-group" style="margin: 0;">
-                                    <label style="font-size: 13px; font-weight: 600; color: #1e293b;">Quy mô công ty</label>
-                                    <select id="company-size" style="margin-top: 8px; width: 100%; box-sizing: border-box; display: block; font-size: 14px; padding: 12px 14px; border-radius: 6px; border: 1px solid #cbd5e1;">
+                                    <label style="font-size: 13px; font-weight: 600; color: #1e293b;">Quy mô công
+                                        ty</label>
+                                    <select id="company-size"
+                                        style="margin-top: 8px; width: 100%; box-sizing: border-box; display: block; font-size: 14px; padding: 12px 14px; border-radius: 6px; border: 1px solid #cbd5e1;">
                                         <option value="">Chọn quy mô</option>
                                         <option value="1-50 nhân viên">1 - 50 nhân viên</option>
                                         <option value="50-150 nhân viên">50 - 150 nhân viên</option>
@@ -116,22 +147,30 @@
                                     </select>
                                 </div>
                             </div>
-                            
+
                             <div class="form-group" style="margin-bottom: 24px;">
-                                <label style="font-size: 13px; font-weight: 600; color: #1e293b;">Địa chỉ trụ sở chính <span class="required" style="color: #ef4444;">*</span></label>
+                                <label style="font-size: 13px; font-weight: 600; color: #1e293b;">Địa chỉ trụ sở chính
+                                    <span class="required" style="color: #ef4444;">*</span></label>
                                 <div style="position: relative; margin-top: 8px;">
-                                    <i class="fa-solid fa-location-dot" style="position: absolute; left: 14px; top: 14px; color: #94a3b8; font-size: 14px;"></i>
-                                    <input type="text" id="company-address" required placeholder="Nhập địa chỉ đầy đủ" style="padding-left: 38px; font-size: 14px; padding-top: 12px; padding-bottom: 12px; border-radius: 6px; width: 100%; box-sizing: border-box; display: block; border: 1px solid #cbd5e1;">
+                                    <i class="fa-solid fa-location-dot"
+                                        style="position: absolute; left: 14px; top: 14px; color: #94a3b8; font-size: 14px;"></i>
+                                    <input type="text" id="company-address" required placeholder="Nhập địa chỉ đầy đủ"
+                                        style="padding-left: 38px; font-size: 14px; padding-top: 12px; padding-bottom: 12px; border-radius: 6px; width: 100%; box-sizing: border-box; display: block; border: 1px solid #cbd5e1;">
                                 </div>
                             </div>
-                            
+
                             <div class="form-group" style="margin-bottom: 32px;">
-                                <label style="font-size: 13px; font-weight: 600; color: #1e293b;">Giới thiệu công ty</label>
-                                <textarea id="company-desc" rows="5" placeholder="Mô tả về lịch sử hình thành, văn hóa, và lĩnh vực hoạt động..." style="margin-top: 8px; font-size: 14px; padding: 12px 14px; border-radius: 6px; width: 100%; box-sizing: border-box; display: block; border: 1px solid #cbd5e1;"></textarea>
+                                <label style="font-size: 13px; font-weight: 600; color: #1e293b;">Giới thiệu công
+                                    ty</label>
+                                <textarea id="company-desc" rows="5"
+                                    placeholder="Mô tả về lịch sử hình thành, văn hóa, và lĩnh vực hoạt động..."
+                                    style="margin-top: 8px; font-size: 14px; padding: 12px 14px; border-radius: 6px; width: 100%; box-sizing: border-box; display: block; border: 1px solid #cbd5e1;"></textarea>
                             </div>
-                            
-                            <div style="display: flex; justify-content: flex-end; align-items: center; gap: 16px; border-top: 1px solid #f1f5f9; padding-top: 24px;">
-                                <button type="submit" class="btn-primary" style="display: inline-flex; align-items: center; gap: 8px;">
+
+                            <div
+                                style="display: flex; justify-content: flex-end; align-items: center; gap: 16px; border-top: 1px solid #f1f5f9; padding-top: 24px;">
+                                <button type="submit" class="btn-primary"
+                                    style="display: inline-flex; align-items: center; gap: 8px;">
                                     Lưu hồ sơ <i class="fa-solid fa-circle-check"></i>
                                 </button>
                             </div>
@@ -143,7 +182,8 @@
             <!-- TAB 2: Quản lý tin tuyển dụng -->
             <section id="tab-jobs" class="tab-pane">
                 <div class="card">
-                    <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+                    <div class="card-header"
+                        style="display: flex; justify-content: space-between; align-items: center;">
                         <div>
                             <h2>Danh sách Tin tuyển dụng</h2>
                             <p>Tất cả các tin đăng của công ty bạn sẽ hiện ở đây.</p>
@@ -162,7 +202,9 @@
                                     </tr>
                                 </thead>
                                 <tbody id="job-table-body">
-                                    <tr><td colspan="4" style="text-align: center;">Đang tải dữ liệu...</td></tr>
+                                    <tr>
+                                        <td colspan="4" style="text-align: center;">Đang tải dữ liệu...</td>
+                                    </tr>
                                 </tbody>
                             </table>
                         </div>
@@ -193,11 +235,18 @@
                 <div class="cand-page-header">
                     <div>
                         <h2 class="cand-page-title">Quản lý Ứng viên</h2>
-                        <p class="cand-page-sub">Xem và theo dõi tất cả đơn ứng tuyển vào các vị trí của công ty bạn.</p>
+                        <p class="cand-page-sub">Xem và theo dõi tất cả đơn ứng tuyển vào các vị trí của công ty bạn.
+                        </p>
                     </div>
-                    <button class="btn-primary cand-refresh-btn" onclick="loadCandidates()">
-                        <i class="fa-solid fa-rotate-right"></i> Làm mới
-                    </button>
+                    <div style="display:flex; gap:8px;">
+                        <button class="cand-quick-reject-btn" onclick="openQuickRejectModal()"
+                            title="Từ chối nhanh theo tiêu chí">
+                            <i class="fa-solid fa-ban"></i> Từ chối nhanh
+                        </button>
+                        <button class="btn-primary cand-refresh-btn" onclick="loadCandidates()">
+                            <i class="fa-solid fa-rotate-right"></i> Làm mới
+                        </button>
+                    </div>
                 </div>
 
                 <!-- Bộ lọc -->
@@ -222,7 +271,8 @@
                     </div>
                     <div class="cand-filter-group">
                         <label><i class="fa-solid fa-magnifying-glass"></i> Tìm kiếm</label>
-                        <input type="text" id="filter-search" placeholder="Tên hoặc email ứng viên..." oninput="applyCandidateFilters()">
+                        <input type="text" id="filter-search" placeholder="Tên hoặc email ứng viên..."
+                            oninput="applyCandidateFilters()">
                     </div>
                 </div>
 
@@ -243,7 +293,10 @@
                                 </tr>
                             </thead>
                             <tbody id="cand-table-body">
-                                <tr><td colspan="5" class="cand-loading"><i class="fa-solid fa-spinner fa-spin"></i> Đang tải dữ liệu...</td></tr>
+                                <tr>
+                                    <td colspan="5" class="cand-loading"><i class="fa-solid fa-spinner fa-spin"></i>
+                                        Đang tải dữ liệu...</td>
+                                </tr>
                             </tbody>
                         </table>
                     </div>
@@ -266,9 +319,12 @@
                     </div>
                     <div class="an-header-actions">
                         <div class="an-period-group">
-                            <button class="an-period-btn" data-period="7d"  onclick="setAnalyticsPeriod('7d',this)">7 ngày</button>
-                            <button class="an-period-btn active" data-period="30d" onclick="setAnalyticsPeriod('30d',this)">30 ngày</button>
-                            <button class="an-period-btn" data-period="3m"  onclick="setAnalyticsPeriod('3m',this)">3 tháng</button>
+                            <button class="an-period-btn" data-period="7d" onclick="setAnalyticsPeriod('7d',this)">7
+                                ngày</button>
+                            <button class="an-period-btn active" data-period="30d"
+                                onclick="setAnalyticsPeriod('30d',this)">30 ngày</button>
+                            <button class="an-period-btn" data-period="3m" onclick="setAnalyticsPeriod('3m',this)">3
+                                tháng</button>
                         </div>
                         <button class="btn-primary an-export-btn" onclick="exportAnalyticsCSV()">
                             <i class="fa-solid fa-file-excel"></i> Xuất Excel
@@ -345,16 +401,20 @@
                                 </tr>
                             </thead>
                             <tbody id="an-job-perf-body">
-                                <tr><td colspan="7" style="text-align:center;padding:32px 0;color:#64748b;">
-                                    <i class="fa-solid fa-spinner fa-spin" style="color:#3b82f6;margin-right:8px;"></i>Đang tải...
-                                </td></tr>
+                                <tr>
+                                    <td colspan="7" style="text-align:center;padding:32px 0;color:#64748b;">
+                                        <i class="fa-solid fa-spinner fa-spin"
+                                            style="color:#3b82f6;margin-right:8px;"></i>Đang tải...
+                                    </td>
+                                </tr>
                             </tbody>
                         </table>
                     </div>
                 </div>
 
                 <!-- Cache note -->
-                <p class="an-cache-note"><i class="fa-solid fa-bolt"></i> Dữ liệu được cache 5 phút để tối ưu hiệu năng. <span id="an-last-updated"></span></p>
+                <p class="an-cache-note"><i class="fa-solid fa-bolt"></i> Dữ liệu được cache 5 phút để tối ưu hiệu năng.
+                    <span id="an-last-updated"></span></p>
 
             </section>
 
@@ -368,7 +428,8 @@
                             <h3>Tin nhắn</h3>
                             <div class="msg-search-wrap">
                                 <i class="fa-solid fa-magnifying-glass"></i>
-                                <input type="text" id="msg-search" placeholder="Tìm ứng viên..." oninput="filterConversations(this.value)">
+                                <input type="text" id="msg-search" placeholder="Tìm ứng viên..."
+                                    oninput="filterConversations(this.value)">
                             </div>
                         </div>
                         <div class="msg-conv-list" id="msg-conv-list">
@@ -381,7 +442,8 @@
                     <!-- Cột giữa: Chat thread -->
                     <div class="msg-thread-col" id="msg-thread-col">
                         <div class="msg-thread-empty" id="msg-thread-empty">
-                            <i class="fa-regular fa-comments" style="font-size:48px;color:#cbd5e1;margin-bottom:16px;"></i>
+                            <i class="fa-regular fa-comments"
+                                style="font-size:48px;color:#cbd5e1;margin-bottom:16px;"></i>
                             <p>Chọn một cuộc hội thoại để bắt đầu</p>
                         </div>
                         <!-- Header thread (ẩn ban đầu) -->
@@ -398,14 +460,17 @@
                         <!-- Input box -->
                         <div class="msg-input-wrap" id="msg-input-wrap" style="display:none;">
                             <div class="msg-input-toolbar">
-                                <button class="msg-toolbar-btn" title="Gửi Email" onclick="setMsgType('email')" id="btn-type-email">
+                                <button class="msg-toolbar-btn" title="Gửi Email" onclick="setMsgType('email')"
+                                    id="btn-type-email">
                                     <i class="fa-regular fa-envelope"></i> Email
                                 </button>
-                                <button class="msg-toolbar-btn active" title="Tin nhắn" onclick="setMsgType('message')" id="btn-type-msg">
+                                <button class="msg-toolbar-btn active" title="Tin nhắn" onclick="setMsgType('message')"
+                                    id="btn-type-msg">
                                     <i class="fa-regular fa-comment"></i> Tin nhắn
                                 </button>
                                 <div class="msg-toolbar-sep"></div>
-                                <select class="msg-template-sel" id="msg-template-sel" onchange="applyTemplate(this.value)">
+                                <select class="msg-template-sel" id="msg-template-sel"
+                                    onchange="applyTemplate(this.value)">
                                     <option value="">Chọn mẫu nhanh...</option>
                                     <option value="invite">📅 Mời phỏng vấn</option>
                                     <option value="offer">🎉 Gửi Offer</option>
@@ -415,8 +480,8 @@
                                 </select>
                             </div>
                             <div class="msg-input-row">
-                                <textarea id="msg-input" class="msg-textarea" placeholder="Nhập tin nhắn tại đây..." rows="3"
-                                    onkeydown="handleMsgKey(event)"></textarea>
+                                <textarea id="msg-input" class="msg-textarea" placeholder="Nhập tin nhắn tại đây..."
+                                    rows="3" onkeydown="handleMsgKey(event)"></textarea>
                                 <button class="msg-send-btn" onclick="sendMessage()">
                                     <i class="fa-solid fa-paper-plane"></i>
                                 </button>
@@ -427,7 +492,8 @@
                     <!-- Cột phải: Thông tin ứng viên -->
                     <div class="msg-info-col" id="msg-info-col">
                         <div class="msg-info-empty" id="msg-info-empty">
-                            <i class="fa-solid fa-user-circle" style="font-size:40px;color:#cbd5e1;margin-bottom:12px;"></i>
+                            <i class="fa-solid fa-user-circle"
+                                style="font-size:40px;color:#cbd5e1;margin-bottom:12px;"></i>
                             <p>Chọn hội thoại để xem hồ sơ</p>
                         </div>
                         <div id="msg-info-content" style="display:none;">
@@ -437,7 +503,7 @@
 
                 </div>
             </section>
-            
+
             <!-- TAB 7: Lịch sử giao dịch -->
             <section id="tab-transactions" class="tab-pane">
                 <div class="card">
@@ -459,7 +525,9 @@
                                     </tr>
                                 </thead>
                                 <tbody id="txn-table-body">
-                                    <tr><td colspan="6" style="text-align: center;">Đang tải...</td></tr>
+                                    <tr>
+                                        <td colspan="6" style="text-align: center;">Đang tải...</td>
+                                    </tr>
                                 </tbody>
                             </table>
                         </div>
@@ -473,11 +541,14 @@
     <div id="schedule-modal" class="modal">
         <div class="modal-content" style="max-width:540px;">
             <div class="modal-header">
-                <h3><i class="fa-regular fa-calendar-plus" style="color:#3b82f6;margin-right:8px;"></i>Lên lịch Phỏng vấn</h3>
+                <h3><i class="fa-regular fa-calendar-plus" style="color:#3b82f6;margin-right:8px;"></i>Lên lịch Phỏng
+                    vấn</h3>
                 <span class="close-btn" onclick="closeScheduleModal()">&times;</span>
             </div>
             <div class="modal-body">
-                <div id="schedule-candidate-info" style="background:#f8fafc;border-radius:10px;padding:14px 16px;margin-bottom:20px;border-left:3px solid #3b82f6;"></div>
+                <div id="schedule-candidate-info"
+                    style="background:#f8fafc;border-radius:10px;padding:14px 16px;margin-bottom:20px;border-left:3px solid #3b82f6;">
+                </div>
                 <div class="form-grid">
                     <div class="form-group">
                         <label>Ngày & Giờ phỏng vấn <span class="required">*</span></label>
@@ -495,20 +566,24 @@
                     </div>
                 </div>
                 <div class="form-group">
-                    <label><i class="fa-solid fa-video" style="color:#3b82f6;margin-right:6px;"></i>Link Meeting (Google Meet / Zoom...)</label>
+                    <label><i class="fa-solid fa-video" style="color:#3b82f6;margin-right:6px;"></i>Link Meeting (Google
+                        Meet / Zoom...)</label>
                     <input type="url" id="sch-link" placeholder="https://meet.google.com/...">
                 </div>
                 <div class="form-group">
-                    <label><i class="fa-solid fa-location-dot" style="color:#64748b;margin-right:6px;"></i>Địa điểm (nếu phỏng vấn trực tiếp)</label>
+                    <label><i class="fa-solid fa-location-dot" style="color:#64748b;margin-right:6px;"></i>Địa điểm (nếu
+                        phỏng vấn trực tiếp)</label>
                     <input type="text" id="sch-location" placeholder="Tầng 3, Tòa nhà ABC, 123 Nguyễn Huệ...">
                 </div>
                 <div class="form-group">
                     <label>Ghi chú cho ứng viên</label>
                     <textarea id="sch-notes" rows="3" placeholder="Mang theo CMND, portfolio..."></textarea>
                 </div>
-                <div style="background:#eff6ff;border-radius:8px;padding:12px 14px;font-size:13px;color:#3b82f6;display:flex;gap:8px;align-items:flex-start;">
+                <div
+                    style="background:#eff6ff;border-radius:8px;padding:12px 14px;font-size:13px;color:#3b82f6;display:flex;gap:8px;align-items:flex-start;">
                     <i class="fa-solid fa-circle-info" style="margin-top:1px;flex-shrink:0;"></i>
-                    <span>Sau khi lên lịch, trạng thái ứng viên sẽ tự động chuyển sang <strong>Phỏng vấn</strong> và một tin nhắn thông báo sẽ được tạo.</span>
+                    <span>Sau khi lên lịch, trạng thái ứng viên sẽ tự động chuyển sang <strong>Phỏng vấn</strong> và một
+                        tin nhắn thông báo sẽ được tạo.</span>
                 </div>
             </div>
             <div class="modal-footer">
@@ -591,11 +666,13 @@
                     <div class="form-grid">
                         <div class="form-group">
                             <label>Lương tối thiểu (VNĐ)</label>
-                            <input type="text" id="job-min-salary" placeholder="10.000.000" oninput="formatCurrency(this)">
+                            <input type="text" id="job-min-salary" placeholder="10.000.000"
+                                oninput="formatCurrency(this)">
                         </div>
                         <div class="form-group">
                             <label>Lương tối đa (VNĐ)</label>
-                            <input type="text" id="job-max-salary" placeholder="20.000.000" oninput="formatCurrency(this)">
+                            <input type="text" id="job-max-salary" placeholder="20.000.000"
+                                oninput="formatCurrency(this)">
                         </div>
                     </div>
                     <div class="form-group">
@@ -604,7 +681,8 @@
                     </div>
                     <div class="form-group">
                         <label>Yêu cầu kỹ năng</label>
-                        <textarea id="job-req" rows="3" placeholder="Bắt buộc: 2 năm ReactJS, Giao tiếp tốt..."></textarea>
+                        <textarea id="job-req" rows="3"
+                            placeholder="Bắt buộc: 2 năm ReactJS, Giao tiếp tốt..."></textarea>
                     </div>
                     <div class="form-group">
                         <label>Quyền lợi (Phúc lợi)</label>
@@ -627,9 +705,13 @@
                             </select>
                         </div>
                     </div>
-                    <div style="background: #fffbeb; border: 1px solid #fde68a; border-radius: 10px; padding: 14px 16px; display: flex; align-items: center; gap: 12px;">
-                        <label style="display:flex; align-items:center; gap:10px; cursor:pointer; margin:0; font-size:14px; font-weight:600; color:#92400e; user-select:none;" id="featured-label">
-                            <input type="checkbox" id="job-featured" style="width:18px; height:18px; accent-color:#f59e0b; cursor:pointer;">
+                    <div
+                        style="background: #fffbeb; border: 1px solid #fde68a; border-radius: 10px; padding: 14px 16px; display: flex; align-items: center; gap: 12px;">
+                        <label
+                            style="display:flex; align-items:center; gap:10px; cursor:pointer; margin:0; font-size:14px; font-weight:600; color:#92400e; user-select:none;"
+                            id="featured-label">
+                            <input type="checkbox" id="job-featured"
+                                style="width:18px; height:18px; accent-color:#f59e0b; cursor:pointer;">
                             <i class="fa-solid fa-star" style="color:#f59e0b;"></i>
                             Đăng tin nổi bật
                         </label>
@@ -652,14 +734,20 @@
                 <span class="close-btn" onclick="closePaymentModal()">&times;</span>
             </div>
             <div class="modal-body">
-                <p style="margin-bottom: 20px; color: #64748b;">Gói dịch vụ: <strong id="payment-pkg-name" style="color: #0f172a;"></strong><br>Số tiền: <strong id="payment-pkg-price" style="color: #ef4444;"></strong></p>
-                
+                <p style="margin-bottom: 20px; color: #64748b;">Gói dịch vụ: <strong id="payment-pkg-name"
+                        style="color: #0f172a;"></strong><br>Số tiền: <strong id="payment-pkg-price"
+                        style="color: #ef4444;"></strong></p>
+
                 <div style="display: flex; flex-direction: column; gap: 12px;">
-                    <button class="btn-primary" style="width: 100%; padding: 12px; background: #005baa; justify-content: center;" onclick="confirmPayment('VNPay')">
+                    <button class="btn-primary"
+                        style="width: 100%; padding: 12px; background: #005baa; justify-content: center;"
+                        onclick="confirmPayment('VNPay')">
                         <i class="fa-solid fa-credit-card" style="margin-right: 8px;"></i> Thanh toán qua VNPay
                     </button>
-                    <button class="btn-secondary" style="width: 100%; padding: 12px; justify-content: center;" onclick="confirmPayment('Manual')">
-                        <i class="fa-solid fa-money-bill-transfer" style="margin-right: 8px;"></i> Chuyển khoản thủ công (Demo)
+                    <button class="btn-secondary" style="width: 100%; padding: 12px; justify-content: center;"
+                        onclick="confirmPayment('Manual')">
+                        <i class="fa-solid fa-money-bill-transfer" style="margin-right: 8px;"></i> Chuyển khoản thủ công
+                        (Demo)
                     </button>
                 </div>
             </div>
@@ -674,13 +762,117 @@
                 <span class="close-btn" onclick="closeCropModal()">&times;</span>
             </div>
             <div class="modal-body" style="padding: 20px;">
-                <div class="img-container" style="max-height: 400px; width: 100%; display: flex; justify-content: center; align-items: center; background-color: #f8fafc; overflow: hidden; border-radius: 8px; border: 1px dashed #cbd5e1;">
+                <div class="img-container"
+                    style="max-height: 400px; width: 100%; display: flex; justify-content: center; align-items: center; background-color: #f8fafc; overflow: hidden; border-radius: 8px; border: 1px dashed #cbd5e1;">
                     <img id="crop-image" src="" alt="Picture" style="max-width: 100%; max-height: 400px;">
                 </div>
             </div>
             <div class="modal-footer">
                 <button class="btn-secondary" onclick="closeCropModal()">Thoát</button>
                 <button class="btn-primary" id="crop-save-btn" onclick="confirmCrop()">Lưu</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Từ chối nhanh -->
+    <div id="quick-reject-modal" class="modal">
+        <div class="modal-content" style="max-width:520px;">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-ban" style="color:#ef4444;margin-right:8px;"></i>Từ chối nhanh</h3>
+                <span class="close-btn" onclick="closeQuickRejectModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <p style="color:#64748b; font-size:14px; margin:0 0 20px;">Chọn tiêu chí để từ chối hàng loạt ứng viên
+                    không phù hợp.</p>
+
+                <div style="margin-bottom:20px;">
+                    <label style="font-size:13px;font-weight:600;color:#1e293b;margin-bottom:10px;display:block;">
+                        <i class="fa-solid fa-filter" style="color:#64748b;margin-right:6px;"></i>Áp dụng cho ứng viên
+                        có trạng thái
+                    </label>
+                    <div class="qr-status-checkboxes">
+                        <label class="qr-checkbox-item">
+                            <input type="checkbox" name="qr-status" value="Applied" onchange="updateQuickRejectCount()"
+                                checked>
+                            <span class="badge badge-applied"><i class="fa-solid fa-file-pen"></i> Mới nộp</span>
+                        </label>
+                        <label class="qr-checkbox-item">
+                            <input type="checkbox" name="qr-status" value="Screening"
+                                onchange="updateQuickRejectCount()">
+                            <span class="badge badge-screening"><i class="fa-solid fa-magnifying-glass"></i> Sàng
+                                lọc</span>
+                        </label>
+                        <label class="qr-checkbox-item">
+                            <input type="checkbox" name="qr-status" value="OnHold" onchange="updateQuickRejectCount()">
+                            <span class="badge badge-onhold"><i class="fa-solid fa-clock"></i> Tạm giữ</span>
+                        </label>
+                        <label class="qr-checkbox-item">
+                            <input type="checkbox" name="qr-status" value="Interview"
+                                onchange="updateQuickRejectCount()">
+                            <span class="badge badge-interview"><i class="fa-solid fa-comments"></i> Phỏng vấn</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div style="margin-bottom:20px;">
+                    <label style="font-size:13px;font-weight:600;color:#1e293b;margin-bottom:10px;display:block;">
+                        <i class="fa-solid fa-user-xmark" style="color:#64748b;margin-right:6px;"></i>Hồ sơ thiếu thông tin <span style="font-weight:400;color:#94a3b8;">(lọc thêm)</span>
+                    </label>
+                    <div class="qr-status-checkboxes">
+                        <label class="qr-checkbox-item">
+                            <input type="checkbox" name="qr-profile" value="no-cv" onchange="updateQuickRejectCount()">
+                            <span class="qr-profile-tag"><i class="fa-solid fa-file-slash"></i> Không có CV</span>
+                        </label>
+                        <label class="qr-checkbox-item">
+                            <input type="checkbox" name="qr-profile" value="no-skills" onchange="updateQuickRejectCount()">
+                            <span class="qr-profile-tag"><i class="fa-solid fa-code-slash"></i> Không có kỹ năng</span>
+                        </label>
+                        <label class="qr-checkbox-item">
+                            <input type="checkbox" name="qr-profile" value="no-experience" onchange="updateQuickRejectCount()">
+                            <span class="qr-profile-tag"><i class="fa-solid fa-briefcase-slash"></i> Không có kinh nghiệm</span>
+                        </label>
+                        <label class="qr-checkbox-item">
+                            <input type="checkbox" name="qr-profile" value="no-education" onchange="updateQuickRejectCount()">
+                            <span class="qr-profile-tag"><i class="fa-solid fa-graduation-cap"></i> Không có bằng cấp</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin-bottom:20px;">
+                    <label style="font-size:13px;font-weight:600;color:#1e293b;">
+                        <i class="fa-solid fa-briefcase" style="color:#64748b;margin-right:6px;"></i>Vị trí tuyển dụng
+                        (tuỳ chọn)
+                    </label>
+                    <select id="qr-job-filter" onchange="updateQuickRejectCount()" style="margin-top:8px;">
+                        <option value="">Tất cả vị trí</option>
+                    </select>
+                </div>
+
+                <div class="form-group" style="margin-bottom:20px;">
+                    <label style="font-size:13px;font-weight:600;color:#1e293b;">
+                        <i class="fa-solid fa-comment-slash" style="color:#64748b;margin-right:6px;"></i>Lý do từ chối
+                    </label>
+                    <select id="qr-reason" style="margin-top:8px;">
+                        <option value="Không đủ kinh nghiệm">Không đủ kinh nghiệm</option>
+                        <option value="Hồ sơ không phù hợp">Hồ sơ không phù hợp</option>
+                        <option value="Vị trí đã tuyển đủ người">Vị trí đã tuyển đủ người</option>
+                        <option value="Đã tuyển ứng viên khác phù hợp hơn">Đã tuyển ứng viên khác phù hợp hơn</option>
+                        <option value="Không đáp ứng yêu cầu kỹ năng">Không đáp ứng yêu cầu kỹ năng</option>
+                        <option value="Yêu cầu lương không phù hợp">Yêu cầu lương không phù hợp</option>
+                        <option value="Khác">Lý do khác</option>
+                    </select>
+                </div>
+
+                <div class="qr-preview-box" id="qr-preview-box">
+                    <i class="fa-solid fa-circle-info" style="flex-shrink:0;"></i>
+                    <span id="qr-count-text">Chọn tiêu chí để xem số lượng ứng viên bị ảnh hưởng.</span>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeQuickRejectModal()">Hủy</button>
+                <button class="btn-danger" id="qr-confirm-btn" onclick="executeQuickReject()" disabled>
+                    <i class="fa-solid fa-ban"></i> Từ chối <span id="qr-confirm-count"></span>
+                </button>
             </div>
         </div>
     </div>
@@ -694,4 +886,5 @@
     <script src="../js/recruiterMessaging.js"></script>
     <script src="../js/recruiterTransactions.js"></script>
 </body>
+
 </html>

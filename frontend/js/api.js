@@ -57,6 +57,25 @@ async function apiFetchAuth(endpoint, options = {}) {
     }
 }
 
+// ── Mở CV ứng viên qua signed URL (tránh lỗi 401 Cloudinary) ──
+async function openSignedCvView(candidateId) {
+    const win = window.open('', '_blank');
+    try {
+        const res = await apiFetchAuth(`/api/profile/${encodeURIComponent(candidateId)}/cv-view`);
+        if (!res) { win.close(); return; }
+        const data = await res.json();
+        if (data.data?.url) {
+            win.location.href = data.data.url;
+        } else {
+            win.close();
+            alert('Không thể tải CV của ứng viên này');
+        }
+    } catch {
+        win.close();
+        alert('Không thể mở CV');
+    }
+}
+
 // ── Lấy thông tin user từ sessionStorage ───────────────────────
 function getCurrentUser() {
     return {

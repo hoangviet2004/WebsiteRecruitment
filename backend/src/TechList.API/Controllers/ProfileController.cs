@@ -69,6 +69,24 @@ public sealed class ProfileController : ControllerBase
         return Ok(ApiResponse<ProfileDto>.Ok(profile, "Avatar updated"));
     }
 
+    [HttpGet("{userId}/cv-view")]
+    public async Task<ActionResult<ApiResponse<object>>> GetCvViewUrlByUser(string userId, CancellationToken ct)
+    {
+        var url = await _profiles.GetCvViewUrlByUserIdAsync(userId, ct);
+        return Ok(ApiResponse<object>.Ok(new { url }));
+    }
+
+    [HttpGet("cv/view")]
+    public async Task<ActionResult<ApiResponse<object>>> GetCvViewUrl(CancellationToken ct)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirstValue("sub");
+        if (string.IsNullOrWhiteSpace(userId))
+            throw new UnauthorizedAccessException("Missing user id");
+
+        var url = await _profiles.GetCvViewUrlAsync(userId, ct);
+        return Ok(ApiResponse<object>.Ok(new { url }));
+    }
+
     [HttpPost("cv")]
     [RequestSizeLimit(10_000_000)]
     public async Task<ActionResult<ApiResponse<ProfileDto>>> UploadCv(IFormFile file, CancellationToken ct)

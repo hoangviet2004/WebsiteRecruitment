@@ -527,10 +527,47 @@ function showCurrentCv(url, filename) {
     const cur = document.getElementById('pf-cv-current');
     if (cur) {
         cur.style.display = 'block';
+        
+        // Link xem (View) — lấy signed URL từ backend để tránh lỗi 401 Cloudinary
         const link = document.getElementById('pf-cv-link');
-        if (link) link.href = url;
+        if (link) {
+            link.removeAttribute('href');
+            link.onclick = async (e) => {
+                e.preventDefault();
+                const win = window.open('', '_blank');
+                try {
+                    const token = sessionStorage.getItem('token');
+                    const res = await fetch(`${API_URL}/api/profile/cv/view`, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    const data = await res.json();
+                    if (data.data?.url) {
+                        win.location.href = data.data.url;
+                    } else {
+                        win.close();
+                        showToast('Không thể lấy link xem CV', 'error');
+                    }
+                } catch {
+                    win.close();
+                    showToast('Không thể mở CV', 'error');
+                }
+            };
+        }
+
+        // Link tải (Download) - Force attachment if cloudinary
+        const download = document.getElementById('pf-cv-download');
+        if (download) {
+            let downloadUrl = url;
+            if(url.includes('cloudinary.com') && url.includes('/upload/')) {
+                // Hỗ trợ cả /image/upload/ và /raw/upload/
+                downloadUrl = url.replace('/upload/', '/upload/fl_attachment/');
+            }
+            download.href = downloadUrl;
+        }
+
         const fn = document.getElementById('pf-cv-filename');
-        if (fn) fn.textContent = filename || 'CV.pdf';
+        if (fn) fn.textContent = filename || 'CV_Cua_Toi.pdf';
+        
         const meta = document.getElementById('pf-cv-updated');
         if (meta) meta.textContent = 'Cập nhật ' + new Date().toLocaleDateString('vi-VN');
     }

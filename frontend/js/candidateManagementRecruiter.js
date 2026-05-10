@@ -238,7 +238,7 @@ function openCandModal(appId) {
         : '<span style="color:#94a3b8;font-size:13px;">Chưa cập nhật</span>';
 
     const cvHtml = app.cvUrl
-        ? `<a href="${app.cvUrl}" target="_blank" style="color:#3b82f6;text-decoration:none;font-weight:600;"><i class="fa-solid fa-file-pdf"></i> Xem / Tải CV</a>`
+        ? `<a href="javascript:void(0)" onclick="openSignedCvView('${app.candidateId}')" style="color:#3b82f6;text-decoration:none;font-weight:600;cursor:pointer;"><i class="fa-solid fa-file-pdf"></i> Xem / Tải CV</a>`
         : '<span style="color:#94a3b8;font-size:13px;">Chưa có CV</span>';
 
     const coverHtml = app.coverLetter
@@ -332,6 +332,150 @@ async function updateCandStatus(appId, newStatus) {
     } catch (e) {
         alert('Lỗi: ' + e.message);
     }
+}
+
+// ── Quick Reject ─────────────────────────────────────────────
+function openQuickRejectModal() {
+    const sel = document.getElementById('qr-job-filter');
+    sel.innerHTML = '<option value="">Tất cả vị trí</option>';
+    const seen = new Set();
+    _allApplications.forEach(a => {
+        if (!seen.has(a.jobPostId)) {
+            seen.add(a.jobPostId);
+            const opt = document.createElement('option');
+            opt.value = a.jobPostId;
+            opt.textContent = a.jobTitle || 'Vị trí không tên';
+            sel.appendChild(opt);
+        }
+    });
+
+    document.querySelectorAll('input[name="qr-status"]').forEach(cb => {
+        cb.checked = cb.value === 'Applied';
+    });
+    document.querySelectorAll('input[name="qr-profile"]').forEach(cb => {
+        cb.checked = false;
+    });
+    document.getElementById('qr-job-filter').value = '';
+
+    updateQuickRejectCount();
+    document.getElementById('quick-reject-modal').classList.add('show');
+}
+
+function closeQuickRejectModal() {
+    document.getElementById('quick-reject-modal').classList.remove('show');
+}
+
+function _isEmptyJson(val) {
+    if (!val) return true;
+    const s = val.trim();
+    return s === '' || s === '[]' || s === 'null';
+}
+
+function _matchesProfileFilter(a, profileFilters) {
+    if (profileFilters.length === 0) return true;
+    for (const f of profileFilters) {
+        if (f === 'no-cv'         && !_isEmptyJson(a.cvUrl))         return false;
+        if (f === 'no-skills'     && !_isEmptyJson(a.skills))        return false;
+        if (f === 'no-experience' && !_isEmptyJson(a.experience))    return false;
+        if (f === 'no-education'  && !_isEmptyJson(a.education))     return false;
+    }
+    return true;
+}
+
+function updateQuickRejectCount() {
+    const selectedStatuses = [...document.querySelectorAll('input[name="qr-status"]:checked')].map(cb => cb.value);
+    const profileFilters   = [...document.querySelectorAll('input[name="qr-profile"]:checked')].map(cb => cb.value);
+    const jobId = document.getElementById('qr-job-filter').value;
+
+    const affected = _allApplications.filter(a => {
+        if (a.status === 'Rejected' || a.status === 'Offered') return false;
+        if (!selectedStatuses.includes(a.status)) return false;
+        if (jobId && a.jobPostId !== jobId) return false;
+        if (!_matchesProfileFilter(a, profileFilters)) return false;
+        return true;
+    });
+
+    const count = affected.length;
+    const btn = document.getElementById('qr-confirm-btn');
+    const countEl = document.getElementById('qr-confirm-count');
+    const textEl = document.getElementById('qr-count-text');
+    const box = document.getElementById('qr-preview-box');
+
+    if (selectedStatuses.length === 0) {
+        textEl.textContent = 'Vui lòng chọn ít nhất một trạng thái.';
+        btn.disabled = true;
+        countEl.textContent = '';
+        box.className = 'qr-preview-box';
+        return;
+    }
+
+    if (count === 0) {
+        textEl.textContent = 'Không có ứng viên nào phù hợp với tiêu chí đã chọn.';
+        btn.disabled = true;
+        countEl.textContent = '';
+        box.className = 'qr-preview-box warning';
+    } else {
+        textEl.textContent = `Sẽ từ chối ${count} ứng viên phù hợp với tiêu chí đã chọn.`;
+        btn.disabled = false;
+        countEl.textContent = `(${count})`;
+        box.className = 'qr-preview-box danger';
+    }
+}
+
+async function executeQuickReject() {
+    const selectedStatuses = [...document.querySelectorAll('input[name="qr-status"]:checked')].map(cb => cb.value);
+    const profileFilters   = [...document.querySelectorAll('input[name="qr-profile"]:checked')].map(cb => cb.value);
+    const jobId = document.getElementById('qr-job-filter').value;
+    const reason = document.getElementById('qr-reason').value;
+
+    const toReject = _allApplications.filter(a => {
+        if (a.status === 'Rejected' || a.status === 'Offered') return false;
+        if (!selectedStatuses.includes(a.status)) return false;
+        if (jobId && a.jobPostId !== jobId) return false;
+        if (!_matchesProfileFilter(a, profileFilters)) return false;
+        return true;
+    });
+
+    if (toReject.length === 0) return;
+
+    if (!confirm(`Xác nhận từ chối ${toReject.length} ứng viên?\nLý do: "${reason}"\n\nHành động này không thể hoàn tác.`)) return;
+
+    const btn = document.getElementById('qr-confirm-btn');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang xử lý...';
+
+    let success = 0, failed = 0;
+
+    for (const app of toReject) {
+        try {
+            const res = await apiFetchAuth(`/api/applications/${app.id}/status`, {
+                method: 'PUT',
+                body: JSON.stringify({ status: 'Rejected' })
+            });
+            const data = await res.json();
+            if (res.ok && data.success) {
+                const idx = _allApplications.findIndex(a => a.id === app.id);
+                if (idx !== -1) {
+                    _allApplications[idx].status = 'Rejected';
+                    _allApplications[idx].updatedAt = new Date().toISOString();
+                }
+                success++;
+            } else {
+                failed++;
+            }
+        } catch {
+            failed++;
+        }
+    }
+
+    closeQuickRejectModal();
+    applyCandidateFilters();
+    renderStats();
+
+    const msg = failed > 0
+        ? `Đã từ chối ${success} ứng viên. ${failed} trường hợp xảy ra lỗi.`
+        : `Đã từ chối thành công ${success} ứng viên.`;
+    alert(msg);
 }
 
 // ── Utility ─────────────────────────────────────────────────
