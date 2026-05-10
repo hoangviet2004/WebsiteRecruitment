@@ -1,23 +1,23 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace TechList.Domain.Entities;
 
 public class Company
 {
     public Guid Id { get; set; } = Guid.NewGuid();
-    
-    // User (Recruiter) that created and owns this company profile
+
     public string OwnerId { get; set; } = default!;
 
-    public string Name { get; set; } = string.Empty;
-    public string Description { get; set; } = string.Empty;
-    public string Website { get; set; } = string.Empty;
-    public string TaxCode { get; set; } = string.Empty;
-    public string Address { get; set; } = string.Empty;
+    [MaxLength(100)] public string Name { get; set; } = string.Empty;
+    [MaxLength(2000)] public string Description { get; set; } = string.Empty;
+    [MaxLength(200)] public string Website { get; set; } = string.Empty;
+    [MaxLength(20)] public string TaxCode { get; set; } = string.Empty;
+    [MaxLength(200)] public string Address { get; set; } = string.Empty;
 
-    // Quy mô công ty (VD: "1-50", "50-150", "150-500", "500+")
     public string? CompanySize { get; set; }
 
-    public string? ContactEmail { get; set; }
-    public string? ContactPhone { get; set; }
+    [MaxLength(100)] public string? ContactEmail { get; set; }
+    [MaxLength(20)] public string? ContactPhone { get; set; }
 
     // Logo Information
     public string? LogoUrl { get; set; }

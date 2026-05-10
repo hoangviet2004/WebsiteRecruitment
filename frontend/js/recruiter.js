@@ -249,6 +249,7 @@ async function loadMyCompany() {
             document.getElementById('company-website').value = res.data.website || '';
             document.getElementById('company-address').value = res.data.address || '';
             document.getElementById('company-desc').value = res.data.description || '';
+            document.getElementById('company-desc-count').textContent = (res.data.description || '').length;
             document.getElementById('company-email').value = res.data.contactEmail || '';
             document.getElementById('company-phone').value = res.data.contactPhone || '';
             // Quy mô công ty
@@ -448,8 +449,11 @@ async function loadMyJobs(companyId) {
             const expDate = new Date(job.expiresAt).toLocaleDateString('vi-VN');
             let statusHtml = '';
             const isExpired = new Date(job.expiresAt) < new Date();
-            if (!job.isActive) {
-                statusHtml = '<span style="background:#fee2e2; color:#dc2626; padding: 4px 8px; border-radius: 4px; font-size:12px; font-weight:600;">Đã ẩn</span>';
+            if (job.isBlocked) {
+                const reasonTip = job.blockReason ? ` title="${job.blockReason}"` : '';
+                statusHtml = `<span${reasonTip} style="background:#fee2e2; color:#dc2626; padding: 4px 8px; border-radius: 4px; font-size:12px; font-weight:600; cursor:${job.blockReason ? 'help' : 'default'};">Bị từ chối</span>`;
+            } else if (!job.isActive) {
+                statusHtml = '<span style="background:#fff7ed; color:#ea580c; padding: 4px 8px; border-radius: 4px; font-size:12px; font-weight:600;">Đã ẩn</span>';
             } else if (isExpired) {
                 statusHtml = '<span style="background:#f1f5f9; color:#64748b; padding: 4px 8px; border-radius: 4px; font-size:12px; font-weight:600;">Hết hạn</span>';
             } else if (!job.isApproved) {
@@ -619,6 +623,9 @@ async function editJob(jobId) {
             document.getElementById('job-desc').value = job.description;
             document.getElementById('job-req').value = job.requirements;
             document.getElementById('job-ben').value = job.benefits;
+            document.getElementById('job-desc-count').textContent = (job.description || '').length;
+            document.getElementById('job-req-count').textContent  = (job.requirements || '').length;
+            document.getElementById('job-ben-count').textContent  = (job.benefits || '').length;
             
             // local datetime format YYYY-MM-DDThh:mm
             const dt = new Date(job.expiresAt);

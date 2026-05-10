@@ -4,6 +4,7 @@ using TechList.Application.Admin.Interfaces;
 using TechList.Application.Admin.Models;
 using TechList.Application.Jobs.Models;
 using TechList.Application.Companies.Models;
+using TechList.Application.Notifications.Interfaces;
 using TechList.Domain.Entities;
 using TechList.Infrastructure.Persistence;
 using TechList.Infrastructure.Identity;
@@ -14,11 +15,13 @@ public sealed class AdminService : IAdminService
 {
     private readonly AppDbContext _db;
     private readonly UserManager<ApplicationUser> _userManager;
+    private readonly INotificationService _notificationService;
 
-    public AdminService(AppDbContext db, UserManager<ApplicationUser> userManager)
+    public AdminService(AppDbContext db, UserManager<ApplicationUser> userManager, INotificationService notificationService)
     {
         _db = db;
         _userManager = userManager;
+        _notificationService = notificationService;
     }
 
     public async Task<List<UserDto>> GetAllUsersAsync(CancellationToken ct)
@@ -158,27 +161,71 @@ public sealed class AdminService : IAdminService
             j.ExpiresAt,
             j.IsActive,
             j.IsApproved,
-            j.CreatedAt
+            j.CreatedAt,
+            j.IsFeatured,
+            j.FeaturedLevel,
+            j.IsBlocked,
+            j.BlockReason
         )).ToList();
     }
 
     public async Task ToggleJobStatusAsync(Guid jobId, CancellationToken ct)
     {
-        var job = await _db.JobPosts.FirstOrDefaultAsync(x => x.Id == jobId, ct);
+        var job = await _db.JobPosts.Include(x => x.Company).FirstOrDefaultAsync(x => x.Id == jobId, ct);
         if (job == null) throw new InvalidOperationException("Job not found");
 
         job.IsActive = !job.IsActive;
         await _db.SaveChangesAsync(ct);
+
+        var recruiterId = job.Company.OwnerId;
+        if (job.IsActive)
+            await _notificationService.CreateAsync(recruiterId,
+                "Tin tuyển dụng đã được hiển thị lại",
+                $"Tin \"{job.Title}\" đã được admin bật hiển thị trở lại.",
+                "Shown", job.Id, job.Title, ct);
+        else
+            await _notificationService.CreateAsync(recruiterId,
+                "Tin tuyển dụng đã bị ẩn",
+                $"Tin \"{job.Title}\" đã bị admin tạm ẩn khỏi hệ thống.",
+                "Hidden", job.Id, job.Title, ct);
     }
 
     public async Task ApproveJobAsync(Guid jobId, CancellationToken ct)
     {
-        var job = await _db.JobPosts.FirstOrDefaultAsync(x => x.Id == jobId, ct);
+        var job = await _db.JobPosts.Include(x => x.Company).FirstOrDefaultAsync(x => x.Id == jobId, ct);
         if (job == null) throw new InvalidOperationException("Job not found");
 
         job.IsApproved = true;
         job.UpdatedAt = DateTime.UtcNow;
         await _db.SaveChangesAsync(ct);
+
+        await _notificationService.CreateAsync(job.Company.OwnerId,
+            "Tin tuyển dụng đã được duyệt",
+            $"Tin \"{job.Title}\" đã được admin phê duyệt và hiển thị trên hệ thống.",
+            "Approved", job.Id, job.Title, ct);
+    }
+
+    public async Task ToggleBlockJobAsync(Guid jobId, string? reason, CancellationToken ct)
+    {
+        var job = await _db.JobPosts.Include(x => x.Company).FirstOrDefaultAsync(x => x.Id == jobId, ct);
+        if (job == null) throw new InvalidOperationException("Job not found");
+
+        job.IsBlocked = !job.IsBlocked;
+        job.BlockReason = job.IsBlocked ? reason : null;
+        job.UpdatedAt = DateTime.UtcNow;
+        await _db.SaveChangesAsync(ct);
+
+        var recruiterId = job.Company.OwnerId;
+        if (job.IsBlocked)
+            await _notificationService.CreateAsync(recruiterId,
+                "Tin tuyển dụng bị từ chối",
+                $"Tin \"{job.Title}\" đã bị từ chối. Lý do: {reason ?? "Không có lý do cụ thể"}.",
+                "Rejected", job.Id, job.Title, ct);
+        else
+            await _notificationService.CreateAsync(recruiterId,
+                "Tin tuyển dụng đã được khôi phục",
+                $"Tin \"{job.Title}\" đã được admin khôi phục và có thể hoạt động bình thường.",
+                "Unblocked", job.Id, job.Title, ct);
     }
 
     public async Task<List<CompanyDto>> GetAllCompaniesAsync(CancellationToken ct)

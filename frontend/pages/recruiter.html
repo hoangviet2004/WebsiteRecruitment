@@ -103,26 +103,26 @@
                                 <div class="form-group" style="margin: 0;">
                                     <label style="font-size: 13px; font-weight: 600; color: #1e293b;">Tên công ty <span
                                             class="required" style="color: #ef4444;">*</span></label>
-                                    <input type="text" id="company-name" required placeholder="Nhập tên công ty"
+                                    <input type="text" id="company-name" required placeholder="Nhập tên công ty" maxlength="100"
                                         style="margin-top: 8px; font-size: 14px; padding: 12px 14px; border-radius: 6px; width: 100%; box-sizing: border-box; display: block; border: 1px solid #cbd5e1;">
                                 </div>
                                 <div class="form-group" style="margin: 0;">
                                     <label style="font-size: 13px; font-weight: 600; color: #1e293b;">Mã số thuế <span
                                             class="required" style="color: #ef4444;">*</span></label>
-                                    <input type="text" id="company-taxcode" required placeholder="Nhập mã số thuế"
+                                    <input type="text" id="company-taxcode" required placeholder="Nhập mã số thuế" maxlength="20"
                                         style="margin-top: 8px; font-size: 14px; padding: 12px 14px; border-radius: 6px; width: 100%; box-sizing: border-box; display: block; border: 1px solid #cbd5e1;">
                                 </div>
 
                                 <div class="form-group" style="margin: 0;">
                                     <label style="font-size: 13px; font-weight: 600; color: #1e293b;">Email liên
                                         hệ</label>
-                                    <input type="email" id="company-email" placeholder="contact@company.com"
+                                    <input type="email" id="company-email" placeholder="contact@company.com" maxlength="100"
                                         style="margin-top: 8px; font-size: 14px; padding: 12px 14px; border-radius: 6px; width: 100%; box-sizing: border-box; display: block; border: 1px solid #cbd5e1;">
                                 </div>
                                 <div class="form-group" style="margin: 0;">
                                     <label style="font-size: 13px; font-weight: 600; color: #1e293b;">Số điện
                                         thoại</label>
-                                    <input type="tel" id="company-phone" placeholder="Nhập số điện thoại"
+                                    <input type="tel" id="company-phone" placeholder="Nhập số điện thoại" maxlength="20"
                                         style="margin-top: 8px; font-size: 14px; padding: 12px 14px; border-radius: 6px; width: 100%; box-sizing: border-box; display: block; border: 1px solid #cbd5e1;">
                                 </div>
 
@@ -131,7 +131,7 @@
                                     <div style="position: relative; margin-top: 8px;">
                                         <i class="fa-solid fa-globe"
                                             style="position: absolute; left: 14px; top: 14px; color: #94a3b8; font-size: 14px;"></i>
-                                        <input type="url" id="company-website" placeholder="https://www.company.com"
+                                        <input type="url" id="company-website" placeholder="https://www.company.com" maxlength="200"
                                             style="padding-left: 38px; font-size: 14px; padding-top: 12px; padding-bottom: 12px; border-radius: 6px; width: 100%; box-sizing: border-box; display: block; border: 1px solid #cbd5e1;">
                                     </div>
                                 </div>
@@ -157,7 +157,7 @@
                                 <div style="position: relative; margin-top: 8px;">
                                     <i class="fa-solid fa-location-dot"
                                         style="position: absolute; left: 14px; top: 14px; color: #94a3b8; font-size: 14px;"></i>
-                                    <input type="text" id="company-address" required placeholder="Nhập địa chỉ đầy đủ"
+                                    <input type="text" id="company-address" required placeholder="Nhập địa chỉ đầy đủ" maxlength="200"
                                         style="padding-left: 38px; font-size: 14px; padding-top: 12px; padding-bottom: 12px; border-radius: 6px; width: 100%; box-sizing: border-box; display: block; border: 1px solid #cbd5e1;">
                                 </div>
                             </div>
@@ -167,7 +167,10 @@
                                     ty</label>
                                 <textarea id="company-desc" rows="5"
                                     placeholder="Mô tả về lịch sử hình thành, văn hóa, và lĩnh vực hoạt động..."
+                                    maxlength="2000"
+                                    oninput="document.getElementById('company-desc-count').textContent=this.value.length"
                                     style="margin-top: 8px; font-size: 14px; padding: 12px 14px; border-radius: 6px; width: 100%; box-sizing: border-box; display: block; border: 1px solid #cbd5e1;"></textarea>
+                                <div style="text-align:right;font-size:11px;color:#94a3b8;margin-top:4px;"><span id="company-desc-count">0</span> / 2000</div>
                             </div>
 
                             <div
@@ -656,7 +659,7 @@
                     <input type="hidden" id="job-id">
                     <div class="form-group">
                         <label>Tiêu đề công việc <span class="required">*</span></label>
-                        <input type="text" id="job-title" required placeholder="Vd: Senior Frontend Developer">
+                        <input type="text" id="job-title" required placeholder="Vd: Senior Frontend Developer" maxlength="100">
                     </div>
                     <div class="form-grid">
                         <div class="form-group">
@@ -670,7 +673,7 @@
                         </div>
                         <div class="form-group">
                             <label>Địa điểm</label>
-                            <input type="text" id="job-location" placeholder="Vd: Hà Nội">
+                            <input type="text" id="job-location" placeholder="Vd: Hà Nội" maxlength="100">
                         </div>
                     </div>
                     <div class="form-grid">
@@ -709,16 +712,21 @@
                     </div>
                     <div class="form-group">
                         <label>Mô tả công việc</label>
-                        <textarea id="job-desc" rows="3" placeholder="Quy trình, nhiệm vụ hàng ngày..."></textarea>
+                        <textarea id="job-desc" rows="3" placeholder="Quy trình, nhiệm vụ hàng ngày..." maxlength="3000"
+                            oninput="document.getElementById('job-desc-count').textContent=this.value.length"></textarea>
+                        <div style="text-align:right;font-size:11px;color:#94a3b8;margin-top:2px;"><span id="job-desc-count">0</span> / 3000</div>
                     </div>
                     <div class="form-group">
                         <label>Yêu cầu kỹ năng</label>
-                        <textarea id="job-req" rows="3"
-                            placeholder="Bắt buộc: 2 năm ReactJS, Giao tiếp tốt..."></textarea>
+                        <textarea id="job-req" rows="3" placeholder="Bắt buộc: 2 năm ReactJS, Giao tiếp tốt..." maxlength="3000"
+                            oninput="document.getElementById('job-req-count').textContent=this.value.length"></textarea>
+                        <div style="text-align:right;font-size:11px;color:#94a3b8;margin-top:2px;"><span id="job-req-count">0</span> / 3000</div>
                     </div>
                     <div class="form-group">
                         <label>Quyền lợi (Phúc lợi)</label>
-                        <textarea id="job-ben" rows="3" placeholder="Đóng bảo hiểm full lương, Mac/PC..."></textarea>
+                        <textarea id="job-ben" rows="3" placeholder="Đóng bảo hiểm full lương, Mac/PC..." maxlength="2000"
+                            oninput="document.getElementById('job-ben-count').textContent=this.value.length"></textarea>
+                        <div style="text-align:right;font-size:11px;color:#94a3b8;margin-top:2px;"><span id="job-ben-count">0</span> / 2000</div>
                     </div>
                     <div class="form-grid" style="grid-template-columns: 1fr 1fr 1fr;">
                         <div class="form-group">

@@ -43,15 +43,24 @@ function _injectNotifPanel() {
 async function _loadNotifBadge() {
     const token = sessionStorage.getItem('token');
     if (!token || typeof API_URL === 'undefined') return;
+    const role = (sessionStorage.getItem('role') || '').toLowerCase();
     try {
-        const res = await fetch(`${API_URL}/api/applications/my-applications`, {
-            headers: { 'Authorization': `Bearer ${token}` }
-        });
-        const data = await res.json();
-        if (data.success) {
-            const seen = _getSeenStatuses();
-            const count = (data.data || []).filter(a => seen[a.id] !== a.status).length;
-            _updateBadge(count);
+        if (role === 'recruiter') {
+            const res = await fetch(`${API_URL}/api/notifications/unread-count`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const data = await res.json();
+            if (data.success) _updateBadge(data.data || 0);
+        } else {
+            const res = await fetch(`${API_URL}/api/applications/my-applications`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const data = await res.json();
+            if (data.success) {
+                const seen = _getSeenStatuses();
+                const count = (data.data || []).filter(a => seen[a.id] !== a.status).length;
+                _updateBadge(count);
+            }
         }
     } catch {}
 }
@@ -64,9 +73,7 @@ function _updateBadge(count) {
 }
 
 async function openNotifPanel() {
-    // Đóng dropdown trước
     document.getElementById('userMenu')?.classList.remove('open');
-
     _injectNotifPanel();
     document.getElementById('notif-overlay')?.classList.add('show');
     document.getElementById('notif-panel')?.classList.add('show');
@@ -75,16 +82,30 @@ async function openNotifPanel() {
     body.innerHTML = '<div class="notif-loading"><i class="fa-solid fa-spinner fa-spin"></i> Đang tải...</div>';
 
     const token = sessionStorage.getItem('token');
-    try {
-        const res = await fetch(`${API_URL}/api/applications/my-applications`, {
-            headers: { 'Authorization': `Bearer ${token}` }
-        });
-        const data = await res.json();
-        if (!data.success) throw new Error();
+    const role = (sessionStorage.getItem('role') || '').toLowerCase();
 
-        const apps = (data.data || []).sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
-        _renderNotifItems(apps);
-        _markAllRead(apps);
+    try {
+        if (role === 'recruiter') {
+            const res = await fetch(`${API_URL}/api/notifications`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const data = await res.json();
+            if (!data.success) throw new Error();
+            _renderRecruiterNotifItems(data.data || []);
+            await fetch(`${API_URL}/api/notifications/mark-read`, {
+                method: 'PUT', headers: { 'Authorization': `Bearer ${token}` }
+            });
+            _updateBadge(0);
+        } else {
+            const res = await fetch(`${API_URL}/api/applications/my-applications`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const data = await res.json();
+            if (!data.success) throw new Error();
+            const apps = (data.data || []).sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+            _renderNotifItems(apps);
+            _markAllRead(apps);
+        }
     } catch {
         body.innerHTML = '<div class="notif-empty"><i class="fa-solid fa-circle-exclamation"></i><p>Không thể tải thông báo.</p></div>';
     }
@@ -138,6 +159,37 @@ function _markAllRead(apps) {
     _updateBadge(0);
 }
 
+const _RECRUITER_NOTIF_CFG = {
+    Approved:  { icon: 'fa-circle-check',  color: '#16a34a' },
+    Rejected:  { icon: 'fa-ban',           color: '#dc2626' },
+    Unblocked: { icon: 'fa-unlock',        color: '#2563eb' },
+    Hidden:    { icon: 'fa-eye-slash',     color: '#d97706' },
+    Shown:     { icon: 'fa-eye',           color: '#0891b2' },
+};
+
+function _renderRecruiterNotifItems(notifications) {
+    const body = document.getElementById('notif-body');
+    if (!notifications.length) {
+        body.innerHTML = '<div class="notif-empty"><i class="fa-solid fa-bell-slash"></i><p>Chưa có thông báo nào.</p></div>';
+        return;
+    }
+    body.innerHTML = notifications.map(n => {
+        const cfg = _RECRUITER_NOTIF_CFG[n.type] || { icon: 'fa-bell', color: '#64748b' };
+        const date = new Date(n.createdAt).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
+        return `
+            <div class="notif-item${n.isRead ? '' : ' unread'}">
+                <div class="notif-icon" style="background:${cfg.color}18;color:${cfg.color};">
+                    <i class="fa-solid ${cfg.icon}"></i>
+                </div>
+                <div class="notif-content">
+                    <div class="notif-job">${_escHtmlNav(n.title)}</div>
+                    <div class="notif-msg">${_escHtmlNav(n.message)}</div>
+                    <div class="notif-date">${date}</div>
+                </div>
+            </div>`;
+    }).join('');
+}
+
 // ─────────────────────────────────────────────────────────────
 function renderNavRight() {
     const navRight = document.getElementById('nav-right');
@@ -181,7 +233,7 @@ function renderNavRight() {
                             <i class="fa-regular fa-bookmark" style="width:14px;margin-right:8px;"></i>Việc làm đã lưu
                         </a>
                     ` : ''}
-                    ${role === 'candidate' ? `
+                    ${role !== 'admin' ? `
                         <a href="#" class="dropdown-item" onclick="openNotifPanel(); return false;">
                             <i class="fa-solid fa-bell" style="width:14px;margin-right:8px;"></i>Thông báo
                             <span id="notif-badge" class="notif-badge" style="display:none;">0</span>
@@ -219,7 +271,7 @@ function renderNavRight() {
             });
         }
 
-        if (role === 'candidate') {
+        if (role === 'candidate' || role === 'recruiter') {
             _injectNotifPanel();
             _loadNotifBadge();
         }

@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 async function loadJobs() {
     const tbody = document.getElementById('job-table-body');
-    tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;"><i class="fa-solid fa-spinner fa-spin"></i> Đang tải dữ liệu...</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="4" style="text-align: center;"><i class="fa-solid fa-spinner fa-spin"></i> Đang tải dữ liệu...</td></tr>';
 
     try {
         const response = await apiFetchAuth('/api/admin/jobs', { method: 'GET' });
@@ -40,11 +40,13 @@ function filterJobs() {
 
     // Lọc theo trạng thái
     if (statusFilter === 'pending') {
-        filtered = filtered.filter(j => !j.isApproved);
+        filtered = filtered.filter(j => !j.isApproved && !j.isBlocked);
     } else if (statusFilter === 'active') {
-        filtered = filtered.filter(j => j.isApproved && j.isActive);
+        filtered = filtered.filter(j => j.isApproved && j.isActive && !j.isBlocked);
     } else if (statusFilter === 'hidden') {
-        filtered = filtered.filter(j => j.isApproved && !j.isActive);
+        filtered = filtered.filter(j => j.isApproved && !j.isActive && !j.isBlocked);
+    } else if (statusFilter === 'blocked') {
+        filtered = filtered.filter(j => j.isBlocked);
     }
 
     renderJobs(filtered);
@@ -54,7 +56,7 @@ function renderJobs(jobs) {
     const tbody = document.getElementById('job-table-body');
 
     if (!jobs || jobs.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding:32px; color:#64748b;">Không tìm thấy tin tuyển dụng nào.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding:32px; color:#64748b;">Không tìm thấy tin tuyển dụng nào.</td></tr>';
         return;
     }
 
@@ -64,34 +66,39 @@ function renderJobs(jobs) {
         const expStr = new Date(j.expiresAt).toLocaleDateString('vi-VN');
         
         let stLabel = '';
-        if (!j.isApproved) {
+        if (j.isBlocked) {
+            stLabel = '<span class="badge badge-blocked">Bị từ chối</span>';
+        } else if (!j.isApproved) {
             stLabel = '<span class="badge badge-inactive">Chờ duyệt</span>';
         } else {
-            stLabel = j.isActive ? '<span class="badge badge-active">Đã duyệt & Hiện</span>' : '<span class="badge badge-blocked">Đang ẩn</span>';
+            stLabel = j.isActive ? '<span class="badge badge-active">Đã duyệt & Hiện</span>' : '<span class="badge" style="background:#e2e8f0;color:#475569;">Đang ẩn</span>';
         }
 
-        const trClass = !j.isApproved ? 'style="background-color: #fffbeb;"' : '';
+        let trClass = '';
+        if (j.isBlocked) trClass = 'style="background-color: #fef2f2;"';
+        else if (!j.isApproved) trClass = 'style="background-color: #fffbeb;"';
 
         let actionHtml = '';
-        // Nút xem chi tiết
         actionHtml += `<button class="btn-action btn-view" onclick="viewJob('${j.id}')" title="Xem chi tiết"><i class="fa-solid fa-eye"></i></button>`;
 
-        if (!j.isApproved) {
-            actionHtml += `<button class="btn-action btn-toggle" onclick="approveJob('${j.id}')" title="Phê duyệt Tin"><i class="fa-solid fa-check"></i></button>`;
+        if (!j.isBlocked) {
+            if (!j.isApproved) {
+                actionHtml += `<button class="btn-action btn-toggle" onclick="approveJob('${j.id}')" title="Phê duyệt Tin"><i class="fa-solid fa-check"></i></button>`;
+            } else {
+                const iconEye = j.isActive ? 'fa-eye-slash' : 'fa-eye';
+                actionHtml += `<button class="btn-action btn-toggle" onclick="toggleJob('${j.id}')" title="Bật/Tắt Hiển Thị"><i class="fa-solid ${iconEye}"></i></button>`;
+            }
+            actionHtml += `<button class="btn-action btn-delete" onclick="blockJob('${j.id}')" title="Từ chối"><i class="fa-solid fa-ban"></i></button>`;
         } else {
-            const iconEye = j.isActive ? 'fa-eye-slash' : 'fa-eye';
-            actionHtml += `<button class="btn-action btn-toggle" onclick="toggleJob('${j.id}')" title="Bật/Tắt Hiển Thị"><i class="fa-solid ${iconEye}"></i></button>`;
+            actionHtml += `<button class="btn-action btn-toggle" onclick="blockJob('${j.id}')" title="Khôi phục"><i class="fa-solid fa-unlock"></i></button>`;
         }
 
         html += `
             <tr ${trClass}>
                 <td><strong style="color:#0f172a;">${j.title}</strong></td>
                 <td>${j.companyName}</td>
-                <td><span class="badge" style="background:#e0e7ff;color:#4f46e5;">${j.jobType || 'N/A'}</span></td>
                 <td>${stLabel}</td>
-                <td>${dateStr}</td>
-                <td>${expStr}</td>
-                <td>${actionHtml}</td>
+                <td style="white-space:nowrap;">${actionHtml}</td>
             </tr>
         `;
     });
@@ -117,11 +124,19 @@ function viewJob(id) {
     const expStr = new Date(j.expiresAt).toLocaleDateString('vi-VN');
 
     let stLabel = '';
-    if (!j.isApproved) {
+    if (j.isBlocked) {
+        stLabel = '<span class="badge badge-blocked">Bị từ chối</span>';
+    } else if (!j.isApproved) {
         stLabel = '<span class="badge badge-inactive">Chờ duyệt</span>';
     } else {
-        stLabel = j.isActive ? '<span class="badge badge-active">Đã duyệt & Hiện</span>' : '<span class="badge badge-blocked">Đang ẩn</span>';
+        stLabel = j.isActive ? '<span class="badge badge-active">Đã duyệt & Hiện</span>' : '<span class="badge" style="background:#e2e8f0;color:#475569;">Đang ẩn</span>';
     }
+
+    const blockReasonHtml = j.isBlocked && j.blockReason
+        ? `<div style="margin-top:12px;padding:12px 14px;background:#fef2f2;border:1px solid #fecaca;border-radius:8px;font-size:13px;color:#b91c1c;">
+               <i class="fa-solid fa-circle-exclamation" style="margin-right:6px;"></i><strong>Lý do từ chối:</strong> ${j.blockReason}
+           </div>`
+        : '';
 
     body.innerHTML = `
         <!-- Header -->
@@ -131,6 +146,7 @@ function viewJob(id) {
                 ${stLabel}
                 <span class="badge" style="background:#e0e7ff;color:#4f46e5;">${j.jobType || 'N/A'}</span>
             </div>
+            ${blockReasonHtml}
         </div>
 
         <!-- Quick info -->
@@ -221,3 +237,94 @@ async function toggleJob(id) {
         alert("Lỗi kết nối.");
     }
 }
+
+// ── Từ chối / Khôi phục tin ─────────────────────────────────
+let _pendingBlockJobId = null;
+
+function blockJob(id) {
+    const j = allJobs.find(x => x.id === id);
+    if (!j) return;
+
+    if (j.isBlocked) {
+        if (!confirm('Bạn có chắc chắn muốn khôi phục tin tuyển dụng này?')) return;
+        _sendBlockRequest(id, null);
+    } else {
+        _pendingBlockJobId = id;
+        document.getElementById('block-reason-select').value = '';
+        document.getElementById('block-reason-select').style.borderColor = '#e2e8f0';
+        document.getElementById('block-reason-input').value = '';
+        document.getElementById('block-reason-input').style.display = 'none';
+        document.getElementById('block-reason-input').style.borderColor = '#e2e8f0';
+        document.getElementById('modal-block-job').classList.add('open');
+        setTimeout(() => document.getElementById('block-reason-select').focus(), 100);
+    }
+}
+
+function closeBlockModal() {
+    document.getElementById('modal-block-job').classList.remove('open');
+    _pendingBlockJobId = null;
+}
+
+function onBlockReasonChange() {
+    const select = document.getElementById('block-reason-select');
+    const textarea = document.getElementById('block-reason-input');
+    const isOther = select.value === 'other';
+    textarea.style.display = isOther ? 'block' : 'none';
+    if (isOther) textarea.focus();
+    select.style.borderColor = '#e2e8f0';
+    textarea.style.borderColor = '#e2e8f0';
+}
+
+async function confirmBlockJob() {
+    const select = document.getElementById('block-reason-select');
+    const textarea = document.getElementById('block-reason-input');
+
+    let reason = '';
+    if (select.value === 'other') {
+        reason = textarea.value.trim();
+        if (!reason) {
+            textarea.style.borderColor = '#ef4444';
+            textarea.focus();
+            return;
+        }
+    } else {
+        reason = select.value;
+        if (!reason) {
+            select.style.borderColor = '#ef4444';
+            select.focus();
+            return;
+        }
+    }
+
+    const jobId = _pendingBlockJobId;
+    select.style.borderColor = '#e2e8f0';
+    textarea.style.borderColor = '#e2e8f0';
+    closeBlockModal();
+    await _sendBlockRequest(jobId, reason);
+}
+
+async function _sendBlockRequest(id, reason) {
+    try {
+        const response = await apiFetchAuth(`/api/admin/jobs/${id}/toggle-block`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ reason })
+        });
+        if (response.ok) {
+            loadJobs();
+        } else {
+            const error = await response.json();
+            alert('Lỗi: ' + error.message);
+        }
+    } catch(e) {
+        alert('Lỗi kết nối.');
+    }
+}
+
+document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeBlockModal();
+});
+
+document.getElementById('modal-block-job')?.addEventListener('click', e => {
+    if (e.target === document.getElementById('modal-block-job')) closeBlockModal();
+});

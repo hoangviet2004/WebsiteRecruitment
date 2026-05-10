@@ -25,6 +25,8 @@ using TechList.Application.Admin.Interfaces;
 using TechList.Infrastructure.Admin;
 using TechList.Application.SavedJobs.Interfaces;
 using TechList.Infrastructure.SavedJobs;
+using TechList.Application.Notifications.Interfaces;
+using TechList.Infrastructure.Notifications;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 
@@ -74,6 +76,7 @@ public static class DependencyInjection
         services.AddScoped<IInterviewService, InterviewService>();
         services.AddScoped<ISavedJobService, SavedJobService>();
         services.AddScoped<ISupportMessagingService, SupportMessagingService>();
+        services.AddScoped<INotificationService, NotificationService>();
         services.AddMemoryCache();
 
         return services;

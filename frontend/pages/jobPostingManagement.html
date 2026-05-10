@@ -34,6 +34,7 @@
           <option value="pending">Chờ duyệt</option>
           <option value="active">Đã duyệt & Hiện</option>
           <option value="hidden">Đang ẩn</option>
+          <option value="blocked">Bị từ chối</option>
         </select>
       </div>
     </div>
@@ -45,20 +46,49 @@
                     <tr>
                         <th>Tiêu đề</th>
                         <th>Doanh nghiệp</th>
-                        <th>Loại hình</th>
                         <th>Trạng Thái</th>
-                        <th>Ngày Đăng</th>
-                        <th>Hết Hạn</th>
                         <th>Thao tác</th>
                     </tr>
                 </thead>
                 <tbody id="job-table-body">
-                    <tr><td colspan="7" style="text-align: center;">Đang tải dữ liệu...</td></tr>
+                    <tr><td colspan="4" style="text-align: center;">Đang tải dữ liệu...</td></tr>
                 </tbody>
             </table>
         </div>
     </div>
 </main>
+
+<!-- ═══════════════════════════════════════════════════════════
+     MODAL: TỪ CHỐI TIN TUYỂN DỤNG
+     ═══════════════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="modal-block-job">
+  <div class="modal-card" style="max-width:480px;">
+    <div class="modal-header">
+      <h2><i class="fa-solid fa-ban"></i> Từ chối tin tuyển dụng</h2>
+      <button class="modal-close-btn" onclick="closeBlockModal()"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal-body">
+      <p style="margin:0 0 14px;color:#475569;font-size:14px;">Vui lòng chọn lý do từ chối tin tuyển dụng này.</p>
+      <select id="block-reason-select" onchange="onBlockReasonChange()"
+        style="width:100%;padding:10px 12px;border:1px solid #e2e8f0;border-radius:10px;font-size:14px;font-family:inherit;outline:none;box-sizing:border-box;background:#fff;color:#0f172a;">
+        <option value="">-- Chọn lý do --</option>
+        <option value="Nội dung tin tuyển dụng không rõ ràng hoặc thiếu thông tin">Nội dung không rõ ràng hoặc thiếu thông tin</option>
+        <option value="Tin tuyển dụng có dấu hiệu lừa đảo">Có dấu hiệu lừa đảo</option>
+        <option value="Mức lương hoặc quyền lợi không thực tế">Mức lương / quyền lợi không thực tế</option>
+        <option value="Vi phạm quy định của nền tảng">Vi phạm quy định của nền tảng</option>
+        <option value="Tin trùng lặp hoặc spam">Tin trùng lặp hoặc spam</option>
+        <option value="other">Lý do khác...</option>
+      </select>
+      <textarea id="block-reason-input" rows="3"
+        style="display:none;width:100%;margin-top:10px;padding:12px;border:1px solid #e2e8f0;border-radius:10px;font-size:14px;font-family:inherit;resize:vertical;outline:none;box-sizing:border-box;"
+        placeholder="Nhập lý do khác..."></textarea>
+      <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:16px;">
+        <button onclick="closeBlockModal()" style="padding:9px 20px;border:1px solid #e2e8f0;border-radius:8px;background:#fff;color:#475569;font-size:14px;font-weight:600;cursor:pointer;">Hủy</button>
+        <button onclick="confirmBlockJob()" style="padding:9px 20px;border:none;border-radius:8px;background:#ef4444;color:#fff;font-size:14px;font-weight:600;cursor:pointer;"><i class="fa-solid fa-ban" style="margin-right:6px;"></i>Xác nhận từ chối</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- ═══════════════════════════════════════════════════════════
      MODAL: CHI TIẾT TIN TUYỂN DỤNG
