@@ -207,16 +207,10 @@ function renderTable(users, isEmpty) {
             : '<span class="badge badge-blocked">Bị chặn</span>';
 
         // Role cell
-        let roleHtml = '';
-        if (isSelf) {
-            roleHtml = `<span class="badge badge-active" style="background:#6366f1;color:#fff;">${roleLabels[u.role] || u.role} (Bạn)</span>`;
-        } else {
-            roleHtml = `<select class="role-select" onchange="changeRole('${u.id}', this.value)">
-                ${['Recruiter','Candidate'].map(r =>
-                    `<option value="${r}" ${u.role === r ? 'selected' : ''}>${roleLabels[r]}</option>`
-                ).join('')}
-            </select>`;
-        }
+        const roleColor = { Admin: '#6366f1', Recruiter: '#3b82f6', Candidate: '#10b981' };
+        const roleHtml = `<span class="badge" style="background:${roleColor[u.role] || '#64748b'}20;color:${roleColor[u.role] || '#64748b'};font-weight:600;">
+            ${roleLabels[u.role] || u.role}${isSelf ? ' (Bạn)' : ''}
+        </span>`;
 
         // Provider icon
         let providerIcon = '<i class="fa-solid fa-envelope text-primary"></i>';
