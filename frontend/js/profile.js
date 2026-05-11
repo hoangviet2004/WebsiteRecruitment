@@ -558,19 +558,45 @@ function showCurrentCv(url, filename) {
             };
         }
 
-        // Link tải (Download) - Force attachment if cloudinary
+        // Link tải (Download) — lấy signed download URL từ backend
         const download = document.getElementById('pf-cv-download');
         if (download) {
-            let downloadUrl = url;
-            if(url.includes('cloudinary.com') && url.includes('/upload/')) {
-                // Hỗ trợ cả /image/upload/ và /raw/upload/
-                downloadUrl = url.replace('/upload/', '/upload/fl_attachment/');
-            }
-            download.href = downloadUrl;
+            download.removeAttribute('href');
+            download.onclick = async (e) => {
+                e.preventDefault();
+                try {
+                    const token = sessionStorage.getItem('token');
+                    const res = await fetch(`${API_URL}/api/profile/cv/download`, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    const data = await res.json();
+                    if (data.data?.url) {
+                        const a = document.createElement('a');
+                        a.href = data.data.url;
+                        a.download = document.getElementById('pf-cv-filename')?.textContent || 'CV.pdf';
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                    } else {
+                        showToast('Không thể lấy link tải CV', 'error');
+                    }
+                } catch {
+                    showToast('Lỗi kết nối khi tải CV', 'error');
+                }
+            };
         }
 
         const fn = document.getElementById('pf-cv-filename');
-        if (fn) fn.textContent = filename || 'CV_Cua_Toi.pdf';
+        if (fn) {
+            let name = filename;
+            if (!name && url) {
+                try {
+                    const parts = new URL(url).pathname.split('/');
+                    name = decodeURIComponent(parts[parts.length - 1]) || 'CV.pdf';
+                } catch { name = 'CV.pdf'; }
+            }
+            fn.textContent = name || 'CV.pdf';
+        }
         
         const meta = document.getElementById('pf-cv-updated');
         if (meta) meta.textContent = 'Cập nhật ' + new Date().toLocaleDateString('vi-VN');

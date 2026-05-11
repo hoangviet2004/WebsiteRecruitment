@@ -54,6 +54,18 @@ public sealed class CloudinaryCvStorageService : ICvStorageService
             resourceType: "raw");
     }
 
+    public string GetSignedDownloadUrl(string publicId)
+    {
+        var expires = DateTimeOffset.UtcNow.AddHours(1).ToUnixTimeSeconds();
+        return _cloudinary.DownloadPrivate(
+            publicId,
+            attachment:   true,
+            format:       "pdf",
+            type:         "upload",
+            expiresAt:    expires,
+            resourceType: "raw");
+    }
+
     public async Task DeleteAsync(string publicId, CancellationToken ct)
     {
         if (string.IsNullOrWhiteSpace(publicId)) return;

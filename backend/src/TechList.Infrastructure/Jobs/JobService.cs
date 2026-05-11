@@ -203,6 +203,9 @@ public sealed class JobService : IJobService
         {
             job.FeaturedLevel = null;
         }
+        job.IsApproved = false;
+        job.IsBlocked = false;
+        job.BlockReason = null;
         job.UpdatedAt = DateTime.UtcNow;
 
         await _db.SaveChangesAsync(ct);

@@ -11,5 +11,6 @@ public interface IProfileService
     Task<ProfileDto> UpdateCvAsync(string userId, Stream content, string fileName, CancellationToken ct);
     Task<string> GetCvViewUrlAsync(string userId, CancellationToken ct);
     Task<string> GetCvViewUrlByUserIdAsync(string candidateId, CancellationToken ct);
+    Task<string> GetCvDownloadUrlAsync(string userId, CancellationToken ct);
 }
 

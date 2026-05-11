@@ -133,6 +133,18 @@ public sealed class ProfileService : IProfileService
         return _cvStorage.GetSignedViewUrl(profile.CvPublicId);
     }
 
+    public async Task<string> GetCvDownloadUrlAsync(string userId, CancellationToken ct)
+    {
+        var profile = await _db.UserProfiles.AsNoTracking()
+            .SingleOrDefaultAsync(x => x.UserId == userId, ct)
+            ?? throw new InvalidOperationException("Profile not found");
+
+        if (string.IsNullOrWhiteSpace(profile.CvPublicId))
+            throw new InvalidOperationException("Chưa có CV");
+
+        return _cvStorage.GetSignedDownloadUrl(profile.CvPublicId);
+    }
+
     private static ProfileDto ToDto(UserProfile profile) =>
         new(profile.UserId, profile.DisplayName, profile.Bio, profile.AvatarUrl, profile.CvUrl,
             profile.Skills, profile.Experience, profile.Education, profile.SocialLinks,
