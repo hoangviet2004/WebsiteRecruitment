@@ -101,7 +101,12 @@ body {
     border-radius: 16px;
     box-shadow: 0 4px 15px rgba(0,0,0,0.03);
     border: 1px solid var(--border-color);
-    overflow: hidden;
+    overflow: visible;
+}
+
+.data-card .table-responsive {
+    overflow-x: auto;
+    border-radius: 16px;
 }
 
 .table-responsive {
