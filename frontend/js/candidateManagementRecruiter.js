@@ -298,6 +298,18 @@ function openCandModal(appId) {
             <i class="fa-solid ${a.icon}"></i> ${a.label}
         </button>`).join('');
 
+    // Nút đánh giá CV bằng AI
+    const aiBtn = document.getElementById('cand-modal-ai-btn');
+    if (app.cvUrl) {
+        aiBtn.style.display = 'inline-flex';
+        aiBtn.onclick = () => evaluateCvWithAI(app.id);
+    } else {
+        aiBtn.style.display = 'none';
+    }
+
+    // Reset kết quả đánh giá cũ
+    document.getElementById('cand-ai-result').style.display = 'none';
+
     document.getElementById('cand-modal').classList.add('show');
 }
 
@@ -481,6 +493,58 @@ async function executeQuickReject() {
         ? `Đã từ chối ${success} ứng viên. ${failed} trường hợp xảy ra lỗi.`
         : `Đã từ chối thành công ${success} ứng viên.`;
     alert(msg);
+}
+
+// ── AI Đánh giá CV ──────────────────────────────────────────
+async function evaluateCvWithAI(appId) {
+    const btn = document.getElementById('cand-modal-ai-btn');
+    const resultBox = document.getElementById('cand-ai-result');
+
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang phân tích...';
+    resultBox.style.display = 'none';
+
+    try {
+        const res = await apiFetchAuth(`/api/cv-evaluation/${appId}`, { method: 'POST' });
+        const data = await res.json();
+
+        if (!res.ok || !data.success) throw new Error(data.message || 'Lỗi đánh giá CV');
+
+        const r = data.data;
+        const scoreColor = r.score >= 75 ? '#10b981' : r.score >= 50 ? '#f59e0b' : '#ef4444';
+        const recColor   = r.recommendation === 'Nên phỏng vấn' ? '#10b981'
+                         : r.recommendation === 'Cân nhắc thêm' ? '#f59e0b' : '#ef4444';
+
+        resultBox.innerHTML = `
+            <div class="ai-result-header">
+                <i class="fa-solid fa-robot" style="color:#8b5cf6;font-size:18px;"></i>
+                <span>Đánh giá bởi AI</span>
+                <span class="ai-score-badge" style="background:${scoreColor};">${r.score}/100</span>
+            </div>
+            <div class="ai-recommendation" style="color:${recColor};">
+                <i class="fa-solid fa-circle-check"></i> ${escHtml(r.recommendation)}
+            </div>
+            <p class="ai-summary">${escHtml(r.summary)}</p>
+            <div class="ai-columns">
+                <div class="ai-col">
+                    <div class="ai-col-title strengths"><i class="fa-solid fa-thumbs-up"></i> Điểm mạnh</div>
+                    <ul>${r.strengths.map(s => `<li>${escHtml(s)}</li>`).join('')}</ul>
+                </div>
+                <div class="ai-col">
+                    <div class="ai-col-title weaknesses"><i class="fa-solid fa-thumbs-down"></i> Điểm yếu</div>
+                    <ul>${r.weaknesses.map(w => `<li>${escHtml(w)}</li>`).join('')}</ul>
+                </div>
+            </div>
+            <div class="ai-details">${escHtml(r.details)}</div>`;
+
+        resultBox.style.display = 'block';
+    } catch (e) {
+        resultBox.innerHTML = `<div style="color:#ef4444;padding:12px;"><i class="fa-solid fa-circle-exclamation"></i> ${escHtml(e.message)}</div>`;
+        resultBox.style.display = 'block';
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-robot"></i> Đánh giá CV bằng AI';
+    }
 }
 
 // ── Utility ─────────────────────────────────────────────────

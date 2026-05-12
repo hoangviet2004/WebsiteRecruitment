@@ -640,8 +640,12 @@
             <div class="modal-body" id="cand-modal-body">
                 <!-- Nội dung được điền bằng JS -->
             </div>
+            <div id="cand-ai-result" style="display:none; margin:0 24px 16px; border-radius:10px; border:1.5px solid #e2e8f0; overflow:hidden;"></div>
             <div class="modal-footer">
                 <button class="btn-secondary" onclick="closeCandModal()">Đóng</button>
+                <button id="cand-modal-ai-btn" class="btn-ai" style="display:none;" onclick="">
+                    <i class="fa-solid fa-robot"></i> Đánh giá CV bằng AI
+                </button>
                 <div id="cand-modal-status-actions" style="display:flex; gap:8px; flex-wrap:wrap;"></div>
             </div>
         </div>

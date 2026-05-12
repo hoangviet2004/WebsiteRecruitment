@@ -27,6 +27,8 @@ using TechList.Application.SavedJobs.Interfaces;
 using TechList.Infrastructure.SavedJobs;
 using TechList.Application.Notifications.Interfaces;
 using TechList.Infrastructure.Notifications;
+using TechList.Application.CvEvaluation.Interfaces;
+using TechList.Infrastructure.CvEvaluation;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 
@@ -56,6 +58,7 @@ public static class DependencyInjection
 
         services.Configure<JwtSettings>(config.GetSection(JwtSettings.SectionName));
         services.Configure<CloudinarySettings>(config.GetSection(CloudinarySettings.SectionName));
+        services.Configure<AnthropicSettings>(config.GetSection("Gemini"));
 
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<ITokenService, JwtTokenService>();
@@ -77,6 +80,7 @@ public static class DependencyInjection
         services.AddScoped<ISavedJobService, SavedJobService>();
         services.AddScoped<ISupportMessagingService, SupportMessagingService>();
         services.AddScoped<INotificationService, NotificationService>();
+        services.AddScoped<ICvEvaluationService, CvEvaluationService>();
         services.AddMemoryCache();
 
         return services;
