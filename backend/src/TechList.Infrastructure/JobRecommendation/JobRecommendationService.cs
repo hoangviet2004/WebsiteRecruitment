@@ -61,14 +61,14 @@ public sealed class JobRecommendationService : IJobRecommendationService
         if (jobs.Count == 0)
             return new JobRecommendationResult([]);
 
-        // Format chi tiết từng job để AI so sánh được chính xác
-        var jobList = string.Join("\n\n", jobs.Select((j, i) =>
+        // Format compact 1 dòng/job để tiết kiệm token
+        var jobList = string.Join("\n", jobs.Select(j =>
         {
-            var req = j.Requirements.Length > 300 ? j.Requirements[..300] : j.Requirements;
-            return $"[{i + 1}]\nID: {j.Id}\nVị trí: {j.Title} — {j.Company.Name}\n"
-                 + $"Kinh nghiệm yêu cầu: {j.Experience ?? "Không yêu cầu cụ thể"}\n"
-                 + $"Học vấn yêu cầu: {j.Education ?? "Không yêu cầu cụ thể"}\n"
-                 + $"Yêu cầu: {req}";
+            var req = j.Requirements.Length > 120 ? j.Requirements[..120] : j.Requirements;
+            // Làm sạch ký tự xuống dòng trong requirements để giữ 1 dòng/job
+            req = req.Replace("\n", " ").Replace("\r", " ");
+            var exp = j.Experience ?? "-";
+            return $"{j.Id}|{j.Title}|{j.Company.Name}|{exp}|{req}";
         }));
 
         var prompt = BuildPrompt(cvText, profile.Skills, profile.Experience, profile.Education, jobList);
@@ -90,50 +90,29 @@ public sealed class JobRecommendationService : IJobRecommendationService
             sb.AppendLine(page.Text);
 
         var text = sb.ToString().Trim();
-        return text.Length > 6000 ? text[..6000] : text;
+        // Giới hạn 800 ký tự — phần đầu CV chứa thông tin quan trọng nhất
+        return text.Length > 800 ? text[..800] : text;
     }
 
     private static string BuildPrompt(
         string cvText, string? skills, string? experience, string? education, string jobList)
     {
-        var cvSection = cvText.Length > 50 ? cvText : "(Không có CV — chỉ dùng thông tin hồ sơ bên dưới)";
+        var cv = cvText.Length > 50 ? cvText : "(trống)";
 
         return $$"""
-            Bạn là hệ thống gợi ý việc làm. Hãy phân tích hồ sơ ứng viên và so sánh với từng vị trí tuyển dụng để tìm ra các vị trí PHÙ HỢP NHẤT.
+            CANDIDATE:
+            CV: {{cv}}
+            Skills: {{skills ?? "-"}}
+            Experience: {{experience ?? "-"}}
+            Education: {{education ?? "-"}}
 
-            ═══ HỒ SƠ ỨNG VIÊN ═══
-            NỘI DUNG CV:
-            {{cvSection}}
-
-            KỸ NĂNG (từ hồ sơ): {{skills ?? "Không có"}}
-            KINH NGHIỆM (từ hồ sơ): {{experience ?? "Không có"}}
-            HỌC VẤN (từ hồ sơ): {{education ?? "Không có"}}
-
-            ═══ DANH SÁCH VIỆC LÀM ═══
+            JOBS (format: ID|Title|Company|RequiredExp|Requirements):
             {{jobList}}
 
-            ═══ HƯỚNG DẪN CHẤM ĐIỂM ═══
-            Với MỖI vị trí, hãy đối chiếu cụ thể:
-            1. Kỹ năng trong CV/hồ sơ có khớp với yêu cầu kỹ năng không? (trọng số 50%)
-            2. Số năm kinh nghiệm có đáp ứng không? (trọng số 30%)
-            3. Học vấn có phù hợp không? (trọng số 20%)
-
-            Quy tắc điểm:
-            - Chỉ chọn vị trí có điểm >= 40
-            - Không gợi ý vị trí khi không có bằng chứng rõ ràng từ CV/hồ sơ
-            - Nếu không có vị trí nào đủ điều kiện thì trả về recommendations rỗng []
-            - Tối đa 5 vị trí, sắp xếp từ cao xuống thấp
-
-            Chỉ trả về JSON hợp lệ, không thêm text nào khác:
-            {
-              "recommendations": [
-                {
-                  "jobId": "<UUID của job trong danh sách>",
-                  "score": <40-100>,
-                  "reason": "<1 câu cụ thể: nêu rõ kỹ năng/kinh nghiệm nào trong hồ sơ khớp với yêu cầu job>"
-                }
-              ]
-            }
+            TASK: Match candidate to jobs. Score each job 0-100 based on skills(50%), experience(30%), education(20%).
+            Rules: only include score>=40, max 5 results, sort descending. Return empty array if no match.
+            Output JSON only:
+            {"recommendations":[{"jobId":"<uuid>","score":<40-100>,"reason":"<one sentence in Vietnamese explaining the match>"}]}
             """;
     }
 
