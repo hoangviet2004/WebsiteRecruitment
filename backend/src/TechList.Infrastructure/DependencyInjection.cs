@@ -29,6 +29,8 @@ using TechList.Application.Notifications.Interfaces;
 using TechList.Infrastructure.Notifications;
 using TechList.Application.CvEvaluation.Interfaces;
 using TechList.Infrastructure.CvEvaluation;
+using TechList.Application.JobRecommendation.Interfaces;
+using TechList.Infrastructure.JobRecommendation;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 
@@ -81,6 +83,7 @@ public static class DependencyInjection
         services.AddScoped<ISupportMessagingService, SupportMessagingService>();
         services.AddScoped<INotificationService, NotificationService>();
         services.AddScoped<ICvEvaluationService, CvEvaluationService>();
+        services.AddScoped<IJobRecommendationService, JobRecommendationService>();
         services.AddMemoryCache();
 
         return services;

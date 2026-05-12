@@ -301,43 +301,126 @@ using (var scope = app.Services.CreateScope())
                         });
                     }
 
-                    // Tự động đăng 2 tin tuyển dụng mẫu nếu chưa có việc làm nào
-                    await db.SaveChangesAsync(); // Lưu Company trước để lấy ID
-                    var jobCount = await db.JobPosts.CountAsync(j => j.CompanyId == company.Id);
-                    if (jobCount < 2)
-                    {
-                        db.JobPosts.Add(new JobPost
-                        {
-                            CompanyId = company.Id,
-                            Title = $"Kỹ sư {displayName} (Senior Level)",
-                            Description = $"Cơ hội gia nhập đội ngũ chuyên gia tại {compName} để tham gia vào các dự án chiến lược. {compDesc}",
-                            Requirements = "• Ít nhất 3-5 năm kinh nghiệm thực chiến.\n• Tư duy hệ thống và khả năng giải quyết vấn đề phức tạp.\n• Tiếng Anh giao tiếp tốt là một lợi thế.",
-                            Benefits = "• Lương tháng 13 + Thưởng hiệu quả công việc hàng năm.\n• Bảo hiểm sức khỏe cao cấp cho nhân viên và người thân.\n• Review lương 2 lần/năm.",
-                            MinSalary = 2000,
-                            MaxSalary = 4500,
-                            Location = compAddr,
-                            JobType = "Full-time",
-                            Experience = "3-5 năm",
-                            Education = "Cử nhân CNTT",
-                            ApplicationLimit = 50,
-                            ExpiresAt = DateTime.UtcNow.AddDays(30)
-                        });
+                    // ── Nội dung tin tuyển dụng chuẩn ──────────────────────
+                    const string seniorDesc =
+                        "• Thiết kế, phát triển và triển khai các giải pháp phần mềm phức tạp, có khả năng mở rộng cao.\n" +
+                        "• Dẫn dắt nhóm kỹ thuật, thực hiện code review và mentor cho các thành viên junior.\n" +
+                        "• Tham gia vào các quyết định kiến trúc hệ thống và lựa chọn công nghệ phù hợp với yêu cầu dự án.\n" +
+                        "• Tối ưu hóa hiệu suất hệ thống, xử lý bottleneck và đảm bảo khả năng chịu tải cao.\n" +
+                        "• Phối hợp với Product Owner và stakeholder để chuyển hóa yêu cầu kinh doanh thành giải pháp kỹ thuật.";
 
+                    const string seniorReqs =
+                        "• Có ít nhất 3-5 năm kinh nghiệm phát triển phần mềm thực tế.\n" +
+                        "• Thành thạo ít nhất một ngôn ngữ backend: Java/Spring Boot, Node.js, .NET hoặc Python.\n" +
+                        "• Kinh nghiệm với kiến trúc Microservices, RESTful APIs.\n" +
+                        "• Hiểu biết sâu về cơ sở dữ liệu SQL và NoSQL (PostgreSQL, MongoDB, Redis).\n" +
+                        "• Kinh nghiệm với Docker, Kubernetes, CI/CD pipeline.\n" +
+                        "• Kỹ năng giao tiếp tốt, có khả năng làm việc trong môi trường Agile/Scrum.\n" +
+                        "• Kinh nghiệm với Cloud platforms (AWS, GCP, Azure) là lợi thế.\n" +
+                        "• Tư duy phân tích tốt, chủ động và chịu trách nhiệm cao.";
+
+                    const string seniorBenefits =
+                        "• Mức lương cạnh tranh, review 2 lần/năm theo hiệu suất.\n" +
+                        "• Bảo hiểm sức khỏe cao cấp cho nhân viên và người thân.\n" +
+                        "• Lộ trình thăng tiến rõ ràng lên Tech Lead / Principal Engineer.\n" +
+                        "• Cơ hội tham gia dự án quốc tế, làm việc với chuyên gia nước ngoài.\n" +
+                        "• Budget học tập hàng năm để tham gia các khóa học và hội nghị công nghệ.";
+
+                    const string juniorDesc =
+                        "• Phối hợp với đội ngũ phát triển để thiết kế, phát triển và triển khai các giải pháp phần mềm chất lượng cao.\n" +
+                        "• Đóng góp vào các tác vụ phát triển fullstack, đảm bảo tích hợp và chức năng liền mạch.\n" +
+                        "• Kiểm tra và khắc phục lỗi (debug) để duy trì hiệu suất tối ưu và trải nghiệm người dùng.\n" +
+                        "• Cập nhật các công nghệ mới và các phương pháp hay nhất (best practices) trong phát triển phần mềm.\n" +
+                        "• Giao tiếp hiệu quả với các thành viên trong nhóm để đảm bảo đáp ứng các yêu cầu của dự án.";
+
+                    const string juniorReqs =
+                        "• Đang là sinh viên năm cuối hoặc mới tốt nghiệp ngành CNTT tại các trường Đại học.\n" +
+                        "• Kỹ năng giao tiếp tiếng Anh tốt (cả nói và viết).\n" +
+                        "• Có thể làm việc fulltime trong suốt thời gian thực tập.\n" +
+                        "• Kiến thức vững chắc về một trong hai framework: Spring Boot hoặc Node.js.\n" +
+                        "• Có hiểu biết về RESTful APIs, OOP (Lập trình hướng đối tượng) và Design Patterns.\n" +
+                        "• Có kiến thức và kinh nghiệm về thiết kế cơ sở dữ liệu SQL, Git, CI/CD là một lợi thế.\n" +
+                        "• Chủ động, có trách nhiệm và ham học hỏi.\n" +
+                        "• Có khả năng làm việc độc lập cũng như làm việc nhóm.";
+
+                    const string juniorBenefits =
+                        "• Cơ hội trở thành nhân viên chính thức sau kỳ thực tập (3 tháng thực tập).\n" +
+                        "• Có lộ trình thăng tiến rõ ràng.\n" +
+                        "• Cơ hội tham gia các dự án quốc tế và làm việc với khách hàng nước ngoài.\n" +
+                        "• Được dẫn dắt, đào tạo bởi các lập trình viên dày dặn kinh nghiệm (senior).\n" +
+                        "• Môi trường làm việc linh hoạt và hỗ trợ lẫn nhau.";
+
+                    // ── Cập nhật hoặc thêm mới tin tuyển dụng ──────────────
+                    await db.SaveChangesAsync(); // Lưu Company trước để lấy ID
+                    var existingJobs = await db.JobPosts
+                        .Where(j => j.CompanyId == company.Id)
+                        .ToListAsync();
+
+                    if (existingJobs.Count >= 2)
+                    {
+                        // Cập nhật nội dung tin đã có
+                        var senior = existingJobs.FirstOrDefault(j => j.Title.Contains("Senior"));
+                        var junior = existingJobs.FirstOrDefault(j => j.Title.Contains("Middle") || j.Title.Contains("Junior"));
+
+                        if (senior != null)
+                        {
+                            senior.Description  = seniorDesc;
+                            senior.Requirements = seniorReqs;
+                            senior.Benefits     = seniorBenefits;
+                            senior.Experience   = "3-5 năm";
+                            senior.Education    = "Cử nhân CNTT";
+                            senior.MinSalary    = 2000;
+                            senior.MaxSalary    = 4500;
+                            senior.JobType      = "Full-time";
+                            senior.UpdatedAt    = DateTime.UtcNow;
+                        }
+                        if (junior != null)
+                        {
+                            junior.Description  = juniorDesc;
+                            junior.Requirements = juniorReqs;
+                            junior.Benefits     = juniorBenefits;
+                            junior.Experience   = "Dưới 1 năm";
+                            junior.Education    = "Đại học";
+                            junior.MinSalary    = 1000;
+                            junior.MaxSalary    = 1800;
+                            junior.JobType      = "Full-time";
+                            junior.UpdatedAt    = DateTime.UtcNow;
+                        }
+                    }
+                    else
+                    {
+                        // Thêm mới nếu chưa có
                         db.JobPosts.Add(new JobPost
                         {
-                            CompanyId = company.Id,
-                            Title = $"Chuyên viên {displayName} (Middle/Junior)",
-                            Description = $"Chúng tôi tìm kiếm những cộng sự trẻ trung, nhiệt huyết để cùng bứt phá tại môi trường năng động của {compName}.",
-                            Requirements = "• Có kiến thức nền tảng vững chắc về quy trình phát triển phần mềm.\n• Ham học hỏi, sẵn sàng tiếp cận các công nghệ mới.\n• Kỹ năng làm việc nhóm tốt.",
-                            Benefits = "• Lộ trình thăng tiến rõ ràng (Career Path).\n• Tài trợ các khóa học chứng chỉ quốc tế.\n• Company trip, teambuilding hàng quý.",
-                            MinSalary = 1000,
-                            MaxSalary = 1800,
-                            Location = compAddr,
-                            JobType = "Hybrid",
-                            Experience = "1-2 năm",
-                            Education = "Đại học",
+                            CompanyId        = company.Id,
+                            Title            = $"Kỹ sư phần mềm {displayName} (Senior Level)",
+                            Description      = seniorDesc,
+                            Requirements     = seniorReqs,
+                            Benefits         = seniorBenefits,
+                            MinSalary        = 2000,
+                            MaxSalary        = 4500,
+                            Location         = compAddr,
+                            JobType          = "Full-time",
+                            Experience       = "3-5 năm",
+                            Education        = "Cử nhân CNTT",
+                            ApplicationLimit = 50,
+                            ExpiresAt        = DateTime.UtcNow.AddDays(30)
+                        });
+                        db.JobPosts.Add(new JobPost
+                        {
+                            CompanyId        = company.Id,
+                            Title            = $"Thực tập sinh / Junior Developer tại {displayName}",
+                            Description      = juniorDesc,
+                            Requirements     = juniorReqs,
+                            Benefits         = juniorBenefits,
+                            MinSalary        = 1000,
+                            MaxSalary        = 1800,
+                            Location         = compAddr,
+                            JobType          = "Full-time",
+                            Experience       = "Dưới 1 năm",
+                            Education        = "Đại học",
                             ApplicationLimit = 100,
-                            ExpiresAt = DateTime.UtcNow.AddDays(45)
+                            ExpiresAt        = DateTime.UtcNow.AddDays(45)
                         });
                     }
 

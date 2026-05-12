@@ -120,7 +120,6 @@
         <!-- Job Results -->
         <main class="jobs-content">
             <div class="jobs-content-header">
-
                 <div class="sort-by">
                     <label>Sắp xếp theo:</label>
                     <select id="sort-order" onchange="applyFilters()">
@@ -129,6 +128,23 @@
                         <option value="salary_desc">Lương cao nhất</option>
                     </select>
                 </div>
+                <button id="ai-recommend-btn" class="btn-ai-recommend" onclick="loadAiRecommendations()" style="display:none;">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i> Gợi ý việc phù hợp với tôi
+                </button>
+            </div>
+
+            <!-- AI Recommendation Panel -->
+            <div id="ai-recommend-panel" style="display:none;">
+                <div class="ai-panel-header">
+                    <div class="ai-panel-title">
+                        <i class="fa-solid fa-robot"></i>
+                        <span>Gợi ý AI dành cho bạn</span>
+                    </div>
+                    <button class="ai-panel-close" onclick="closeAiPanel()">
+                        <i class="fa-solid fa-xmark"></i> Đóng
+                    </button>
+                </div>
+                <div id="ai-recommend-list" class="ai-panel-list"></div>
             </div>
 
             <div class="jobs-list" id="jobs-list-container">
@@ -148,6 +164,16 @@
     <script src="../js/api.js"></script>
     <script src="../js/navbar.js"></script>
     <script src="../js/jobs.js"></script>
+    <script>
+        // Chỉ hiện nút gợi ý AI nếu là Candidate đã đăng nhập
+        document.addEventListener('DOMContentLoaded', () => {
+            const token = sessionStorage.getItem('token');
+            const role  = (sessionStorage.getItem('role') || '').toLowerCase();
+            if (token && role === 'candidate') {
+                document.getElementById('ai-recommend-btn').style.display = 'flex';
+            }
+        });
+    </script>
 </body>
 
 </html>

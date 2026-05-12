@@ -37,6 +37,7 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<InterviewSchedule> InterviewSchedules => Set<InterviewSchedule>();
     public DbSet<SupportMessage> SupportMessages => Set<SupportMessage>();
     public DbSet<Notification> Notifications => Set<Notification>();
+    public DbSet<CvEvaluationRecord> CvEvaluationRecords => Set<CvEvaluationRecord>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -360,6 +361,24 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
             e.Property(x => x.SenderId).HasMaxLength(450).IsRequired();
             e.Property(x => x.Content).HasMaxLength(4000).IsRequired();
             e.HasIndex(x => new { x.UserId, x.SentAt });
+        });
+
+        // ── CvEvaluationRecord ──────────────────────────────
+        builder.Entity<CvEvaluationRecord>(e =>
+        {
+            e.ToTable("CvEvaluationRecords");
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Summary).HasMaxLength(1000);
+            e.Property(x => x.Strengths).HasMaxLength(4000);
+            e.Property(x => x.Weaknesses).HasMaxLength(4000);
+            e.Property(x => x.Recommendation).HasMaxLength(100);
+            e.Property(x => x.Details).HasMaxLength(4000);
+            e.HasIndex(x => x.ApplicationId).IsUnique();
+
+            e.HasOne(x => x.Application)
+             .WithMany()
+             .HasForeignKey(x => x.ApplicationId)
+             .OnDelete(DeleteBehavior.Cascade);
         });
     }
 }
