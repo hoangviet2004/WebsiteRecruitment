@@ -25,13 +25,14 @@ public sealed class CloudinaryCvStorageService : ICvStorageService
 
     public async Task<(string Url, string PublicId)> UploadCvAsync(Stream content, string fileName, CancellationToken ct)
     {
-        var upload = new ImageUploadParams
+        var upload = new RawUploadParams
         {
             File = new FileDescription(fileName, content),
             Folder = "cvs",
             UseFilename = true,
             UniqueFilename = true,
-            Overwrite = false
+            Overwrite = false,
+            AccessMode = "public"
         };
 
         var result = await Task.Run(() => _cloudinary.Upload(upload), ct);
@@ -41,10 +42,34 @@ public sealed class CloudinaryCvStorageService : ICvStorageService
         return (result.SecureUrl.ToString(), result.PublicId);
     }
 
+    public string GetSignedViewUrl(string publicId)
+    {
+        var expires = DateTimeOffset.UtcNow.AddHours(1).ToUnixTimeSeconds();
+        return _cloudinary.DownloadPrivate(
+            publicId,
+            attachment:   false,
+            format:       "pdf",
+            type:         "upload",
+            expiresAt:    expires,
+            resourceType: "raw");
+    }
+
+    public string GetSignedDownloadUrl(string publicId)
+    {
+        var expires = DateTimeOffset.UtcNow.AddHours(1).ToUnixTimeSeconds();
+        return _cloudinary.DownloadPrivate(
+            publicId,
+            attachment:   true,
+            format:       "pdf",
+            type:         "upload",
+            expiresAt:    expires,
+            resourceType: "raw");
+    }
+
     public async Task DeleteAsync(string publicId, CancellationToken ct)
     {
         if (string.IsNullOrWhiteSpace(publicId)) return;
         ct.ThrowIfCancellationRequested();
-        await _cloudinary.DestroyAsync(new DeletionParams(publicId) { ResourceType = ResourceType.Image });
+        await _cloudinary.DestroyAsync(new DeletionParams(publicId) { ResourceType = ResourceType.Raw });
     }
 }

@@ -69,6 +69,14 @@ public sealed class CandidateMessagingController : ControllerBase
         return Ok(ApiResponse<RecruiterPanelDto>.Ok(result));
     }
 
+    // GET /api/candidate/messages/interviews
+    [HttpGet("interviews")]
+    public async Task<ActionResult<ApiResponse<List<CandidateInterviewListDto>>>> GetAllInterviews(CancellationToken ct)
+    {
+        var result = await _svc.GetAllInterviewsAsync(Me, ct);
+        return Ok(ApiResponse<List<CandidateInterviewListDto>>.Ok(result));
+    }
+
     // POST /api/candidate/messages/interviews/{scheduleId}/respond
     [HttpPost("interviews/{scheduleId:guid}/respond")]
     public async Task<ActionResult<ApiResponse<InterviewCardDto>>> RespondInterview(

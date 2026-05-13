@@ -1,21 +1,22 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace TechList.Domain.Entities;
 
 public class JobPost
 {
     public Guid Id { get; set; } = Guid.NewGuid();
-    
-    // Which company this job belongs to
+
     public Guid CompanyId { get; set; }
 
-    public string Title { get; set; } = string.Empty;
-    public string Description { get; set; } = string.Empty;
-    public string Requirements { get; set; } = string.Empty;
-    public string Benefits { get; set; } = string.Empty;
+    [MaxLength(100)] public string Title { get; set; } = string.Empty;
+    [MaxLength(3000)] public string Description { get; set; } = string.Empty;
+    [MaxLength(3000)] public string Requirements { get; set; } = string.Empty;
+    [MaxLength(2000)] public string Benefits { get; set; } = string.Empty;
 
     public decimal? MinSalary { get; set; }
     public decimal? MaxSalary { get; set; }
-    
-    public string Location { get; set; } = string.Empty;
+
+    [MaxLength(100)] public string Location { get; set; } = string.Empty;
     
     // e.g. Full-time, Part-time, Remote, Hybrid
     public string JobType { get; set; } = default!;
@@ -29,6 +30,8 @@ public class JobPost
     public DateTime ExpiresAt { get; set; } 
     public bool IsActive { get; set; } = true;
     public bool IsApproved { get; set; } = true;
+    public bool IsBlocked { get; set; } = false;
+    public string? BlockReason { get; set; }
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;

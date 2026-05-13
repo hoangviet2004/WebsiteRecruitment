@@ -27,5 +27,6 @@ public interface IInterviewService
 {
     Task<InterviewScheduleDto> ScheduleAsync(string recruiterId, ScheduleInterviewRequest request, CancellationToken ct);
     Task<List<InterviewScheduleDto>> GetUpcomingAsync(string recruiterId, Guid companyId, CancellationToken ct);
+    Task<List<InterviewScheduleDto>> GetAllByCompanyAsync(string recruiterId, Guid companyId, CancellationToken ct);
     Task<InterviewScheduleDto> CancelAsync(string recruiterId, Guid scheduleId, CancellationToken ct);
 }

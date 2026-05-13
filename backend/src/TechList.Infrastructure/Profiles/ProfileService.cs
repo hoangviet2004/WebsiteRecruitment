@@ -109,6 +109,42 @@ public sealed class ProfileService : IProfileService
         return ToDto(profile);
     }
 
+    public async Task<string> GetCvViewUrlByUserIdAsync(string candidateId, CancellationToken ct)
+    {
+        var profile = await _db.UserProfiles.AsNoTracking()
+            .SingleOrDefaultAsync(x => x.UserId == candidateId && x.IsApproved, ct)
+            ?? throw new InvalidOperationException("Không tìm thấy hồ sơ ứng viên");
+
+        if (string.IsNullOrWhiteSpace(profile.CvPublicId))
+            throw new InvalidOperationException("Ứng viên chưa có CV");
+
+        return _cvStorage.GetSignedViewUrl(profile.CvPublicId);
+    }
+
+    public async Task<string> GetCvViewUrlAsync(string userId, CancellationToken ct)
+    {
+        var profile = await _db.UserProfiles.AsNoTracking()
+            .SingleOrDefaultAsync(x => x.UserId == userId, ct)
+            ?? throw new InvalidOperationException("Profile not found");
+
+        if (string.IsNullOrWhiteSpace(profile.CvPublicId))
+            throw new InvalidOperationException("Chưa có CV");
+
+        return _cvStorage.GetSignedViewUrl(profile.CvPublicId);
+    }
+
+    public async Task<string> GetCvDownloadUrlAsync(string userId, CancellationToken ct)
+    {
+        var profile = await _db.UserProfiles.AsNoTracking()
+            .SingleOrDefaultAsync(x => x.UserId == userId, ct)
+            ?? throw new InvalidOperationException("Profile not found");
+
+        if (string.IsNullOrWhiteSpace(profile.CvPublicId))
+            throw new InvalidOperationException("Chưa có CV");
+
+        return _cvStorage.GetSignedDownloadUrl(profile.CvPublicId);
+    }
+
     private static ProfileDto ToDto(UserProfile profile) =>
         new(profile.UserId, profile.DisplayName, profile.Bio, profile.AvatarUrl, profile.CvUrl,
             profile.Skills, profile.Experience, profile.Education, profile.SocialLinks,

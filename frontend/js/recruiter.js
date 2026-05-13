@@ -448,8 +448,11 @@ async function loadMyJobs(companyId) {
             const expDate = new Date(job.expiresAt).toLocaleDateString('vi-VN');
             let statusHtml = '';
             const isExpired = new Date(job.expiresAt) < new Date();
-            if (!job.isActive) {
-                statusHtml = '<span style="background:#fee2e2; color:#dc2626; padding: 4px 8px; border-radius: 4px; font-size:12px; font-weight:600;">Đã ẩn</span>';
+            if (job.isBlocked) {
+                const reasonTip = job.blockReason ? ` title="${job.blockReason}"` : '';
+                statusHtml = `<span${reasonTip} style="background:#fee2e2; color:#dc2626; padding: 4px 8px; border-radius: 4px; font-size:12px; font-weight:600; cursor:${job.blockReason ? 'help' : 'default'};">Bị từ chối</span>`;
+            } else if (!job.isActive) {
+                statusHtml = '<span style="background:#fff7ed; color:#ea580c; padding: 4px 8px; border-radius: 4px; font-size:12px; font-weight:600;">Đã ẩn</span>';
             } else if (isExpired) {
                 statusHtml = '<span style="background:#f1f5f9; color:#64748b; padding: 4px 8px; border-radius: 4px; font-size:12px; font-weight:600;">Hết hạn</span>';
             } else if (!job.isApproved) {
@@ -463,7 +466,8 @@ async function loadMyJobs(companyId) {
                 <td><strong>${job.title}</strong><br><small style="color:#64748b">${job.jobType} • ${job.location}</small></td>
                 <td>${statusHtml}</td>
                 <td>${expDate}</td>
-                <td>
+                <td style="white-space:nowrap;">
+                    ${job.isBlocked && job.blockReason ? `<button style="border:none;background:transparent;color:#dc2626;cursor:pointer;margin-right:8px;font-size:15px;" onclick="showBlockReason('${escapeJs(job.blockReason)}')"><i class="fa-solid fa-circle-info"></i></button>` : ''}
                     <button style="border:none; background:transparent; color:#3b82f6; cursor:pointer; margin-right:10px;" onclick="editJob('${job.id}')"><i class="fa-solid fa-pen-to-square"></i></button>
                     <button style="border:none; background:transparent; color:#ef4444; cursor:pointer;" onclick="deleteJob('${job.id}')"><i class="fa-solid fa-trash"></i></button>
                 </td>
@@ -619,6 +623,9 @@ async function editJob(jobId) {
             document.getElementById('job-desc').value = job.description;
             document.getElementById('job-req').value = job.requirements;
             document.getElementById('job-ben').value = job.benefits;
+            document.getElementById('job-desc-count').textContent = (job.description || '').length;
+            document.getElementById('job-req-count').textContent  = (job.requirements || '').length;
+            document.getElementById('job-ben-count').textContent  = (job.benefits || '').length;
             
             // local datetime format YYYY-MM-DDThh:mm
             const dt = new Date(job.expiresAt);
@@ -674,11 +681,66 @@ async function deleteJob(jobId) {
     }
 }
 
+// ── Lý do từ chối ──────────────────────────────────────────
+function escapeJs(str) {
+    return (str || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+}
+
+function showBlockReason(reason) {
+    let modal = document.getElementById('block-reason-modal');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'block-reason-modal';
+        modal.style.cssText = 'position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.4);';
+        modal.innerHTML = `
+            <div style="background:#fff;border-radius:14px;padding:28px;max-width:440px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,0.2);">
+                <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
+                    <div style="width:36px;height:36px;border-radius:50%;background:#fee2e2;display:flex;align-items:center;justify-content:center;">
+                        <i class="fa-solid fa-ban" style="color:#dc2626;font-size:16px;"></i>
+                    </div>
+                    <h3 style="margin:0;font-size:16px;font-weight:700;color:#0f172a;">Lý do từ chối</h3>
+                </div>
+                <p id="block-reason-text" style="margin:0 0 20px;font-size:14px;color:#475569;line-height:1.6;background:#fef2f2;padding:14px;border-radius:8px;border:1px solid #fecaca;word-break:break-word;"></p>
+                <div style="display:flex;justify-content:flex-end;">
+                    <button onclick="closeBlockReasonModal()" style="padding:9px 22px;border:none;border-radius:8px;background:#0f172a;color:#fff;font-size:14px;font-weight:600;cursor:pointer;">Đóng</button>
+                </div>
+            </div>`;
+        modal.addEventListener('click', e => { if (e.target === modal) closeBlockReasonModal(); });
+        document.body.appendChild(modal);
+    }
+    document.getElementById('block-reason-text').textContent = reason;
+    modal.style.display = 'flex';
+}
+
+function closeBlockReasonModal() {
+    const modal = document.getElementById('block-reason-modal');
+    if (modal) modal.style.display = 'none';
+}
+
 // ── Khởi tạo ───────────────────────────────────────────────
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', async function() {
     requireRecruiter();
-    loadMyCompany();
+    await loadMyCompany();
     loadSubscriptionInfo();
+
+    // Inline counters — single-line inputs
+    ['company-name', 'company-taxcode', 'company-email', 'company-phone',
+     'company-website', 'company-address', 'job-title', 'job-location'
+    ].forEach(id => attachInlineCounter(document.getElementById(id)));
+
+    // Inline counters — textareas (ẩn counter cũ bên dưới)
+    ['company-desc', 'job-desc', 'job-req', 'job-ben'].forEach(id => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        const oldDiv = el.nextElementSibling;
+        if (oldDiv) oldDiv.style.display = 'none';
+        attachInlineCounter(el);
+    });
+
+    // Cập nhật counter sau khi loadMyCompany điền dữ liệu
+    ['company-name', 'company-taxcode', 'company-email', 'company-phone',
+     'company-website', 'company-address', 'company-desc'
+    ].forEach(id => document.getElementById(id)?.dispatchEvent(new Event('input')));
 
     const urlParams = new URLSearchParams(window.location.search);
     const tab = urlParams.get('tab') || 'company';

@@ -111,7 +111,7 @@ function sortCompanies(list, col, dir) {
                 break;
             case 'size': {
                 // Sort by numeric value of companySize range
-                const sizeOrder = { '1-50': 1, '50-150': 2, '150-500': 3, '500+': 4 };
+                const sizeOrder = { '1-50 nhân viên': 1, '50-150 nhân viên': 2, '150-300 nhân viên': 3, '300-500 nhân viên': 4, '500-1000 nhân viên': 5, '1000+ nhân viên': 6 };
                 va = sizeOrder[a.companySize] ?? 0;
                 vb = sizeOrder[b.companySize] ?? 0;
                 break;

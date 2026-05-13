@@ -1,0 +1,245 @@
+/* ============================================================
+   applied-jobs.css – Danh sách tin tuyển dụng đã ứng tuyển
+   ============================================================ */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Inter', sans-serif; background: #f8fafc; color: #1e293b; display: flex; flex-direction: column; min-height: 100vh; }
+
+/* ── Layout ─────────────────────────────────────────────── */
+.aj-container {
+    width: 100%;
+    padding: 40px;
+    box-sizing: border-box;
+}
+.aj-content { width: 100%; min-height: 600px; }
+
+/* ── Header ─────────────────────────────────────────────── */
+.aj-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+}
+.aj-header h1 {
+    font-size: 26px;
+    font-weight: 800;
+    color: #0f172a;
+    letter-spacing: -0.02em;
+}
+.aj-header-actions { display: flex; align-items: center; gap: 12px; }
+
+.aj-search {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #fff;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 10px 16px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+.aj-search:focus-within { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
+.aj-search i { color: #94a3b8; font-size: 14px; }
+.aj-search input {
+    border: none;
+    outline: none;
+    font-size: 14px;
+    color: #1e293b;
+    background: transparent;
+    width: 220px;
+    font-family: 'Inter', sans-serif;
+}
+.aj-search input::placeholder { color: #94a3b8; }
+
+/* ── Tab Bar ────────────────────────────────────────────── */
+.aj-tabs-row {
+    border-bottom: 2px solid #e2e8f0;
+    margin-bottom: 28px;
+    overflow-x: auto;
+}
+.aj-tabs { display: flex; gap: 0; }
+.aj-tab {
+    padding: 12px 18px;
+    font-size: 13.5px;
+    font-weight: 500;
+    color: #64748b;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+    transition: all 0.2s;
+    white-space: nowrap;
+    background: transparent;
+    border-top: none;
+    border-left: none;
+    border-right: none;
+    font-family: 'Inter', sans-serif;
+}
+.aj-tab:hover { color: #1e293b; }
+.aj-tab.active { color: #2563eb; border-bottom-color: #2563eb; font-weight: 600; }
+
+/* ── Grid ───────────────────────────────────────────────── */
+.aj-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+}
+@media (max-width: 1200px) { .aj-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 750px)  { .aj-grid { grid-template-columns: 1fr; } }
+
+/* ── Skeleton ───────────────────────────────────────────── */
+.aj-skeleton {
+    height: 200px;
+    background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    border-radius: 16px;
+}
+@keyframes shimmer {
+    0%   { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+/* ── Card ───────────────────────────────────────────────── */
+.aj-card {
+    background: #fff;
+    border: 1.5px solid #e8eef4;
+    border-radius: 16px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+    transition: border-color 0.25s, box-shadow 0.25s, transform 0.25s;
+}
+.aj-card:hover {
+    border-color: #3b82f6;
+    box-shadow: 0 8px 24px rgba(59,130,246,0.1);
+    transform: translateY(-3px);
+}
+
+.aj-card-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.aj-job-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: #eff6ff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #3b82f6;
+    font-size: 18px;
+    flex-shrink: 0;
+}
+
+.aj-status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.aj-job-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: #0f172a;
+    line-height: 1.45;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    min-height: 44px;
+    transition: color 0.2s;
+}
+.aj-card:hover .aj-job-title { color: #2563eb; }
+
+.aj-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.aj-meta-item {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 12.5px;
+    color: #64748b;
+}
+.aj-meta-item i { font-size: 12px; flex-shrink: 0; }
+
+/* ── Actions ────────────────────────────────────────────── */
+.aj-card-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: auto;
+}
+.aj-btn-detail, .aj-btn-chat {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 9px 0;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-decoration: none;
+    font-family: 'Inter', sans-serif;
+}
+.aj-btn-detail {
+    background: #f1f5f9;
+    color: #475569;
+    border: 1.5px solid #e2e8f0;
+}
+.aj-btn-detail:hover {
+    background: #e2e8f0;
+    color: #1e293b;
+}
+.aj-btn-chat {
+    background: #3b82f6;
+    color: #fff;
+    border: none;
+}
+.aj-btn-chat:hover { background: #2563eb; }
+
+/* ── Empty State ────────────────────────────────────────── */
+.aj-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    padding: 80px 20px;
+    color: #94a3b8;
+    text-align: center;
+}
+.aj-empty i { font-size: 52px; color: #cbd5e1; }
+.aj-empty h3 { font-size: 18px; font-weight: 700; color: #475569; }
+.aj-empty p  { font-size: 14px; color: #94a3b8; }
+
+.aj-btn-find {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 11px 24px;
+    background: #3b82f6;
+    color: #fff;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background 0.2s;
+    margin-top: 6px;
+}
+.aj-btn-find:hover { background: #2563eb; }

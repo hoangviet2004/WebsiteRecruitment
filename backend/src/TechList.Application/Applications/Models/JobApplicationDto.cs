@@ -10,6 +10,8 @@ public record JobApplicationDto(
     string? AvatarUrl,
     string? CvUrl,
     string? Skills,
+    string? Experience,
+    string? Education,
     string Status,
     string? CoverLetter,
     DateTime AppliedAt,

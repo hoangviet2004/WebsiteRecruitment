@@ -20,5 +20,7 @@ public sealed record JobDto(
     bool IsApproved,
     DateTime CreatedAt,
     bool IsFeatured = false,
-    string? FeaturedLevel = null
+    string? FeaturedLevel = null,
+    bool IsBlocked = false,
+    string? BlockReason = null
 );

@@ -408,7 +408,7 @@ async function loadTransactions(page = 1) {
                 else methodBadge = t.paymentMethod;
 
                 return `<tr>
-                    <td style="font-family:monospace;color:#64748b;">${t.transactionCode}</td>
+                    <td style="font-family:monospace;color:#64748b;white-space:nowrap;">${t.transactionCode}</td>
                     <td>
                         <strong>${t.companyName}</strong><br>
                         <small style="color:#64748b;">${t.userEmail}</small>
@@ -418,9 +418,9 @@ async function loadTransactions(page = 1) {
                     <td style="color:#ef4444;">${t.discountAmount > 0 ? '-' + formatMoney(t.discountAmount) : '0'}</td>
                     <td style="color:#10b981;font-weight:bold;">${formatMoney(t.finalAmount)}</td>
                     <td>${methodBadge}</td>
-                    <td>${badge}</td>
-                    <td>${formatDate(t.createdAt)}</td>
-                    <td>
+                    <td style="white-space:nowrap;">${badge}</td>
+                    <td style="white-space:nowrap;color:#64748b;font-size:13px;">${formatDate(t.createdAt)}</td>
+                    <td style="white-space:nowrap;">
                         <button class="btn-action text-primary" title="Chi tiết" onclick="viewTransaction('${t.id}')"><i class="fa-solid fa-eye"></i></button>
                         ${t.status === 'Success' ? `<button class="btn-action text-danger" title="Hoàn tiền" onclick="openRefundModal('${t.id}', '${t.transactionCode}', ${t.finalAmount})"><i class="fa-solid fa-rotate-left"></i></button>` : ''}
                     </td>

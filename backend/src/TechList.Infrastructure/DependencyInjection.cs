@@ -25,6 +25,12 @@ using TechList.Application.Admin.Interfaces;
 using TechList.Infrastructure.Admin;
 using TechList.Application.SavedJobs.Interfaces;
 using TechList.Infrastructure.SavedJobs;
+using TechList.Application.Notifications.Interfaces;
+using TechList.Infrastructure.Notifications;
+using TechList.Application.CvEvaluation.Interfaces;
+using TechList.Infrastructure.CvEvaluation;
+using TechList.Application.JobRecommendation.Interfaces;
+using TechList.Infrastructure.JobRecommendation;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 
@@ -54,6 +60,7 @@ public static class DependencyInjection
 
         services.Configure<JwtSettings>(config.GetSection(JwtSettings.SectionName));
         services.Configure<CloudinarySettings>(config.GetSection(CloudinarySettings.SectionName));
+        services.Configure<AnthropicSettings>(config.GetSection("Gemini"));
 
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<ITokenService, JwtTokenService>();
@@ -73,6 +80,10 @@ public static class DependencyInjection
         services.AddScoped<ICandidateMessagingService, CandidateMessagingService>();
         services.AddScoped<IInterviewService, InterviewService>();
         services.AddScoped<ISavedJobService, SavedJobService>();
+        services.AddScoped<ISupportMessagingService, SupportMessagingService>();
+        services.AddScoped<INotificationService, NotificationService>();
+        services.AddScoped<ICvEvaluationService, CvEvaluationService>();
+        services.AddScoped<IJobRecommendationService, JobRecommendationService>();
         services.AddMemoryCache();
 
         return services;

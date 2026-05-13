@@ -11,6 +11,8 @@ public interface ICandidateMessagingService
     Task<RecruiterPanelDto> GetRecruiterPanelAsync(string candidateId, Guid applicationId, CancellationToken ct);
     Task<int> GetUnreadCountAsync(string candidateId, CancellationToken ct);
 
+    Task<List<CandidateInterviewListDto>> GetAllInterviewsAsync(string candidateId, CancellationToken ct);
+
     // Interview & Offer responses
     Task<InterviewCardDto> RespondToInterviewAsync(string candidateId, Guid scheduleId, InterviewResponseRequest req, CancellationToken ct);
     Task<OfferCardDto> RespondToOfferAsync(string candidateId, Guid offerId, OfferResponseRequest req, CancellationToken ct);

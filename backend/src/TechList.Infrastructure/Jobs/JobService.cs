@@ -20,7 +20,7 @@ public sealed class JobService : IJobService
         var jobs = await _db.JobPosts
             .Include(x => x.Company)
             .AsNoTracking()
-            .Where(x => x.IsActive && x.IsApproved && x.ExpiresAt >= DateTime.UtcNow)
+            .Where(x => x.IsActive && x.IsApproved && !x.IsBlocked && x.ExpiresAt >= DateTime.UtcNow)
             .OrderByDescending(x => x.CreatedAt)
             .ToListAsync(ct);
 
@@ -203,6 +203,9 @@ public sealed class JobService : IJobService
         {
             job.FeaturedLevel = null;
         }
+        job.IsApproved = false;
+        job.IsBlocked = false;
+        job.BlockReason = null;
         job.UpdatedAt = DateTime.UtcNow;
 
         await _db.SaveChangesAsync(ct);
@@ -260,6 +263,8 @@ public sealed class JobService : IJobService
         x.IsApproved,
         x.CreatedAt,
         x.IsFeatured,
-        x.FeaturedLevel
+        x.FeaturedLevel,
+        x.IsBlocked,
+        x.BlockReason
     );
 }

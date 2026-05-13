@@ -38,28 +38,27 @@
                     <i class="fa-solid fa-spinner fa-spin"></i> Đang tải...
                 </div>
                 <h3 id="pf-header-name" class="pf-sidebar-name">Tên ứng viên</h3>
-                <p id="pf-header-title" class="pf-sidebar-title">Thêm chức danh...</p>
             </div>
 
             <!-- Nav links -->
             <nav class="pf-nav">
                 <span class="pf-nav-group-label">HỒ SƠ CÁ NHÂN</span>
-                <a class="pf-nav-link active" href="#sec-info" onclick="scrollToSection('sec-info',this)">
+                <a class="pf-nav-link active" href="#sec-info" onclick="scrollToSection('sec-info')">
                     <i class="fa-regular fa-user"></i> Thông tin cá nhân
                 </a>
-                <a class="pf-nav-link" href="#sec-skills" onclick="scrollToSection('sec-skills',this)">
+                <a class="pf-nav-link" href="#sec-skills" onclick="scrollToSection('sec-skills')">
                     <i class="fa-solid fa-star-half-stroke"></i> Kỹ năng chuyên môn
                 </a>
-                <a class="pf-nav-link" href="#sec-exp" onclick="scrollToSection('sec-exp',this)">
+                <a class="pf-nav-link" href="#sec-exp" onclick="scrollToSection('sec-exp')">
                     <i class="fa-solid fa-briefcase"></i> Kinh nghiệm làm việc
                 </a>
-                <a class="pf-nav-link" href="#sec-edu" onclick="scrollToSection('sec-edu',this)">
+                <a class="pf-nav-link" href="#sec-edu" onclick="scrollToSection('sec-edu')">
                     <i class="fa-solid fa-graduation-cap"></i> Học vấn & Bằng cấp
                 </a>
-                <a class="pf-nav-link" href="#sec-social" onclick="scrollToSection('sec-social',this)">
+                <a class="pf-nav-link" href="#sec-social" onclick="scrollToSection('sec-social')">
                     <i class="fa-solid fa-link"></i> Portfolio & Liên kết
                 </a>
-                <a class="pf-nav-link" href="#sec-cv" onclick="scrollToSection('sec-cv',this)">
+                <a class="pf-nav-link" href="#sec-cv" onclick="scrollToSection('sec-cv')">
                     <i class="fa-regular fa-file-lines"></i> CV & Tài liệu
                 </a>
             </nav>
@@ -78,15 +77,56 @@
                 <div class="pf-banner-left">
                     <div>
                         <h1 id="pf-banner-name">Tên ứng viên</h1>
-                        <p id="pf-banner-title" class="pf-banner-subtitle">Chức danh • Địa điểm</p>
-                    </div>
+                        </div>
                 </div>
                 <div class="pf-banner-right">
-                    <button class="pf-btn-secondary" onclick="openPublicProfile()">
-                        <i class="fa-regular fa-eye"></i> Xem trang công khai
+                    <button class="pf-btn-secondary" id="pf-chpw-toggle" onclick="togglePasswordForm()">
+                        <i class="fa-solid fa-lock"></i> Đổi mật khẩu
                     </button>
                     <button class="pf-btn-primary" id="pf-save-btn" onclick="saveProfile()">
                         <i class="fa-solid fa-check"></i> Lưu thay đổi
+                    </button>
+                </div>
+            </div>
+
+            <!-- Form đổi mật khẩu (ẩn mặc định) -->
+            <div class="pf-card pf-chpw-card" id="pf-chpw-card" style="display:none;">
+                <div class="pf-card-header">
+                    <i class="fa-solid fa-lock"></i> Đổi mật khẩu
+                </div>
+                <div class="pf-card-body">
+                    <div class="pf-grid-2">
+                        <div class="pf-field pf-field-full">
+                            <label>MẬT KHẨU HIỆN TẠI <span style="color:#ef4444;">*</span></label>
+                            <div class="pf-pw-wrap">
+                                <input type="password" id="pf-pw-current" placeholder="Nhập mật khẩu hiện tại" autocomplete="current-password">
+                                <button type="button" class="pf-pw-eye" onclick="togglePwVisibility('pf-pw-current')"><i class="fa-regular fa-eye"></i></button>
+                            </div>
+                        </div>
+                        <div class="pf-field">
+                            <label>MẬT KHẨU MỚI <span style="color:#ef4444;">*</span></label>
+                            <div class="pf-pw-wrap">
+                                <input type="password" id="pf-pw-new" placeholder="Tối thiểu 6 ký tự" autocomplete="new-password" oninput="checkPwStrength(this.value)">
+                                <button type="button" class="pf-pw-eye" onclick="togglePwVisibility('pf-pw-new')"><i class="fa-regular fa-eye"></i></button>
+                            </div>
+                            <div class="pf-pw-strength" id="pf-pw-strength" style="display:none;">
+                                <div class="pf-pw-strength-bar" id="pf-pw-strength-bar"></div>
+                                <span id="pf-pw-strength-label"></span>
+                            </div>
+                        </div>
+                        <div class="pf-field">
+                            <label>XÁC NHẬN MẬT KHẨU MỚI <span style="color:#ef4444;">*</span></label>
+                            <div class="pf-pw-wrap">
+                                <input type="password" id="pf-pw-confirm" placeholder="Nhập lại mật khẩu mới" autocomplete="new-password">
+                                <button type="button" class="pf-pw-eye" onclick="togglePwVisibility('pf-pw-confirm')"><i class="fa-regular fa-eye"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="pf-chpw-footer">
+                    <button class="pf-btn-secondary" onclick="togglePasswordForm()">Hủy</button>
+                    <button class="pf-btn-primary" id="pf-chpw-btn" onclick="changePassword()">
+                        <i class="fa-solid fa-lock"></i> Xác nhận đổi mật khẩu
                     </button>
                 </div>
             </div>
@@ -100,7 +140,10 @@
                     <div class="pf-grid-2">
                         <div class="pf-field">
                             <label>HỌ VÀ TÊN</label>
-                            <input type="text" id="pf-fullname" placeholder="Nguyễn Văn A">
+                            <div style="position:relative;">
+                                <input type="text" id="pf-fullname" placeholder="Nguyễn Văn A" maxlength="50" oninput="updateNameCounter(this)">
+                                <span id="pf-name-counter" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:11px;color:#94a3b8;pointer-events:none;">0/50</span>
+                            </div>
                         </div>
                         <div class="pf-field">
                             <label>TRẠNG THÁI TÌM VIỆC</label>
@@ -118,16 +161,15 @@
                         </div>
                         <div class="pf-field">
                             <label>SỐ ĐIỆN THOẠI</label>
-                            <input type="tel" id="pf-phone" placeholder="+84 901 234 567">
+                            <input type="tel" id="pf-phone" placeholder="+84 901 234 567" maxlength="20">
                         </div>
                         <div class="pf-field pf-field-full">
                             <label>ĐỊA CHỈ / THÀNH PHỐ</label>
-                            <input type="text" id="pf-location" placeholder="Quận 1, TP. Hồ Chí Minh, Việt Nam">
+                            <input type="text" id="pf-location" placeholder="Quận 1, TP. Hồ Chí Minh, Việt Nam" maxlength="100">
                         </div>
                         <div class="pf-field pf-field-full">
                             <label>GIỚI THIỆU BẢN THÂN</label>
-                            <textarea id="pf-bio" rows="4" placeholder="Tôi là Frontend Developer với 2 năm kinh nghiệm..."></textarea>
-                            <span class="pf-counter"><span id="pf-bio-count">0</span> / 500</span>
+                            <textarea id="pf-bio" rows="4" placeholder="Tôi là Frontend Developer với 2 năm kinh nghiệm..." maxlength="500"></textarea>
                         </div>
                     </div>
                 </div>
@@ -189,21 +231,21 @@
                             <span class="pf-social-icon linkedin"><i class="fa-brands fa-linkedin-in"></i></span>
                             <div class="pf-field" style="flex:1;margin:0;">
                                 <label>LINKEDIN</label>
-                                <input type="url" id="pf-linkedin" placeholder="linkedin.com/in/username">
+                                <input type="url" id="pf-linkedin" placeholder="linkedin.com/in/username" maxlength="200">
                             </div>
                         </div>
                         <div class="pf-social-item">
                             <span class="pf-social-icon github"><i class="fa-brands fa-github"></i></span>
                             <div class="pf-field" style="flex:1;margin:0;">
                                 <label>GITHUB</label>
-                                <input type="url" id="pf-github" placeholder="github.com/username">
+                                <input type="url" id="pf-github" placeholder="github.com/username" maxlength="200">
                             </div>
                         </div>
                         <div class="pf-social-item">
                             <span class="pf-social-icon portfolio"><i class="fa-solid fa-globe"></i></span>
                             <div class="pf-field" style="flex:1;margin:0;">
                                 <label>PORTFOLIO / WEBSITE</label>
-                                <input type="url" id="pf-portfolio" placeholder="portfolio.example.com">
+                                <input type="url" id="pf-portfolio" placeholder="portfolio.example.com" maxlength="200">
                             </div>
                         </div>
                     </div>
@@ -250,7 +292,10 @@
                                     <a id="pf-cv-link" href="#" target="_blank" class="pf-btn-secondary pf-cv-action-btn">
                                         <i class="fa-regular fa-eye"></i> Xem
                                     </a>
-                                    <button class="pf-cv-action-btn pf-btn-danger-ghost" onclick="document.getElementById('pf-cv-input').click()">
+                                    <a id="pf-cv-download" href="#" download class="pf-btn-secondary pf-cv-action-btn">
+                                        <i class="fa-solid fa-download"></i> Tải xuống
+                                    </a>
+                                    <button class="pf-btn-secondary pf-cv-action-btn" style="color:#ef4444; border-color:#fecaca;" onclick="document.getElementById('pf-cv-input').click()">
                                         <i class="fa-solid fa-arrows-rotate"></i> Thay thế
                                     </button>
                                 </div>
@@ -274,7 +319,7 @@
                 <input type="hidden" id="skill-edit-index">
                 <div class="pf-field">
                     <label>TÊN KỸ NĂNG <span style="color:#ef4444;">*</span></label>
-                    <input type="text" id="skill-name" placeholder="VD: React, Python, Photoshop...">
+                    <input type="text" id="skill-name" placeholder="VD: React, Python, Photoshop..." maxlength="50">
                 </div>
                 <div class="pf-field">
                     <label>MỨC ĐỘ THÀNH THẠO</label>
@@ -306,11 +351,11 @@
                 <div class="pf-grid-2">
                     <div class="pf-field">
                         <label>CHỨC VỤ / VỊ TRÍ <span style="color:#ef4444;">*</span></label>
-                        <input type="text" id="exp-position" placeholder="VD: Senior Frontend Developer">
+                        <input type="text" id="exp-position" placeholder="VD: Senior Frontend Developer" maxlength="100">
                     </div>
                     <div class="pf-field">
                         <label>CÔNG TY <span style="color:#ef4444;">*</span></label>
-                        <input type="text" id="exp-company" placeholder="VD: TechNova Solutions">
+                        <input type="text" id="exp-company" placeholder="VD: TechNova Solutions" maxlength="100">
                     </div>
                     <div class="pf-field">
                         <label>THỜI GIAN BẮT ĐẦU</label>
@@ -329,7 +374,7 @@
                 </div>
                 <div class="pf-field">
                     <label>MÔ TẢ CÔNG VIỆC</label>
-                    <textarea id="exp-desc" rows="4" placeholder="Mô tả trách nhiệm, thành tích... VD: Dẫn dắt team 5 người xây dựng hệ thống SaaS..."></textarea>
+                    <textarea id="exp-desc" rows="4" placeholder="Mô tả trách nhiệm, thành tích... VD: Dẫn dắt team 5 người xây dựng hệ thống SaaS..." maxlength="1000"></textarea>
                 </div>
             </div>
             <div class="pf-modal-footer">
@@ -350,11 +395,11 @@
                 <input type="hidden" id="edu-edit-index">
                 <div class="pf-field">
                     <label>BẰNG CẤP / CHUYÊN NGÀNH <span style="color:#ef4444;">*</span></label>
-                    <input type="text" id="edu-degree" placeholder="VD: Cử nhân Khoa học Máy tính">
+                    <input type="text" id="edu-degree" placeholder="VD: Cử nhân Khoa học Máy tính" maxlength="100">
                 </div>
                 <div class="pf-field">
                     <label>TRƯỜNG / TỔ CHỨC <span style="color:#ef4444;">*</span></label>
-                    <input type="text" id="edu-school" placeholder="VD: Đại học Bách Khoa TP.HCM">
+                    <input type="text" id="edu-school" placeholder="VD: Đại học Bách Khoa TP.HCM" maxlength="100">
                 </div>
                 <div class="pf-grid-2">
                     <div class="pf-field">
@@ -368,7 +413,7 @@
                 </div>
                 <div class="pf-field">
                     <label>GPA / XẾP LOẠI <span style="color:#94a3b8;font-weight:400;">(tuỳ chọn)</span></label>
-                    <input type="text" id="edu-gpa" placeholder="VD: 3.6/4.0 hoặc Xuất sắc">
+                    <input type="text" id="edu-gpa" placeholder="VD: 3.6/4.0 hoặc Xuất sắc" maxlength="30">
                 </div>
             </div>
             <div class="pf-modal-footer">

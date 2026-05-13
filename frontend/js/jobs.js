@@ -363,6 +363,64 @@ async function jobsToggleBookmark(e, jobPostId, btn) {
     }
 }
 
+// ── AI Job Recommendation ────────────────────────────────
+async function loadAiRecommendations() {
+    const btn   = document.getElementById('ai-recommend-btn');
+    const panel = document.getElementById('ai-recommend-panel');
+    const list  = document.getElementById('ai-recommend-list');
+
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang phân tích hồ sơ...';
+    panel.style.display = 'none';
+
+    try {
+        const res  = await apiFetchAuth('/api/job-recommendations', { method: 'POST' });
+        const data = await res.json();
+
+        if (!res.ok || !data.success) throw new Error(data.message || 'Lỗi gợi ý');
+
+        const recs = data.data?.recommendations || [];
+
+        if (recs.length === 0) {
+            list.innerHTML = `<div class="ai-empty">
+                <i class="fa-solid fa-circle-info"></i>
+                Không tìm thấy việc làm phù hợp. Hãy cập nhật CV và hồ sơ của bạn.
+            </div>`;
+        } else {
+            list.innerHTML = recs.map(r => {
+                const job = allJobs.find(j => j.id === r.jobId);
+                if (!job) return '';
+                const scoreColor = r.score >= 70 ? '#10b981' : r.score >= 50 ? '#f59e0b' : '#ef4444';
+                const logoHtml = job.companyLogo
+                    ? `<img src="${job.companyLogo}" alt="${job.companyName}" style="width:100%;height:100%;object-fit:cover;">`
+                    : `<span style="font-weight:700;color:#3b82f6;font-size:14px;">${getInitials(job.companyName)}</span>`;
+                return `
+                <div class="ai-rec-card" onclick="window.location.href='job-detail.html?id=${job.id}'">
+                    <div class="ai-rec-logo">${logoHtml}</div>
+                    <div class="ai-rec-info">
+                        <div class="ai-rec-title">${job.title}</div>
+                        <div class="ai-rec-company">${job.companyName} • ${job.location || ''}</div>
+                        <div class="ai-rec-reason"><i class="fa-solid fa-check-circle" style="color:#10b981;"></i> ${r.reason}</div>
+                    </div>
+                    <div class="ai-rec-score" style="background:${scoreColor};">${r.score}%</div>
+                </div>`;
+            }).join('');
+        }
+
+        panel.style.display = 'block';
+        panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } catch (e) {
+        jobsShowToast('Lỗi: ' + e.message, 'error');
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-wand-magic-sparkles"></i> Gợi ý việc phù hợp với tôi';
+    }
+}
+
+function closeAiPanel() {
+    document.getElementById('ai-recommend-panel').style.display = 'none';
+}
+
 function jobsShowToast(msg, type = 'success') {
     let el = document.getElementById('jobs-toast');
     if (!el) {

@@ -162,8 +162,8 @@
        TAB 3: GIAO DỊCH
        ═══════════════════════════════════════════════════════ -->
   <div class="tab-pane" id="pane-transactions">
-    <div class="am-toolbar">
-      <div class="am-search-wrap">
+    <div class="am-toolbar" style="flex-wrap:wrap;gap:10px;">
+      <div class="am-search-wrap" style="flex:1;min-width:200px;">
         <i class="fa-solid fa-magnifying-glass am-search-icon"></i>
         <input type="text" id="txn-search" class="am-search-input" placeholder="Tìm theo mã GD hoặc công ty..." autocomplete="off">
       </div>
@@ -187,11 +187,15 @@
           <option value="Manual">Thủ công</option>
         </select>
       </div>
-      <input type="date" id="txn-from-date" class="am-search-input" style="width:150px;padding:10px 12px;">
-      <input type="date" id="txn-to-date" class="am-search-input" style="width:150px;padding:10px 12px;">
-      <button class="tm-btn-primary" onclick="loadTransactions(1)" style="padding:10px 18px;">
-        <i class="fa-solid fa-search"></i> Lọc
-      </button>
+      <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
+        <label style="font-size:13px;color:#64748b;white-space:nowrap;"><i class="fa-regular fa-calendar" style="margin-right:4px;"></i>Từ</label>
+        <input type="date" id="txn-from-date" class="am-select" style="width:145px;">
+        <label style="font-size:13px;color:#64748b;white-space:nowrap;">đến</label>
+        <input type="date" id="txn-to-date" class="am-select" style="width:145px;">
+        <button class="tm-btn-primary" onclick="loadTransactions(1)">
+          <i class="fa-solid fa-search"></i> Lọc
+        </button>
+      </div>
     </div>
 
     <div class="data-card">

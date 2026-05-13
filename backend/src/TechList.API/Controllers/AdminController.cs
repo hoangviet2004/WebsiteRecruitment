@@ -94,6 +94,13 @@ public sealed class AdminController : ControllerBase
         return Ok(ApiResponse<object>.Ok(null!, "Job approved successfully"));
     }
 
+    [HttpPut("jobs/{id}/toggle-block")]
+    public async Task<ActionResult<ApiResponse<object>>> ToggleBlockJob(Guid id, [FromBody] BlockJobRequest? request, CancellationToken ct)
+    {
+        await _adminService.ToggleBlockJobAsync(id, request?.Reason, ct);
+        return Ok(ApiResponse<object>.Ok(null!, "Job block status toggled successfully"));
+    }
+
     // --- COMPANIES ---
     [HttpGet("companies")]
     public async Task<ActionResult<ApiResponse<List<CompanyDto>>>> GetAllCompanies(CancellationToken ct)

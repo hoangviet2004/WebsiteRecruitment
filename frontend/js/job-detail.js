@@ -171,9 +171,14 @@ async function loadJobDetail(id) {
 async function checkAndRenderApplyState(jobId) {
     const token = sessionStorage.getItem('token');
     const role = sessionStorage.getItem('role');
-    
+
+    if (token && role && role.toLowerCase() !== 'candidate') {
+        document.querySelectorAll('.btn-apply-big').forEach(el => el.style.display = 'none');
+        return;
+    }
+
     if (!token || !role || role.toLowerCase() !== 'candidate') return;
-    
+
     try {
         const res = await apiFetchAuth(`/api/applications/check/${jobId}`, { method: 'GET' });
         if (!res || !res.ok) return;
@@ -200,15 +205,7 @@ function applyThisJob() {
         return;
     }
 
-    var role = sessionStorage.getItem('role');
-    if (role === 'Recruiter') {
-        alert("Tài khoản Nhà tuyển dụng không thể ứng tuyển. Vui lòng dùng tài khoản Ứng viên.");
-        return;
-    }
-    if (role === 'Admin') {
-        alert("Tài khoản Admin không thể ứng tuyển.");
-        return;
-    }
+    if (sessionStorage.getItem('role') !== 'Candidate') return;
 
     var jobTitle = document.getElementById('detail-title').innerText;
     document.getElementById('apply-job-title').innerText = jobTitle;
