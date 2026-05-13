@@ -298,15 +298,6 @@ function openCandModal(appId) {
             <i class="fa-solid ${a.icon}"></i> ${a.label}
         </button>`).join('');
 
-    // Nút đánh giá CV bằng AI
-    const aiBtn = document.getElementById('cand-modal-ai-btn');
-    if (app.cvUrl) {
-        aiBtn.style.display = 'inline-flex';
-        aiBtn.onclick = () => evaluateCvWithAI(app.id);
-    } else {
-        aiBtn.style.display = 'none';
-    }
-
     // Reset kết quả đánh giá cũ
     document.getElementById('cand-ai-result').style.display = 'none';
 
@@ -412,16 +403,14 @@ function updateQuickRejectCount() {
         return true;
     });
 
-    const count = affected.length;
-    const btn = document.getElementById('qr-confirm-btn');
-    const countEl = document.getElementById('qr-confirm-count');
+    const count  = affected.length;
+    const btn    = document.getElementById('qr-confirm-btn');
     const textEl = document.getElementById('qr-count-text');
-    const box = document.getElementById('qr-preview-box');
+    const box    = document.getElementById('qr-preview-box');
 
     if (selectedStatuses.length === 0) {
         textEl.textContent = 'Vui lòng chọn ít nhất một trạng thái.';
         btn.disabled = true;
-        countEl.textContent = '';
         box.className = 'qr-preview-box';
         return;
     }
@@ -429,12 +418,10 @@ function updateQuickRejectCount() {
     if (count === 0) {
         textEl.textContent = 'Không có ứng viên nào phù hợp với tiêu chí đã chọn.';
         btn.disabled = true;
-        countEl.textContent = '';
         box.className = 'qr-preview-box warning';
     } else {
         textEl.textContent = `Sẽ từ chối ${count} ứng viên phù hợp với tiêu chí đã chọn.`;
         btn.disabled = false;
-        countEl.textContent = `(${count})`;
         box.className = 'qr-preview-box danger';
     }
 }
@@ -493,6 +480,191 @@ async function executeQuickReject() {
         ? `Đã từ chối ${success} ứng viên. ${failed} trường hợp xảy ra lỗi.`
         : `Đã từ chối thành công ${success} ứng viên.`;
     alert(msg);
+}
+
+// ── Batch AI Đánh giá CV hàng loạt ─────────────────────────
+function openBatchAIModal() {
+    document.querySelectorAll('input[name="bai-status"]').forEach(cb => {
+        cb.checked = cb.value === 'Applied';
+    });
+
+    const sel = document.getElementById('bai-job-filter');
+    sel.innerHTML = '<option value="">Tất cả tin tuyển dụng</option>';
+    const seen = new Set();
+    _allApplications.forEach(a => {
+        if (!seen.has(a.jobPostId)) {
+            seen.add(a.jobPostId);
+            const opt = document.createElement('option');
+            opt.value = a.jobPostId;
+            opt.textContent = a.jobTitle || 'Vị trí không tên';
+            sel.appendChild(opt);
+        }
+    });
+
+    const resultsEl = document.getElementById('bai-results');
+    resultsEl.style.display = 'none';
+    resultsEl.innerHTML = '';
+    const btn = document.getElementById('bai-confirm-btn');
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fa-solid fa-robot"></i> Đánh giá';
+
+    updateBatchAICount();
+    document.getElementById('batch-ai-modal').classList.add('show');
+}
+
+function closeBatchAIModal() {
+    document.getElementById('batch-ai-modal').classList.remove('show');
+}
+
+function updateBatchAICount() {
+    const jobFilter = document.getElementById('bai-job-filter').value;
+    const statuses  = [...document.querySelectorAll('input[name="bai-status"]:checked')].map(cb => cb.value);
+    const btn    = document.getElementById('bai-confirm-btn');
+    const textEl = document.getElementById('bai-count-text');
+    const box    = document.getElementById('bai-preview-box');
+
+    if (statuses.length === 0) {
+        textEl.textContent = 'Vui lòng chọn ít nhất một trạng thái.';
+        btn.disabled = true;
+        box.className = 'qr-preview-box';
+        return;
+    }
+
+    const matched  = _allApplications.filter(a =>
+        (!jobFilter || a.jobPostId === jobFilter) && statuses.includes(a.status)
+    );
+    const withCV    = matched.filter(a => a.cvUrl).length;
+    const withoutCV = matched.length - withCV;
+
+    if (matched.length === 0) {
+        textEl.textContent = 'Không có ứng viên nào phù hợp với tiêu chí đã chọn.';
+        btn.disabled = true;
+        box.className = 'qr-preview-box warning';
+    } else if (withCV === 0) {
+        textEl.textContent = `${matched.length} ứng viên phù hợp nhưng không ai có CV để đánh giá.`;
+        btn.disabled = true;
+        box.className = 'qr-preview-box warning';
+    } else {
+        let msg = `Sẽ đánh giá CV của ${withCV} ứng viên.`;
+        if (withoutCV > 0) msg += ` (${withoutCV} người không có CV sẽ bỏ qua)`;
+        textEl.textContent = msg;
+        btn.disabled = false;
+        box.className = 'qr-preview-box';
+        box.style.borderColor = '#8b5cf6';
+        box.style.background  = '#f5f3ff';
+    }
+}
+
+async function executeBatchAI() {
+    const jobFilter = document.getElementById('bai-job-filter').value;
+    const statuses  = [...document.querySelectorAll('input[name="bai-status"]:checked')].map(cb => cb.value);
+
+    const targets = _allApplications.filter(a =>
+        (!jobFilter || a.jobPostId === jobFilter) && statuses.includes(a.status) && a.cvUrl
+    );
+    if (targets.length === 0) return;
+
+    const btn       = document.getElementById('bai-confirm-btn');
+    const resultsEl = document.getElementById('bai-results');
+
+    btn.disabled    = true;
+    btn.innerHTML   = '<i class="fa-solid fa-spinner fa-spin"></i> Đang đánh giá...';
+    resultsEl.style.display = 'block';
+    resultsEl.innerHTML     = `<div style="font-size:13px;font-weight:600;color:#475569;margin-bottom:10px;">Kết quả (${targets.length} ứng viên):</div>`;
+
+    for (const app of targets) {
+        const item = document.createElement('div');
+        item.style.cssText = 'padding:12px;border:1px solid #e2e8f0;border-radius:10px;margin-bottom:8px;font-size:13px;background:#fff;';
+        item.innerHTML = `
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+                <strong style="color:#0f172a;">${escHtml(app.candidateName || 'Ứng viên')}</strong>
+                <span style="color:#94a3b8;font-size:12px;">— ${escHtml(app.jobTitle || '')}</span>
+                <span style="margin-left:auto;color:#94a3b8;font-size:12px;"><i class="fa-solid fa-spinner fa-spin"></i> Đang phân tích...</span>
+            </div>`;
+        resultsEl.appendChild(item);
+
+        try {
+            const res  = await apiFetchAuth(`/api/cv-evaluation/${app.id}`, { method: 'POST' });
+            const data = await res.json();
+            if (!res.ok || !data.success) throw new Error(data.message || 'Lỗi đánh giá');
+
+            const r          = data.data;
+            const scoreColor = r.score >= 75 ? '#10b981' : r.score >= 50 ? '#f59e0b' : '#ef4444';
+            const recColor   = r.recommendation === 'Nên phỏng vấn' ? '#10b981'
+                             : r.recommendation === 'Cân nhắc thêm'  ? '#f59e0b' : '#ef4444';
+
+            item.innerHTML = `
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+                    <strong style="color:#0f172a;">${escHtml(app.candidateName || 'Ứng viên')}</strong>
+                    <span style="color:#94a3b8;font-size:12px;">— ${escHtml(app.jobTitle || '')}</span>
+                    <span style="margin-left:auto;background:${scoreColor};color:#fff;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700;">${r.score}/100</span>
+                </div>
+                <div style="color:${recColor};font-size:12px;font-weight:600;margin-bottom:3px;">
+                    <i class="fa-solid fa-circle-check"></i> ${escHtml(r.recommendation)}
+                </div>
+                <div style="color:#64748b;font-size:12px;line-height:1.5;margin-bottom:8px;">${escHtml(r.summary)}</div>`;
+
+            const statusRow = document.createElement('div');
+            statusRow.style.cssText = 'padding-top:8px;border-top:1px solid #f1f5f9;display:flex;flex-wrap:wrap;align-items:center;gap:6px;';
+            statusRow.innerHTML = _batchStatusButtons(app.id, app.status);
+            item.appendChild(statusRow);
+        } catch (e) {
+            item.innerHTML = `
+                <div style="display:flex;align-items:center;gap:8px;">
+                    <strong style="color:#0f172a;">${escHtml(app.candidateName || 'Ứng viên')}</strong>
+                    <span style="color:#94a3b8;font-size:12px;">— ${escHtml(app.jobTitle || '')}</span>
+                    <span style="margin-left:auto;color:#ef4444;font-size:12px;"><i class="fa-solid fa-circle-exclamation"></i> ${escHtml(e.message)}</span>
+                </div>`;
+        }
+    }
+
+    btn.disabled  = false;
+    btn.innerHTML = '<i class="fa-solid fa-robot"></i> Đánh giá lại';
+}
+
+function _batchStatusButtons(appId, currentStatus) {
+    const all = [
+        { status: 'Screening', cls: 'screening', icon: 'fa-magnifying-glass', label: 'Sàng lọc' },
+        { status: 'Interview', cls: 'interview', icon: 'fa-comments',         label: 'Phỏng vấn' },
+        { status: 'Offered',   cls: 'offered',   icon: 'fa-handshake',        label: 'Đề nghị' },
+        { status: 'OnHold',    cls: 'onhold',    icon: 'fa-clock',            label: 'Tạm giữ' },
+        { status: 'Rejected',  cls: 'rejected',  icon: 'fa-xmark',            label: 'Từ chối' },
+    ];
+    const currentLabel = STATUS_CONFIG[currentStatus]?.label || currentStatus;
+    const btns = all
+        .filter(s => s.status !== currentStatus)
+        .map(s => `<button class="cand-status-btn ${s.cls}" style="font-size:11px;padding:3px 8px;"
+            onclick="changeBatchResultStatus('${appId}','${s.status}',this.parentElement)">
+            <i class="fa-solid ${s.icon}"></i> ${s.label}
+        </button>`).join('');
+    return `<span style="font-size:11px;color:#64748b;flex-shrink:0;">Trạng thái: <strong>${escHtml(currentLabel)}</strong></span>${btns}`;
+}
+
+async function changeBatchResultStatus(appId, newStatus, rowEl) {
+    const prev = rowEl.innerHTML;
+    rowEl.innerHTML = '<span style="font-size:11px;color:#3b82f6;"><i class="fa-solid fa-spinner fa-spin"></i> Đang cập nhật...</span>';
+
+    try {
+        const res  = await apiFetchAuth(`/api/applications/${appId}/status`, {
+            method: 'PUT',
+            body: JSON.stringify({ status: newStatus })
+        });
+        const data = await res.json();
+        if (!res.ok || !data.success) throw new Error(data.message || 'Lỗi cập nhật');
+
+        const idx = _allApplications.findIndex(a => a.id === appId);
+        if (idx !== -1) {
+            _allApplications[idx].status    = newStatus;
+            _allApplications[idx].updatedAt = new Date().toISOString();
+        }
+        applyCandidateFilters();
+        renderStats();
+
+        rowEl.innerHTML = _batchStatusButtons(appId, newStatus);
+    } catch (e) {
+        rowEl.innerHTML = prev;
+        alert('Lỗi đổi trạng thái: ' + e.message);
+    }
 }
 
 // ── AI Đánh giá CV ──────────────────────────────────────────

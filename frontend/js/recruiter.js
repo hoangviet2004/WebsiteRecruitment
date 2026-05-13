@@ -249,7 +249,6 @@ async function loadMyCompany() {
             document.getElementById('company-website').value = res.data.website || '';
             document.getElementById('company-address').value = res.data.address || '';
             document.getElementById('company-desc').value = res.data.description || '';
-            document.getElementById('company-desc-count').textContent = (res.data.description || '').length;
             document.getElementById('company-email').value = res.data.contactEmail || '';
             document.getElementById('company-phone').value = res.data.contactPhone || '';
             // Quy mô công ty
@@ -723,6 +722,25 @@ document.addEventListener('DOMContentLoaded', async function() {
     requireRecruiter();
     await loadMyCompany();
     loadSubscriptionInfo();
+
+    // Inline counters — single-line inputs
+    ['company-name', 'company-taxcode', 'company-email', 'company-phone',
+     'company-website', 'company-address', 'job-title', 'job-location'
+    ].forEach(id => attachInlineCounter(document.getElementById(id)));
+
+    // Inline counters — textareas (ẩn counter cũ bên dưới)
+    ['company-desc', 'job-desc', 'job-req', 'job-ben'].forEach(id => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        const oldDiv = el.nextElementSibling;
+        if (oldDiv) oldDiv.style.display = 'none';
+        attachInlineCounter(el);
+    });
+
+    // Cập nhật counter sau khi loadMyCompany điền dữ liệu
+    ['company-name', 'company-taxcode', 'company-email', 'company-phone',
+     'company-website', 'company-address', 'company-desc'
+    ].forEach(id => document.getElementById(id)?.dispatchEvent(new Event('input')));
 
     const urlParams = new URLSearchParams(window.location.search);
     const tab = urlParams.get('tab') || 'company';

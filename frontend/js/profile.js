@@ -25,12 +25,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     const emailEl = document.getElementById('pf-email');
     if (emailEl) emailEl.value = user.email || '';
 
-    // Bio counter
-    const bioEl = document.getElementById('pf-bio');
-    if (bioEl) {
-        bioEl.addEventListener('input', updateBioCounter);
-    }
-
     // Avatar upload
     const avatarInput = document.getElementById('pf-avatar-input');
     if (avatarInput) avatarInput.addEventListener('change', handleAvatarUpload);
@@ -48,9 +42,113 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Skill level picker
     initLevelPicker();
 
+    const isRecruiter = (sessionStorage.getItem('role') || '') === 'Recruiter';
+    if (isRecruiter) applyRecruiterMode();
+
+    // Gắn inline counter cho tất cả các trường có giới hạn ký tự
+    ['pf-phone', 'pf-location', 'pf-linkedin', 'pf-github', 'pf-portfolio',
+     'skill-name', 'exp-position', 'exp-company', 'exp-desc',
+     'edu-degree', 'edu-school', 'edu-gpa'
+    ].forEach(id => attachInlineCounter(document.getElementById(id)));
+    if (!isRecruiter) attachInlineCounter(document.getElementById('pf-bio'));
+
     await loadProfile();
     initScrollHighlight();
 });
+
+function applyRecruiterMode() {
+    // ── 1. Ẩn toàn bộ sidebar ──────────────────────────────
+    const sidebar = document.querySelector('.pf-sidebar');
+    if (sidebar) sidebar.style.display = 'none';
+
+    // ── 2. Bỏ margin-left của main (sidebar đã ẩn) ─────────
+    const main = document.querySelector('.pf-main');
+    if (main) main.style.marginLeft = '0';
+
+    // ── 3. Di chuyển avatar vào banner, căn giữa ──────────
+    const avatarWrap = document.querySelector('.pf-avatar-wrap');
+    const banner     = document.querySelector('.pf-banner');
+    if (avatarWrap && banner) {
+        avatarWrap.style.cssText = 'border-bottom:none; padding-bottom:0; width:auto;';
+
+        const ring = avatarWrap.querySelector('.pf-avatar-ring');
+        const img  = avatarWrap.querySelector('#pf-avatar-img');
+        if (ring) { ring.style.width = '110px'; ring.style.height = '110px'; }
+        if (img)  { img.style.width  = '110px'; img.style.height  = '110px'; }
+
+        const nameEl = avatarWrap.querySelector('#pf-header-name');
+        if (nameEl) {
+            nameEl.style.fontSize   = '22px';
+            nameEl.style.fontWeight = '800';
+            nameEl.style.marginTop  = '10px';
+        }
+
+        banner.insertBefore(avatarWrap, banner.firstChild);
+        Object.assign(banner.style, {
+            flexDirection: 'column',
+            alignItems:    'center',
+            textAlign:     'center',
+            padding:       '32px 24px',
+        });
+    }
+
+    // Ẩn pf-banner-left (tên đã hiện trong avatar wrap)
+    const bannerLeft = document.querySelector('.pf-banner-left');
+    if (bannerLeft) bannerLeft.style.display = 'none';
+
+    // Chuyển form đổi mật khẩu và button xuống dưới cùng của main
+    const bannerRight = document.querySelector('.pf-banner-right');
+    const chpwCard    = document.getElementById('pf-chpw-card');
+    if (bannerRight && main) {
+        Object.assign(bannerRight.style, {
+            justifyContent: 'flex-end',
+            paddingTop:     '8px',
+        });
+        if (chpwCard) main.appendChild(chpwCard);
+        main.appendChild(bannerRight);
+    }
+
+    // ── 4. Ẩn các section không cần cho recruiter ──────────
+    ['sec-skills', 'sec-exp', 'sec-edu', 'sec-social', 'sec-cv'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.style.display = 'none';
+    });
+
+    // ── 5. Ẩn trường Trạng thái tìm việc & Địa chỉ ────────
+    const jobStatusField = document.getElementById('pf-jobstatus')?.closest('.pf-field');
+    if (jobStatusField) jobStatusField.style.display = 'none';
+
+    const locationField = document.getElementById('pf-location')?.closest('.pf-field');
+    if (locationField) locationField.style.display = 'none';
+
+    // ── 6. Đổi trường Bio → Chức danh / Vị trí ────────────
+    const bio = document.getElementById('pf-bio');
+    if (bio) {
+        const bioField = bio.closest('.pf-field');
+        if (bioField) {
+            bioField.classList.remove('pf-field-full');
+            const lbl = bioField.querySelector('label');
+            if (lbl) lbl.textContent = 'CHỨC DANH / VỊ TRÍ';
+            const ctr = bioField.querySelector('.pf-counter');
+            if (ctr) ctr.style.display = 'none';
+        }
+        bio.placeholder = 'VD: HR Manager, Talent Acquisition';
+        bio.maxLength   = 100;
+        bio.rows        = 1;
+        bio.style.resize   = 'none';
+        bio.style.overflow = 'hidden';
+
+        // Khớp chiều cao với các input khác
+        const refInput = document.getElementById('pf-phone');
+        if (refInput) {
+            const h = refInput.offsetHeight + 'px';
+            bio.style.height    = h;
+            bio.style.minHeight = h;
+        }
+
+        attachInlineCounter(bio, { inputStyle: true });
+    }
+}
 
 // ── Load profile from API ────────────────────────────────────
 async function loadProfile() {
@@ -67,7 +165,10 @@ async function loadProfile() {
         setVal('pf-phone',    p.phone || '');
         setVal('pf-location', p.location || '');
         setVal('pf-bio',      p.bio || '');
-        updateBioCounter();
+
+        // Cập nhật inline counters sau khi load dữ liệu
+        ['pf-phone', 'pf-location', 'pf-bio', 'pf-linkedin', 'pf-github', 'pf-portfolio']
+            .forEach(id => document.getElementById(id)?.dispatchEvent(new Event('input')));
 
         const statusEl = document.getElementById('pf-jobstatus');
         if (statusEl) statusEl.value = p.jobStatus || 'Seeking';
@@ -117,6 +218,9 @@ async function loadProfile() {
 }
 
 function buildSubtitle(p) {
+    if ((sessionStorage.getItem('role') || '') === 'Recruiter') {
+        return p.bio || 'Nhà tuyển dụng';
+    }
     const parts = [];
     if (p.experience) {
         try {
@@ -130,12 +234,17 @@ function buildSubtitle(p) {
 
 // ── Save profile ─────────────────────────────────────────────
 async function saveProfile() {
+    const isRecruiter = (sessionStorage.getItem('role') || '') === 'Recruiter';
     const btn = document.getElementById('pf-save-btn');
     const name = (document.getElementById('pf-fullname')?.value || '').trim();
     if (!name) { showToast('Vui lòng nhập họ và tên!', 'error'); return; }
 
     const bio = document.getElementById('pf-bio')?.value || '';
-    if (bio.length > 500) { showToast('Giới thiệu tối đa 500 ký tự!', 'error'); return; }
+    const bioMax = isRecruiter ? 100 : 500;
+    if (bio.length > bioMax) {
+        showToast(isRecruiter ? 'Chức danh tối đa 100 ký tự!' : 'Giới thiệu tối đa 500 ký tự!', 'error');
+        return;
+    }
 
     btn.disabled = true;
     btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang lưu...';
@@ -151,7 +260,7 @@ async function saveProfile() {
         bio,
         phone:       (document.getElementById('pf-phone')?.value    || '').trim(),
         location:    (document.getElementById('pf-location')?.value || '').trim(),
-        jobStatus:   document.getElementById('pf-jobstatus')?.value || 'Seeking',
+        jobStatus:   document.getElementById('pf-jobstatus')?.value || (isRecruiter ? 'NotSeeking' : 'Seeking'),
         skills:      JSON.stringify(_skills),
         experience:  JSON.stringify(_exp),
         education:   JSON.stringify(_edu),
@@ -166,12 +275,11 @@ async function saveProfile() {
             sessionStorage.setItem('fullName', name);
             showToast('Lưu hồ sơ thành công!', 'success');
 
-            // Cập nhật header & sidebar
-            const title = buildSubtitle({ experience: payload.experience, location: payload.location });
+            const title = isRecruiter ? bio : buildSubtitle({ experience: payload.experience, location: payload.location });
             setText('pf-header-name', name);
             setText('pf-banner-name', name);
             setText('pf-banner-title', title);
-    
+
             if (typeof renderNavRight === 'function') renderNavRight();
         } else {
             showToast('Lỗi: ' + (data?.message || 'Không thể lưu hồ sơ'), 'error');
@@ -191,9 +299,10 @@ function updateBioCounter() {
     const ctr = el?.parentElement?.querySelector('.pf-counter');
     if (!el || !cnt) return;
     const len = el.value.length;
+    const max = parseInt(el.maxLength) || 500;
     cnt.textContent = len;
     if (ctr) {
-        ctr.className = 'pf-counter' + (len > 500 ? ' over' : len > 420 ? ' warn' : '');
+        ctr.className = 'pf-counter' + (len > max ? ' over' : len > max * 0.84 ? ' warn' : '');
     }
 }
 
@@ -234,6 +343,7 @@ function openSkillModal(editIndex) {
     setVal('skill-name', s?.name || '');
     setLevelPicker(s?.level || 'beginner');
 
+    document.getElementById('skill-name')?.dispatchEvent(new Event('input'));
     document.getElementById('modal-skill').classList.add('show');
     document.getElementById('skill-name').focus();
 }
@@ -316,7 +426,8 @@ function openExpModal(editIndex) {
     setVal('exp-from',     e?.from     || '');
     setVal('exp-to',       e?.to       || '');
     setVal('exp-desc',     e?.desc     || '');
-    updateCounter(document.getElementById('exp-desc'), 'exp-desc-count');
+    ['exp-position', 'exp-company', 'exp-desc'].forEach(id =>
+        document.getElementById(id)?.dispatchEvent(new Event('input')));
     const cur = document.getElementById('exp-current');
     if (cur) { cur.checked = !!e?.current; toggleExpCurrent(cur); }
 
@@ -396,6 +507,8 @@ function openEduModal(editIndex) {
     setVal('edu-from',   e?.from   || '');
     setVal('edu-to',     e?.to     || '');
     setVal('edu-gpa',    e?.gpa    || '');
+    ['edu-degree', 'edu-school', 'edu-gpa'].forEach(id =>
+        document.getElementById(id)?.dispatchEvent(new Event('input')));
 
     document.getElementById('modal-edu').classList.add('show');
     document.getElementById('edu-degree').focus();
