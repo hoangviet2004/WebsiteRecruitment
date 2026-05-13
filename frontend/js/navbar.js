@@ -238,6 +238,9 @@ function renderNavRight() {
                         <a href="candidate-messages.html" class="dropdown-item">
                             <i class="fa-regular fa-comments" style="width:14px;margin-right:8px;"></i>Tin nhắn
                         </a>
+                        <a href="applied-jobs.html" class="dropdown-item">
+                            <i class="fa-regular fa-paper-plane" style="width:14px;margin-right:8px;"></i>Việc làm đã ứng tuyển
+                        </a>
                         <a href="savedJobs.html" class="dropdown-item">
                             <i class="fa-regular fa-bookmark" style="width:14px;margin-right:8px;"></i>Việc làm đã lưu
                         </a>

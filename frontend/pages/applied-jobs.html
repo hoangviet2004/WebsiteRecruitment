@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Việc làm đã ứng tuyển — TechList</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/home.css">
+  <link rel="stylesheet" href="../assets/css/applied-jobs.css">
+</head>
+<body>
+  <nav class="homebar">
+    <div class="left">
+      <a href="home.html" class="logo-svg"><img src="../assets/logo.svg" alt="Logo">TechList</a>
+      <ul>
+        <li><a href="jobs.html">Tìm việc</a></li>
+        <li><a href="companies.html">Công ty</a></li>
+        <li><a href="blog.html">Blog</a></li>
+      </ul>
+    </div>
+    <div class="right" id="nav-right"></div>
+  </nav>
+
+  <div class="aj-container">
+    <main class="aj-content">
+
+      <!-- Header -->
+      <div class="aj-header">
+        <h1><i class="fa-regular fa-paper-plane" style="color:#3b82f6;margin-right:10px;font-size:22px;"></i>Việc làm đã ứng tuyển</h1>
+        <div class="aj-header-actions">
+          <div class="aj-search">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" id="aj-search-input" placeholder="Tìm theo tên vị trí...">
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab Bar -->
+      <div class="aj-tabs-row">
+        <div class="aj-tabs">
+          <button class="aj-tab active" data-status="all" onclick="switchTab('all', this)">Tất cả <span id="count-all">(0)</span></button>
+          <button class="aj-tab" data-status="Applied" onclick="switchTab('Applied', this)">Đã nộp <span id="count-Applied">(0)</span></button>
+          <button class="aj-tab" data-status="Screening" onclick="switchTab('Screening', this)">Đang xem xét <span id="count-Screening">(0)</span></button>
+          <button class="aj-tab" data-status="Interview" onclick="switchTab('Interview', this)">Phỏng vấn <span id="count-Interview">(0)</span></button>
+          <button class="aj-tab" data-status="Offered" onclick="switchTab('Offered', this)">Đề nghị <span id="count-Offered">(0)</span></button>
+          <button class="aj-tab" data-status="OnHold" onclick="switchTab('OnHold', this)">Tạm giữ <span id="count-OnHold">(0)</span></button>
+          <button class="aj-tab" data-status="Rejected" onclick="switchTab('Rejected', this)">Từ chối <span id="count-Rejected">(0)</span></button>
+        </div>
+      </div>
+
+      <!-- Job Cards Grid -->
+      <div class="aj-grid" id="aj-grid">
+        <div class="aj-skeleton"></div>
+        <div class="aj-skeleton"></div>
+        <div class="aj-skeleton"></div>
+      </div>
+
+      <!-- Empty State -->
+      <div class="aj-empty" id="aj-empty" style="display:none;">
+        <i class="fa-regular fa-paper-plane"></i>
+        <h3>Chưa có đơn ứng tuyển nào</h3>
+        <p>Hãy khám phá các tin tuyển dụng và bắt đầu ứng tuyển</p>
+        <a href="jobs.html" class="aj-btn-find">
+          <i class="fa-solid fa-magnifying-glass"></i> Tìm việc ngay
+        </a>
+      </div>
+
+    </main>
+  </div>
+
+  <script src="../js/api.js"></script>
+  <script src="../js/navbar.js"></script>
+  <script src="../js/home.js"></script>
+  <script src="../js/applied-jobs.js"></script>
+  <script>
+    const _role = sessionStorage.getItem('role');
+    const _token = sessionStorage.getItem('token');
+    if (!_token || _role !== 'Candidate') {
+      window.location.href = 'auth.html#login';
+    } else {
+      initAppliedJobs();
+    }
+  </script>
+</body>
+</html>

@@ -72,7 +72,7 @@ public sealed class JobRecommendationService : IJobRecommendationService
         }));
 
         var prompt = BuildPrompt(cvText, profile.Skills, profile.Experience, profile.Education, jobList);
-        var json   = await CallGroqAsync(prompt, ct);
+        var json   = await CallGeminiAsync(prompt, ct);
         return ParseResult(json);
     }
 
@@ -116,37 +116,46 @@ public sealed class JobRecommendationService : IJobRecommendationService
             """;
     }
 
-    private async Task<string> CallGroqAsync(string prompt, CancellationToken ct)
+    private async Task<string> CallGeminiAsync(string prompt, CancellationToken ct)
     {
         var requestBody = new
         {
-            model           = _settings.Model,
-            messages        = new[]
+            systemInstruction = new
             {
-                new { role = "system", content = "Bạn là hệ thống gợi ý việc làm AI. Chỉ trả về JSON hợp lệ, không thêm text nào khác." },
-                new { role = "user",   content = prompt }
+                parts = new[] { new { text = "Bạn là hệ thống gợi ý việc làm AI. Chỉ trả về JSON hợp lệ, không thêm text nào khác." } }
             },
-            max_tokens      = 1024,
-            temperature     = 0,
-            response_format = new { type = "json_object" }
+            contents = new[]
+            {
+                new
+                {
+                    role = "user",
+                    parts = new[] { new { text = prompt } }
+                }
+            },
+            generationConfig = new
+            {
+                temperature = 0,
+                responseMimeType = "application/json"
+            }
         };
 
-        using var request = new HttpRequestMessage(HttpMethod.Post, "https://api.groq.com/openai/v1/chat/completions");
-        request.Headers.Add("Authorization", $"Bearer {_settings.ApiKey}");
+        var url = $"https://generativelanguage.googleapis.com/v1beta/models/{_settings.Model}:generateContent?key={_settings.ApiKey}";
+        using var request = new HttpRequestMessage(HttpMethod.Post, url);
         request.Content = new StringContent(JsonSerializer.Serialize(requestBody), Encoding.UTF8, "application/json");
 
         var response = await _http.SendAsync(request, ct);
         var body     = await response.Content.ReadAsStringAsync(ct);
 
         if (!response.IsSuccessStatusCode)
-            throw new InvalidOperationException($"Groq API lỗi: {response.StatusCode} - {body}");
+            throw new InvalidOperationException($"Gemini API lỗi: {response.StatusCode} - {body}");
 
         using var doc = JsonDocument.Parse(body);
         return doc.RootElement
-            .GetProperty("choices")[0]
-            .GetProperty("message")
+            .GetProperty("candidates")[0]
             .GetProperty("content")
-            .GetString() ?? throw new InvalidOperationException("Phản hồi Groq rỗng.");
+            .GetProperty("parts")[0]
+            .GetProperty("text")
+            .GetString() ?? throw new InvalidOperationException("Phản hồi Gemini rỗng.");
     }
 
     private static JobRecommendationResult ParseResult(string json)

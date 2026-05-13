@@ -61,7 +61,7 @@ body { padding-top: 76px; background-color: #f8fafc; color: #1e293b; }
     position: absolute; top: calc(100% + 14px); right: 0;
     background: #ffffff; border: 1px solid rgba(226, 232, 240, 0.8); border-radius: 16px;
     box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
-    min-width: 220px; z-index: 100; padding: 8px;
+    min-width: 250px; z-index: 100; padding: 8px;
     transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .user-menu.open .user-dropdown { visibility: visible; opacity: 1; transform: translateY(0) scale(1); }
