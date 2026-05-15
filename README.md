@@ -177,7 +177,7 @@ Swagger UI: `http://localhost:5240/swagger`
 
 **Frontend:**
 
-Mở file `frontend/pages/home.html` bằng trình duyệt hoặc dùng Live Server (VS Code extension), đảm bảo frontend chạy tại port `5500`.
+Mở file `frontend/index.html` bằng trình duyệt hoặc dùng Live Server (VS Code extension), đảm bảo frontend chạy tại port `5500`.
 
 ---
 
