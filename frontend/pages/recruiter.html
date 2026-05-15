@@ -282,9 +282,9 @@
                             <option value="">Tất cả</option>
                             <option value="Applied">Mới nộp</option>
                             <option value="Screening">Sàng lọc</option>
-                            <option value="Interview">Phỏng vấn</option>
+                            <option value="Interview">Đang phỏng vấn</option>
                             <option value="Offered">Đề nghị</option>
-                            <option value="OnHold">Tạm giữ</option>
+                            <option value="Hired">Đã tuyển</option>
                             <option value="Rejected">Từ chối</option>
                         </select>
                     </div>
@@ -308,6 +308,7 @@
                                     <th>Tin ứng tuyển</th>
                                     <th>Ngày nộp</th>
                                     <th>Trạng thái</th>
+                                    <th>Giai đoạn</th>
                                     <th>Thao tác</th>
                                 </tr>
                             </thead>
@@ -467,8 +468,14 @@
                         <div class="msg-thread-header" id="msg-thread-header" style="display:none;">
                             <div class="msg-thread-candidate" id="msg-thread-candidate"></div>
                             <div class="msg-thread-actions">
-                                <button class="msg-icon-btn" title="Lên lịch phỏng vấn" onclick="openScheduleModal()">
-                                    <i class="fa-regular fa-calendar-plus"></i>
+                                <button class="msg-icon-btn" title="Tìm kiếm trong cuộc trò chuyện">
+                                    <i class="fa-solid fa-magnifying-glass"></i>
+                                </button>
+                                <button class="msg-icon-btn" title="Gọi video">
+                                    <i class="fa-solid fa-video"></i>
+                                </button>
+                                <button class="msg-icon-btn" title="Gọi điện">
+                                    <i class="fa-solid fa-phone"></i>
                                 </button>
                             </div>
                         </div>
@@ -649,9 +656,10 @@
             <div id="cand-ai-result"
                 style="display:none; margin:0 24px 16px; border-radius:10px; border:1.5px solid #e2e8f0; overflow:hidden;">
             </div>
+            <div id="cand-modal-inline-form"></div>
             <div class="modal-footer">
+                <div id="cand-modal-status-actions" style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;"></div>
                 <button class="btn-secondary" onclick="closeCandModal()">Đóng</button>
-                <div id="cand-modal-status-actions" style="display:flex; gap:8px; flex-wrap:wrap;"></div>
             </div>
         </div>
     </div>
@@ -846,26 +854,31 @@
                         có trạng thái
                     </label>
                     <div class="qr-status-checkboxes">
-                        <label class="qr-checkbox-item">
-                            <input type="checkbox" name="qr-status" value="Applied" onchange="updateQuickRejectCount()"
-                                checked>
-                            <span class="badge badge-applied"><i class="fa-solid fa-file-pen"></i> Mới nộp</span>
-                        </label>
-                        <label class="qr-checkbox-item">
-                            <input type="checkbox" name="qr-status" value="Screening"
-                                onchange="updateQuickRejectCount()">
-                            <span class="badge badge-screening"><i class="fa-solid fa-magnifying-glass"></i> Sàng
-                                lọc</span>
-                        </label>
-                        <label class="qr-checkbox-item">
-                            <input type="checkbox" name="qr-status" value="OnHold" onchange="updateQuickRejectCount()">
-                            <span class="badge badge-onhold"><i class="fa-solid fa-clock"></i> Tạm giữ</span>
-                        </label>
-                        <label class="qr-checkbox-item">
-                            <input type="checkbox" name="qr-status" value="Interview"
-                                onchange="updateQuickRejectCount()">
-                            <span class="badge badge-interview"><i class="fa-solid fa-comments"></i> Phỏng vấn</span>
-                        </label>
+                        <div class="qr-stage-group">
+                            <span class="qr-stage-label badge badge-stage stage-apply">Nộp hồ sơ</span>
+                            <label class="qr-checkbox-item">
+                                <input type="checkbox" name="qr-status" value="Applied" onchange="updateQuickRejectCount()" checked>
+                                <span class="badge badge-applied"><i class="fa-solid fa-file-pen"></i> Mới nộp</span>
+                            </label>
+                            <label class="qr-checkbox-item">
+                                <input type="checkbox" name="qr-status" value="Screening" onchange="updateQuickRejectCount()">
+                                <span class="badge badge-screening"><i class="fa-solid fa-magnifying-glass"></i> Sàng lọc</span>
+                            </label>
+                        </div>
+                        <div class="qr-stage-group">
+                            <span class="qr-stage-label badge badge-stage stage-interview">Phỏng vấn</span>
+                            <label class="qr-checkbox-item">
+                                <input type="checkbox" name="qr-status" value="Interview" onchange="updateQuickRejectCount()">
+                                <span class="badge badge-interview"><i class="fa-solid fa-comments"></i> Đang phỏng vấn</span>
+                            </label>
+                        </div>
+                        <div class="qr-stage-group">
+                            <span class="qr-stage-label badge badge-stage stage-offer">Offer</span>
+                            <label class="qr-checkbox-item">
+                                <input type="checkbox" name="qr-status" value="Offered" onchange="updateQuickRejectCount()">
+                                <span class="badge badge-offered"><i class="fa-solid fa-handshake"></i> Đề nghị</span>
+                            </label>
+                        </div>
                     </div>
                 </div>
 
@@ -913,7 +926,7 @@
                     <label style="font-size:13px;font-weight:600;color:#1e293b;">
                         <i class="fa-solid fa-comment-slash" style="color:#64748b;margin-right:6px;"></i>Lý do từ chối
                     </label>
-                    <select id="qr-reason" style="margin-top:8px;">
+                    <select id="qr-reason" style="margin-top:8px;width:100%;box-sizing:border-box;" onchange="toggleQrOther(this)">
                         <option value="Không đủ kinh nghiệm">Không đủ kinh nghiệm</option>
                         <option value="Hồ sơ không phù hợp">Hồ sơ không phù hợp</option>
                         <option value="Vị trí đã tuyển đủ người">Vị trí đã tuyển đủ người</option>
@@ -922,6 +935,9 @@
                         <option value="Yêu cầu lương không phù hợp">Yêu cầu lương không phù hợp</option>
                         <option value="Khác">Lý do khác</option>
                     </select>
+                    <textarea id="qr-reason-other" maxlength="100" placeholder="Mô tả lý do từ chối (tối đa 100 ký tự)..."
+                        style="display:none;margin-top:8px;width:100%;box-sizing:border-box;padding:8px 10px;border:1.5px solid #e2e8f0;border-radius:7px;font-size:13px;font-family:inherit;resize:none;overflow:hidden;"
+                        oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
                 </div>
 
                 <div class="qr-preview-box" id="qr-preview-box">
@@ -963,22 +979,31 @@
                         <i class="fa-solid fa-filter" style="color:#64748b;margin-right:6px;"></i>Áp dụng cho ứng viên có trạng thái
                     </label>
                     <div class="qr-status-checkboxes">
-                        <label class="qr-checkbox-item">
-                            <input type="checkbox" name="bai-status" value="Applied" onchange="updateBatchAICount()" checked>
-                            <span class="badge badge-applied"><i class="fa-solid fa-file-pen"></i> Mới nộp</span>
-                        </label>
-                        <label class="qr-checkbox-item">
-                            <input type="checkbox" name="bai-status" value="Screening" onchange="updateBatchAICount()">
-                            <span class="badge badge-screening"><i class="fa-solid fa-magnifying-glass"></i> Sàng lọc</span>
-                        </label>
-                        <label class="qr-checkbox-item">
-                            <input type="checkbox" name="bai-status" value="OnHold" onchange="updateBatchAICount()">
-                            <span class="badge badge-onhold"><i class="fa-solid fa-clock"></i> Tạm giữ</span>
-                        </label>
-                        <label class="qr-checkbox-item">
-                            <input type="checkbox" name="bai-status" value="Interview" onchange="updateBatchAICount()">
-                            <span class="badge badge-interview"><i class="fa-solid fa-comments"></i> Phỏng vấn</span>
-                        </label>
+                        <div class="qr-stage-group">
+                            <span class="qr-stage-label badge badge-stage stage-apply">Nộp hồ sơ</span>
+                            <label class="qr-checkbox-item">
+                                <input type="checkbox" name="bai-status" value="Applied" onchange="updateBatchAICount()" checked>
+                                <span class="badge badge-applied"><i class="fa-solid fa-file-pen"></i> Mới nộp</span>
+                            </label>
+                            <label class="qr-checkbox-item">
+                                <input type="checkbox" name="bai-status" value="Screening" onchange="updateBatchAICount()">
+                                <span class="badge badge-screening"><i class="fa-solid fa-magnifying-glass"></i> Sàng lọc</span>
+                            </label>
+                        </div>
+                        <div class="qr-stage-group">
+                            <span class="qr-stage-label badge badge-stage stage-interview">Phỏng vấn</span>
+                            <label class="qr-checkbox-item">
+                                <input type="checkbox" name="bai-status" value="Interview" onchange="updateBatchAICount()">
+                                <span class="badge badge-interview"><i class="fa-solid fa-comments"></i> Đang phỏng vấn</span>
+                            </label>
+                        </div>
+                        <div class="qr-stage-group">
+                            <span class="qr-stage-label badge badge-stage stage-offer">Offer</span>
+                            <label class="qr-checkbox-item">
+                                <input type="checkbox" name="bai-status" value="Offered" onchange="updateBatchAICount()">
+                                <span class="badge badge-offered"><i class="fa-solid fa-handshake"></i> Đề nghị</span>
+                            </label>
+                        </div>
                     </div>
                 </div>
 

@@ -527,7 +527,7 @@ function pollUnread() {
 
 // ── Helpers ─────────────────────────────────────────────────────
 function statusLabel(s) {
-    return { Applied:'Mới nộp', Screening:'Sàng lọc', Interview:'Phỏng vấn', Offered:'Đề nghị', Rejected:'Từ chối', OnHold:'Tạm giữ' }[s] || s;
+    return { Applied:'Mới nộp', Screening:'Sàng lọc', Interview:'Đang phỏng vấn', Offered:'Đề nghị', Hired:'Đã tuyển', Rejected:'Từ chối' }[s] || s;
 }
 
 function esc(s) {

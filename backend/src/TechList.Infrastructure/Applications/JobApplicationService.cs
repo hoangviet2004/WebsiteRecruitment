@@ -133,22 +133,21 @@ public sealed class JobApplicationService : IJobApplicationService
             .Select(j => j.Id)
             .ToListAsync(ct);
 
-        var ids = await _db.JobApplications
+        var apps = await _db.JobApplications
+            .Include(a => a.JobPost)
             .Where(a => jobIds.Contains(a.JobPostId))
             .OrderByDescending(a => a.AppliedAt)
-            .Select(a => a.Id)
+            .AsNoTracking()
             .ToListAsync(ct);
 
-        var result = new List<JobApplicationDto>();
-        foreach (var id in ids)
-            result.Add(await BuildDto(id, ct));
+        if (apps.Count == 0) return [];
 
-        return result;
+        return await BuildBatchDto(apps, ct);
     }
 
     public async Task<JobApplicationDto> UpdateStatusAsync(string recruiterId, Guid applicationId, string newStatus, CancellationToken ct)
     {
-        var validStatuses = new[] { "Applied", "Screening", "Interview", "Offered", "Rejected", "OnHold" };
+        var validStatuses = new[] { "Applied", "Screening", "Interview", "Offered", "Rejected", "Hired" };
         if (!validStatuses.Contains(newStatus))
             throw new InvalidOperationException($"Trạng thái không hợp lệ: {newStatus}");
 
@@ -161,6 +160,7 @@ public sealed class JobApplicationService : IJobApplicationService
         if (application.JobPost.Company.OwnerId != recruiterId)
             throw new UnauthorizedAccessException("Bạn không có quyền cập nhật đơn này.");
 
+        var oldStatus = application.Status;
         application.Status = newStatus;
         application.UpdatedAt = DateTime.UtcNow;
         await _db.SaveChangesAsync(ct);
@@ -183,22 +183,24 @@ public sealed class JobApplicationService : IJobApplicationService
             _logger.LogWarning(ex, "Không thể tạo thông báo in-app cho ứng viên {Id}", application.CandidateId);
         }
 
-        if (!string.IsNullOrEmpty(dto.CandidateEmail))
+        if (!string.IsNullOrEmpty(dto.CandidateEmail) && GetStage(newStatus) != GetStage(oldStatus))
         {
-            try
+            var toEmail       = dto.CandidateEmail;
+            var candidateName = dto.CandidateName;
+            var jobTitle      = dto.JobTitle;
+            var companyName   = application.JobPost.Company.Name;
+            _ = Task.Run(async () =>
             {
-                await _emailService.SendApplicationStatusEmailAsync(
-                    toEmail: dto.CandidateEmail,
-                    candidateName: dto.CandidateName,
-                    jobTitle: dto.JobTitle,
-                    companyName: application.JobPost.Company.Name,
-                    newStatus: newStatus,
-                    ct: ct);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogWarning(ex, "Không thể gửi email thông báo cho ứng viên {Email}", dto.CandidateEmail);
-            }
+                try
+                {
+                    await _emailService.SendApplicationStatusEmailAsync(
+                        toEmail, candidateName, jobTitle, companyName, newStatus);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Không thể gửi email thông báo cho ứng viên {Email}", toEmail);
+                }
+            });
         }
 
         return dto;
@@ -244,13 +246,22 @@ public sealed class JobApplicationService : IJobApplicationService
         await _db.SaveChangesAsync(ct);
     }
 
+    private static string GetStage(string status) => status switch
+    {
+        "Applied" or "Screening"   => "apply",
+        "Interview"                => "interview",
+        "Offered"                  => "offer",
+        "Hired" or "Rejected"      => "done",
+        _                          => status
+    };
+
     private static string GetStatusTitle(string status) => status switch
     {
         "Screening" => "Hồ sơ đang được xem xét",
         "Interview" => "Bạn được mời phỏng vấn",
         "Offered"   => "Chúc mừng! Bạn nhận được offer",
+        "Hired"     => "Chúc mừng! Bạn đã được tuyển dụng",
         "Rejected"  => "Đơn ứng tuyển đã bị từ chối",
-        "OnHold"    => "Đơn ứng tuyển đang tạm giữ",
         _           => "Cập nhật trạng thái ứng tuyển"
     };
 
@@ -261,27 +272,48 @@ public sealed class JobApplicationService : IJobApplicationService
             .AsNoTracking()
             .FirstAsync(a => a.Id == applicationId, ct);
 
-        var user = await _userManager.FindByIdAsync(app.CandidateId);
+        var user    = await _userManager.FindByIdAsync(app.CandidateId);
         var profile = await _db.UserProfiles
             .AsNoTracking()
             .FirstOrDefaultAsync(p => p.UserId == app.CandidateId, ct);
 
-        return new JobApplicationDto(
-            app.Id,
-            app.JobPostId,
-            app.JobPost.Title,
+        return MapToDto(app, user, profile);
+    }
+
+    private async Task<List<JobApplicationDto>> BuildBatchDto(
+        List<JobApplication> apps, CancellationToken ct)
+    {
+        var candidateIds = apps.Select(a => a.CandidateId).Distinct().ToList();
+
+        var users = await _userManager.Users
+            .Where(u => candidateIds.Contains(u.Id))
+            .ToListAsync(ct);
+
+        var profiles = await _db.UserProfiles
+            .Where(p => candidateIds.Contains(p.UserId))
+            .AsNoTracking()
+            .ToListAsync(ct);
+
+        var userDict    = users.ToDictionary(u => u.Id);
+        var profileDict = profiles.ToDictionary(p => p.UserId);
+
+        return apps.Select(app =>
+        {
+            userDict.TryGetValue(app.CandidateId, out var user);
+            profileDict.TryGetValue(app.CandidateId, out var profile);
+            return MapToDto(app, user, profile);
+        }).ToList();
+    }
+
+    private static JobApplicationDto MapToDto(
+        JobApplication app, ApplicationUser? user, UserProfile? profile) =>
+        new(
+            app.Id, app.JobPostId, app.JobPost.Title,
             app.CandidateId,
             profile?.DisplayName ?? user?.FullName ?? user?.Email ?? "Ứng viên",
             user?.Email ?? "",
-            profile?.AvatarUrl,
-            profile?.CvUrl,
-            profile?.Skills,
-            profile?.Experience,
-            profile?.Education,
-            app.Status,
-            app.CoverLetter,
-            app.AppliedAt,
-            app.UpdatedAt
+            profile?.AvatarUrl, profile?.CvUrl, profile?.Skills,
+            profile?.Experience, profile?.Education,
+            app.Status, app.CoverLetter, app.AppliedAt, app.UpdatedAt
         );
-    }
 }

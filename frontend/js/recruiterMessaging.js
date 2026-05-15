@@ -72,9 +72,9 @@ Phòng Nhân sự`
 const APP_STATUS_TAGS = {
     Applied:   { label: 'Mới nộp',   bg: '#eff6ff', color: '#3b82f6' },
     Screening: { label: 'Sàng lọc',  bg: '#fef9c3', color: '#ca8a04' },
-    Interview: { label: 'Phỏng vấn', bg: '#f0fdf4', color: '#16a34a' },
+    Interview: { label: 'Đang phỏng vấn', bg: '#f0fdf4', color: '#16a34a' },
     Offered:   { label: 'Đề nghị',   bg: '#ecfdf5', color: '#059669' },
-    OnHold:    { label: 'Tạm giữ',   bg: '#fef3c7', color: '#d97706' },
+    Hired:     { label: 'Đã tuyển',  bg: '#fefce8', color: '#854d0e' },
     Rejected:  { label: 'Từ chối',   bg: '#fef2f2', color: '#dc2626' }
 };
 
@@ -357,17 +357,6 @@ function renderCandidateInfo(d){
             <div style="margin-top:8px;">${_statusTag(d.applicationStatus)}</div>
         </div>
 
-        <div class="msg-info-actions">
-            <button class="msg-info-btn primary" onclick="openScheduleModal()">
-                <i class="fa-regular fa-calendar-plus"></i> Lên lịch phỏng vấn
-            </button>
-            <button class="msg-info-btn success" onclick="quickAction('offer')">
-                <i class="fa-solid fa-handshake"></i> Gửi Offer
-            </button>
-            <button class="msg-info-btn danger" onclick="quickAction('reject')">
-                <i class="fa-solid fa-xmark"></i> Từ chối
-            </button>
-        </div>
 
         ${interviewHtml}
         ${cvHtml}

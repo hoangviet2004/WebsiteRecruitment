@@ -96,24 +96,28 @@ public sealed class InterviewService : IInterviewService
 
         if (!string.IsNullOrEmpty(candidate?.Email))
         {
-            try
+            var toEmail       = candidate.Email;
+            var candName      = dto.CandidateName;
+            var jobTitle      = app.JobPost.Title;
+            var companyName   = app.JobPost.Company.Name;
+            var scheduledAt   = schedule.ScheduledAt;
+            var duration      = schedule.DurationMinutes;
+            var meetingLink   = schedule.MeetingLink;
+            var location      = schedule.Location;
+            var notes         = schedule.Notes;
+            _ = Task.Run(async () =>
             {
-                await _emailService.SendInterviewScheduledEmailAsync(
-                    toEmail: candidate.Email,
-                    candidateName: dto.CandidateName,
-                    jobTitle: app.JobPost.Title,
-                    companyName: app.JobPost.Company.Name,
-                    scheduledAt: schedule.ScheduledAt,
-                    durationMinutes: schedule.DurationMinutes,
-                    meetingLink: schedule.MeetingLink,
-                    location: schedule.Location,
-                    notes: schedule.Notes,
-                    ct: ct);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogWarning(ex, "Không thể gửi email lịch phỏng vấn cho ứng viên {Email}", candidate.Email);
-            }
+                try
+                {
+                    await _emailService.SendInterviewScheduledEmailAsync(
+                        toEmail, candName, jobTitle, companyName,
+                        scheduledAt, duration, meetingLink, location, notes);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Không thể gửi email lịch phỏng vấn cho ứng viên {Email}", toEmail);
+                }
+            });
         }
 
         return dto;

@@ -582,6 +582,12 @@ async function submitJobForm() {
         return;
     }
 
+    if (payload.minSalary !== null && payload.maxSalary !== null && payload.minSalary >= payload.maxSalary) {
+        alert("Lương tối thiểu phải nhỏ hơn lương tối đa.");
+        document.getElementById('job-min-salary').focus();
+        return;
+    }
+
     try {
         let response;
         if (isUpdate) {

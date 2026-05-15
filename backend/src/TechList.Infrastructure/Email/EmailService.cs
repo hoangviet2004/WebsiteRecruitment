@@ -151,12 +151,6 @@ public sealed class EmailService : IEmailService
                 $"Sau khi cân nhắc kỹ lưỡng, chúng tôi rất tiếc phải thông báo rằng hồ sơ của bạn cho vị trí <strong>{jobTitle}</strong> tại <strong>{companyName}</strong> chưa phù hợp với yêu cầu hiện tại. Chúng tôi trân trọng sự quan tâm của bạn và mong có cơ hội hợp tác trong tương lai.",
                 "#ef4444"
             ),
-            "OnHold" => (
-                $"Hồ sơ của bạn đang tạm giữ — {jobTitle}",
-                "Hồ sơ của bạn đang được tạm giữ",
-                $"Hồ sơ ứng tuyển của bạn cho vị trí <strong>{jobTitle}</strong> tại <strong>{companyName}</strong> hiện đang được tạm giữ trong quá trình tuyển dụng. Chúng tôi sẽ cập nhật tình trạng sớm nhất có thể.",
-                "#f59e0b"
-            ),
             _ => (
                 $"Cập nhật trạng thái ứng tuyển — {jobTitle}",
                 "Trạng thái ứng tuyển đã được cập nhật",

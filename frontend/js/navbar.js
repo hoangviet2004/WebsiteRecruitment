@@ -19,7 +19,7 @@ const _STATUS_NOTIF = {
     Screening: { icon: 'fa-magnifying-glass', color: '#ca8a04', msg: 'Hồ sơ của bạn đang được xem xét và sàng lọc.' },
     Interview: { icon: 'fa-comments',         color: '#16a34a', msg: 'Bạn được mời tham gia phỏng vấn.' },
     Offered:   { icon: 'fa-handshake',        color: '#059669', msg: 'Chúc mừng! Bạn nhận được đề nghị công việc.' },
-    OnHold:    { icon: 'fa-clock',            color: '#d97706', msg: 'Đơn ứng tuyển của bạn đang được tạm giữ.' },
+    Hired:     { icon: 'fa-trophy',            color: '#854d0e', msg: 'Chúc mừng! Bạn đã được tuyển dụng.' },
     Rejected:  { icon: 'fa-xmark',            color: '#dc2626', msg: 'Rất tiếc, đơn ứng tuyển của bạn đã bị từ chối.' },
 };
 

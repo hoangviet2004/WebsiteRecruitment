@@ -17,7 +17,7 @@ const STATUS_COLORS = {
     Screening: '#f59e0b',
     Interview: '#22c55e',
     Offered:   '#10b981',
-    OnHold:    '#f97316',
+    Hired:     '#854d0e',
     Rejected:  '#ef4444',
 };
 
