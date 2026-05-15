@@ -64,8 +64,11 @@
             <div class="msg-bubbles" id="msg-bubbles"></div>
             <div class="msg-input-wrap" id="msg-input-wrap" style="display:none;">
                 <div class="msg-input-row">
-                    <textarea id="msg-input" class="msg-textarea" placeholder="Nhập phản hồi tại đây... (Ctrl+Enter để gửi)" rows="3"
-                        onkeydown="handleMsgKey(event)"></textarea>
+                    <div class="msg-textarea-wrap">
+                        <textarea id="msg-input" class="msg-textarea" placeholder="Nhập phản hồi tại đây... (Ctrl+Enter để gửi)" rows="1"
+                            maxlength="500" onkeydown="handleMsgKey(event)" oninput="autoResizeTextarea(this); updateCharCount(this, 'msg-char-count')"></textarea>
+                        <span class="msg-char-counter" id="msg-char-counter"><span id="msg-char-count">0</span>/500</span>
+                    </div>
                     <button class="msg-send-btn" onclick="sendMessage()">
                         <i class="fa-solid fa-paper-plane"></i>
                     </button>

@@ -488,8 +488,11 @@
                                 </select>
                             </div>
                             <div class="msg-input-row">
-                                <textarea id="msg-input" class="msg-textarea" placeholder="Nhập tin nhắn tại đây..."
-                                    rows="1" onkeydown="handleMsgKey(event)" oninput="autoResizeTextarea(this)"></textarea>
+                                <div class="msg-textarea-wrap">
+                                    <textarea id="msg-input" class="msg-textarea" placeholder="Nhập tin nhắn tại đây..."
+                                        rows="1" maxlength="500" onkeydown="handleMsgKey(event)" oninput="autoResizeTextarea(this); updateCharCount(this, 'msg-char-count')"></textarea>
+                                    <span class="msg-char-counter" id="msg-char-counter"><span id="msg-char-count">0</span>/500</span>
+                                </div>
                                 <button class="msg-send-btn" onclick="sendMessage()">
                                     <i class="fa-solid fa-paper-plane"></i>
                                 </button>

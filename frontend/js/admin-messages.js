@@ -169,6 +169,8 @@ async function sendMessage(){
         });
         if(!res?.ok) throw new Error('Lỗi gửi tin');
         input.value = '';
+        autoResizeTextarea(input);
+        updateCharCount(input, 'msg-char-count');
         loadThread(_activeUserId);
         fetchConversations();
     } catch(e){ alert(e.message); }
@@ -179,6 +181,21 @@ function handleMsgKey(e){
         e.preventDefault();
         sendMessage();
     }
+}
+
+function autoResizeTextarea(el){
+    el.style.height = 'auto';
+    el.style.height = Math.max(42, el.scrollHeight) + 'px';
+}
+
+function updateCharCount(el, spanId){
+    const len = el.value.length;
+    const span = document.getElementById(spanId);
+    const counter = span?.parentElement;
+    if(!span) return;
+    span.textContent = len;
+    counter.classList.toggle('warn',  len >= 450 && len < 500);
+    counter.classList.toggle('limit', len >= 500);
 }
 
 function startMsgPolling(userId){

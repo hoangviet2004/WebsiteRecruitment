@@ -1760,9 +1760,9 @@
     background: #f8fafc;
     transition: none;
     line-height: 1.5;
+    box-sizing: border-box;
     min-height: 42px;
     height: 42px;
-    max-height: 200px;
     overflow-y: hidden;
 }
 .msg-textarea:focus {
@@ -1785,6 +1785,29 @@
     flex-shrink: 0;
 }
 .msg-send-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(59,130,246,0.35); }
+
+.msg-textarea-wrap {
+    position: relative;
+    flex: 1;
+}
+.msg-textarea-wrap .msg-textarea {
+    flex: none;
+    width: 100%;
+}
+.msg-char-counter {
+    position: absolute;
+    bottom: 6px;
+    right: 10px;
+    font-size: 11px;
+    color: #94a3b8;
+    pointer-events: none;
+    background: rgba(248,250,252,0.85);
+    border-radius: 4px;
+    padding: 1px 5px;
+    line-height: 1.4;
+}
+.msg-char-counter.warn  { color: #f59e0b; }
+.msg-char-counter.limit { color: #ef4444; font-weight: 600; }
 
 /* ── Cột phải: Candidate info ── */
 .msg-info-col {

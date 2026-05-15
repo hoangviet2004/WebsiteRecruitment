@@ -415,6 +415,7 @@ async function sendMessage(){
 
         input.value = '';
         autoResizeTextarea(input);
+        updateCharCount(input, 'msg-char-count');
         // Reload thread để hiện tin mới
         await loadThread(_activeAppId);
         // Cập nhật conversation list (last message)
@@ -437,6 +438,16 @@ function handleMsgKey(e){
 function autoResizeTextarea(el){
     el.style.height = 'auto';
     el.style.height = Math.max(42, el.scrollHeight) + 'px';
+}
+
+function updateCharCount(el, spanId){
+    const len = el.value.length;
+    const span = document.getElementById(spanId);
+    const counter = span?.parentElement;
+    if(!span) return;
+    span.textContent = len;
+    counter.classList.toggle('warn',  len >= 450 && len < 500);
+    counter.classList.toggle('limit', len >= 500);
 }
 
 // ── Áp dụng template ─────────────────────────────────────────
