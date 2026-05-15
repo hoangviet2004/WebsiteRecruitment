@@ -1,22 +1,33 @@
-# TechList Backend
+# TechList
 
-Hệ thống backend cho trang web tuyển dụng sinh viên IT **TechList**, xây dựng theo **Clean Architecture** với **ASP.NET Core**.
+Nền tảng tuyển dụng dành cho sinh viên IT Việt Nam, bao gồm **backend** (ASP.NET Core 9.0) và **frontend** (HTML/CSS/JS thuần).
+
+---
+
+## Tính năng
+
+- Đăng nhập bằng tài khoản thường (JWT), Google OAuth2, GitHub OAuth2
+- Quản lý tin tuyển dụng, công ty, hồ sơ ứng viên
+- Quy trình ứng tuyển: nộp CV → duyệt → phỏng vấn → kết quả
+- Chat trực tiếp giữa nhà tuyển dụng và ứng viên
+- Gói dịch vụ trả phí, tích hợp thanh toán VNPay
+- Đánh giá CV và gợi ý việc làm bằng Gemini AI
+- Thông báo real-time và gửi email tự động
+- Phân quyền: Admin / Recruiter / Candidate
+- Thống kê doanh thu, lượt ứng tuyển, tin đăng
 
 ---
 
 ## Yêu cầu hệ thống
 
-Trước khi bắt đầu, hãy đảm bảo máy bạn đã cài đặt:
-
-| Công cụ | Version | Link tải |
+| Công cụ | Phiên bản | Link tải |
 |---|---|---|
-| .NET SDK | 9.0 trở lên | https://dotnet.microsoft.com/download |
-| SQL Server | 2019 trở lên | https://www.microsoft.com/sql-server |
-| SQL Server Management Studio (SSMS) | Mới nhất | https://aka.ms/ssmsfullsetup |
-| Visual Studio Code | Mới nhất | https://code.visualstudio.com |
+| .NET SDK | 9.0+ | https://dotnet.microsoft.com/download/dotnet/9.0 |
+| SQL Server | 2019+ | https://www.microsoft.com/sql-server |
+| SSMS | Mới nhất | https://aka.ms/ssmsfullsetup |
 | Git | Mới nhất | https://git-scm.com |
 
-Kiểm tra đã cài đúng chưa:
+Kiểm tra:
 ```bash
 dotnet --version   # phải >= 9.0
 git --version
@@ -24,214 +35,274 @@ git --version
 
 ---
 
-## Cài đặt dự án
+## Cài đặt
 
 ### Bước 1 — Clone repository
 
 ```bash
 git clone https://github.com/hoangviet2004/WebsiteRecruitment
-cd WebsiteRecruitment/backend
+cd WebsiteRecruitment
 ```
 
 ### Bước 2 — Cấu hình appsettings.json
 
-Copy file mẫu và đổi tên:
-
 ```bash
 # Windows CMD
-copy src\TechList.API\appsettings.example.json src\TechList.API\appsettings.json
+copy backend\src\TechList.API\appsettings.example.json backend\src\TechList.API\appsettings.json
 
-# Windows PowerShell / macOS / Linux
-cp src/TechList.API/appsettings.example.json src/TechList.API/appsettings.json
+# PowerShell / macOS / Linux
+cp backend/src/TechList.API/appsettings.example.json backend/src/TechList.API/appsettings.json
 ```
 
-Mở file `src/TechList.API/appsettings.json` và điền thông tin thực tế:
+Mở `backend/src/TechList.API/appsettings.json` và điền thông tin thực tế:
 
 ```json
 {
   "ConnectionStrings": {
-    "DefaultConnection": "Server=.;Database=TechListDB;Trusted_Connection=True;TrustServerCertificate=True"
+    "DefaultConnection": "Server=.;Database=TechList;Trusted_Connection=True;TrustServerCertificate=True"
   },
+
   "JwtSettings": {
-    "SecretKey": "đặt-chuỗi-bí-mật-tối-thiểu-32-ký-tự-ở-đây",
+    "SecretKey": "chuoi-bi-mat-toi-thieu-32-ky-tu-o-day",
     "Issuer": "TechListAPI",
     "Audience": "TechListClient",
     "ExpiryMinutes": 60
   },
+
   "OAuth": {
     "Google": {
-      "ClientId": "lấy-từ-google-cloud-console",
-      "ClientSecret": "lấy-từ-google-cloud-console"
+      "ClientId": "lấy từ Google Cloud Console",
+      "ClientSecret": "lấy từ Google Cloud Console"
     },
     "GitHub": {
-      "ClientId": "lấy-từ-github-developer-settings",
-      "ClientSecret": "lấy-từ-github-developer-settings"
+      "ClientId": "lấy từ GitHub Developer Settings",
+      "ClientSecret": "lấy từ GitHub Developer Settings"
     }
   },
+
   "Cloudinary": {
-    "CloudName": "lấy-từ-cloudinary-dashboard",
-    "ApiKey": "lấy-từ-cloudinary-dashboard",
-    "ApiSecret": "lấy-từ-cloudinary-dashboard"
+    "CloudName": "lấy từ Cloudinary Dashboard",
+    "ApiKey": "lấy từ Cloudinary Dashboard",
+    "ApiSecret": "lấy từ Cloudinary Dashboard"
+  },
+
+  "EmailSettings": {
+    "Host": "smtp.gmail.com",
+    "Port": 587,
+    "Username": "your-email@gmail.com",
+    "Password": "gmail-app-password-16-ky-tu",
+    "FromName": "TechList",
+    "FromEmail": "your-email@gmail.com",
+    "EnableSsl": true
+  },
+
+  "Gemini": {
+    "ApiKey": "lấy từ Google AI Studio",
+    "Model": "gemini-2.5-flash"
+  },
+
+  "VNPay": {
+    "TmnCode": "mã-merchant-vnpay",
+    "HashSecret": "chuoi-bi-mat-vnpay",
+    "BaseUrl": "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html",
+    "ReturnUrl": "http://localhost:5500/frontend/pages/recruiter.html"
   }
 }
 ```
 
-> ⚠️ **Lưu ý:** Không được commit file `appsettings.json` lên GitHub vì chứa thông tin nhạy cảm!
+> **Lưu ý:** File `appsettings.json` đã được thêm vào `.gitignore`, không được commit lên GitHub.
 
-### Bước 3 — Restore các packages
+### Bước 3 — Lấy API Keys
+
+#### Google OAuth2
+1. Truy cập https://console.cloud.google.com
+2. Tạo project → **APIs & Services** → **Credentials**
+3. Chọn **Create Credentials** → **OAuth 2.0 Client ID** → **Web application**
+4. Thêm vào **Authorized redirect URIs**:
+   ```
+   http://localhost:5240/api/auth/google/callback
+   ```
+5. Copy `Client ID` và `Client Secret` vào `appsettings.json`
+
+#### GitHub OAuth2
+1. Truy cập https://github.com/settings/developers → **OAuth Apps** → **New OAuth App**
+2. Điền thông tin:
+   - **Homepage URL:** `http://localhost:5240`
+   - **Authorization callback URL:** `http://localhost:5240/signin-github`
+3. Copy `Client ID` và `Client Secret` vào `appsettings.json`
+
+#### Cloudinary (lưu trữ ảnh & CV)
+1. Đăng ký tại https://cloudinary.com (có gói miễn phí)
+2. Vào **Dashboard** → copy `Cloud Name`, `API Key`, `API Secret`
+
+#### Gmail App Password (gửi email)
+1. Bật xác minh 2 bước tại https://myaccount.google.com/security
+2. Vào **App passwords** → tạo mật khẩu ứng dụng mới
+3. Dán mật khẩu 16 ký tự vào `EmailSettings.Password`
+
+#### Gemini AI (đánh giá CV & gợi ý việc làm)
+1. Truy cập https://aistudio.google.com/apikey
+2. Tạo API key mới → copy vào `Gemini.ApiKey`
+
+#### VNPay (thanh toán)
+1. Đăng ký tại https://sandbox.vnpayment.vn/devreg (môi trường test)
+2. Lấy `TmnCode` và `HashSecret` từ trang quản trị sandbox
+
+### Bước 4 — Khởi tạo Database
+
+Đảm bảo SQL Server đang chạy, sau đó chạy:
 
 ```bash
-dotnet restore
-```
+cd backend
 
-### Bước 4 — Tạo Database
+# Cài EF Tools nếu chưa có
+dotnet tool install --global dotnet-ef
 
-Đảm bảo SQL Server đang chạy trên máy, sau đó chạy Migration:
-
-```bash
+# Tạo database và chạy toàn bộ Migration
 dotnet ef database update --project src/TechList.Infrastructure --startup-project src/TechList.API
 ```
 
-Nếu lệnh trên báo lỗi `dotnet-ef not found`, cài EF Tools trước:
-
-```bash
-dotnet tool install --global dotnet-ef
-```
+> Database `TechList` sẽ được tạo tự động kèm đầy đủ schema và dữ liệu mẫu (10 công ty, 12 ứng viên, các gói dịch vụ).
 
 ### Bước 5 — Chạy dự án
 
+**Backend:**
 ```bash
+cd backend
 dotnet run --project src/TechList.API/TechList.API.csproj
 ```
 
-Mở trình duyệt và truy cập Swagger UI:
-```
-https://localhost:{port}/swagger
-```
+Backend chạy tại: `http://localhost:5240`  
+Swagger UI: `http://localhost:5240/swagger`
+
+**Frontend:**
+
+Mở file `frontend/pages/home.html` bằng trình duyệt hoặc dùng Live Server (VS Code extension), đảm bảo frontend chạy tại port `5500`.
 
 ---
 
 ## Cấu trúc dự án
 
 ```
-backend/
-├── src/
-│   ├── TechList.Domain/              # Entities, Enums, Interfaces (không phụ thuộc ai)
-│   ├── TechList.Application/         # Business Logic, CQRS, DTOs
-│   ├── TechList.Infrastructure/      # EF Core, Identity, Services
-│   └── TechList.API/                 # Controllers, Middlewares, Swagger
-│
-└── tests/
-    ├── TechList.Domain.Tests/
-    ├── TechList.Application.Tests/
-    ├── TechList.Infrastructure.Tests/
-    └── TechList.API.Tests/
+WebsiteRecruitment/
+├── backend/
+│   ├── src/
+│   │   ├── TechList.Domain/            # Entities, Enums — không phụ thuộc lớp nào
+│   │   ├── TechList.Application/       # Business logic, DTOs, Validation, Mapping
+│   │   ├── TechList.Infrastructure/    # EF Core, Identity, Email, Cloudinary, VNPay
+│   │   └── TechList.API/              # Controllers, Middleware, Swagger, Program.cs
+│   └── tests/
+│       ├── TechList.Domain.Tests/
+│       ├── TechList.Application.Tests/
+│       ├── TechList.Infrastructure.Tests/
+│       └── TechList.API.Tests/
+└── frontend/
+    ├── pages/                          # Các trang HTML
+    ├── js/                             # Logic JavaScript
+    └── assets/                         # CSS, ảnh, font
 ```
 
----
+### API Endpoints chính
 
-## Danh sách Packages
-
-### TechList.Application
-| Package | Mục đích |
+| Controller | Chức năng |
 |---|---|
-| MediatR | CQRS pattern (Commands & Queries) |
-| AutoMapper | Map Entity ↔ DTO |
-| FluentValidation | Validate dữ liệu đầu vào |
-
-### TechList.Infrastructure
-| Package | Mục đích |
-|---|---|
-| Microsoft.EntityFrameworkCore | ORM chính |
-| Microsoft.EntityFrameworkCore.SqlServer | Kết nối SQL Server |
-| Microsoft.EntityFrameworkCore.Tools | Chạy Migration |
-| Microsoft.AspNetCore.Identity.EntityFrameworkCore | Quản lý User/Role |
-| Microsoft.AspNetCore.Authentication.JwtBearer | Xác thực JWT |
-| Microsoft.IdentityModel.Tokens | Tạo/đọc JWT token |
-| CloudinaryDotNet | Upload CV, ảnh |
-
-### TechList.API
-| Package | Mục đích |
-|---|---|
-| Swashbuckle.AspNetCore | Swagger UI |
-| Microsoft.AspNetCore.Authentication.Google | Đăng nhập Google |
-| AspNet.Security.OAuth.GitHub | Đăng nhập GitHub |
-| Microsoft.EntityFrameworkCore.Design | Hỗ trợ chạy Migration |
+| `/api/auth` | Đăng ký, đăng nhập, OAuth, refresh token |
+| `/api/jobs` | CRUD tin tuyển dụng |
+| `/api/job-applications` | Nộp đơn, quản lý trạng thái ứng tuyển |
+| `/api/profile` | Hồ sơ ứng viên, upload CV/ảnh |
+| `/api/company` | Hồ sơ công ty |
+| `/api/messaging` | Chat nhà tuyển dụng ↔ ứng viên |
+| `/api/notifications` | Thông báo |
+| `/api/packages` | Gói dịch vụ |
+| `/api/payment` | Thanh toán VNPay |
+| `/api/transactions` | Quản lý giao dịch (Admin) |
+| `/api/cv-evaluation` | Đánh giá CV bằng Gemini AI |
+| `/api/job-recommendations` | Gợi ý việc làm bằng Gemini AI |
+| `/api/recruiter-statistics` | Thống kê dành cho nhà tuyển dụng |
+| `/api/admin` | Quản trị hệ thống |
+| `/api/saved-jobs` | Lưu tin yêu thích |
+| `/api/account` | Đổi mật khẩu, cài đặt tài khoản |
 
 ---
 
-## Lấy API Keys
+## Công nghệ sử dụng
 
-### Google OAuth2
-1. Vào https://console.cloud.google.com
-2. Tạo project mới
-3. Vào **APIs & Services** → **Credentials**
-4. Tạo **OAuth 2.0 Client ID**
-5. Copy `ClientId` và `ClientSecret` vào `appsettings.json`
-
-### GitHub OAuth2
-1. Vào https://github.com/settings/developers
-2. Chọn **OAuth Apps** → **New OAuth App**
-3. Điền thông tin, `Authorization callback URL`: `https://localhost:{port}/signin-github`
-4. Copy `ClientId` và `ClientSecret` vào `appsettings.json`
-
-### Cloudinary
-1. Đăng ký tại https://cloudinary.com (có free tier)
-2. Vào **Dashboard**
-3. Copy `Cloud Name`, `API Key`, `API Secret` vào `appsettings.json`
+| Thành phần | Công nghệ |
+|---|---|
+| Framework | ASP.NET Core 9.0 |
+| Architecture | Clean Architecture |
+| ORM | Entity Framework Core 9.0 |
+| Database | SQL Server 2019+ |
+| Authentication | ASP.NET Core Identity + JWT Bearer |
+| OAuth | Google OAuth2, GitHub OAuth2 |
+| Validation | FluentValidation |
+| Mapping | AutoMapper |
+| Messaging pattern | MediatR |
+| File storage | Cloudinary |
+| Email | MailKit (Gmail SMTP) |
+| Payment | VNPay |
+| AI | Google Gemini API |
+| PDF parsing | PdfPig |
+| API docs | Swagger (Swashbuckle) |
+| Testing | xUnit, Moq, FluentAssertions |
 
 ---
 
 ## Các lệnh thường dùng
 
 ```bash
-# Build project
+# Build
 dotnet build
 
-# Chạy project
-dotnet run --project src/TechList.API/TechList.API.csproj
+# Chạy backend
+dotnet run --project backend/src/TechList.API/TechList.API.csproj
 
 # Chạy tests
 dotnet test
 
 # Tạo Migration mới
-dotnet ef migrations add <TênMigration> --project src/TechList.Infrastructure --startup-project src/TechList.API
+dotnet ef migrations add <TênMigration> \
+  --project backend/src/TechList.Infrastructure \
+  --startup-project backend/src/TechList.API
 
 # Cập nhật Database
-dotnet ef database update --project src/TechList.Infrastructure --startup-project src/TechList.API
+dotnet ef database update \
+  --project backend/src/TechList.Infrastructure \
+  --startup-project backend/src/TechList.API
 
 # Xóa Migration gần nhất
-dotnet ef migrations remove --project src/TechList.Infrastructure --startup-project src/TechList.API
+dotnet ef migrations remove \
+  --project backend/src/TechList.Infrastructure \
+  --startup-project backend/src/TechList.API
 ```
 
 ---
 
 ## Lỗi thường gặp
 
-**Lỗi: Cannot open database "TechListDB"**
+**`Cannot open database "TechList"`**  
 → Chưa chạy Migration. Thực hiện lại Bước 4.
 
-**Lỗi: dotnet-ef not found**
-→ Chạy lệnh: `dotnet tool install --global dotnet-ef`
+**`dotnet-ef: command not found`**  
+→ Chạy: `dotnet tool install --global dotnet-ef`
 
-**Lỗi: Port đang bị chiếm**
+**`Port 5240 already in use`**  
 → Chạy với port khác:
 ```bash
-dotnet run --project src/TechList.API --urls "https://localhost:7001;http://localhost:5001"
+dotnet run --project backend/src/TechList.API --urls "http://localhost:5001"
 ```
+Sau đó cập nhật `API_URL` trong `frontend/js/api.js` cho khớp.
 
-**Lỗi: SSL Certificate**
+**`SSL Certificate not trusted`**  
 ```bash
 dotnet dev-certs https --trust
 ```
 
+**Đăng nhập Google/GitHub báo lỗi redirect**  
+→ Kiểm tra lại Authorized redirect URI trong Google Cloud Console / GitHub OAuth App có khớp với port đang chạy không.
+
 ---
 
-## Công nghệ sử dụng
+## Liên hệ
 
-- **Framework:** ASP.NET Core 9.0
-- **Architecture:** Clean Architecture + CQRS
-- **Database:** SQL Server + Entity Framework Core
-- **Authentication:** JWT + Google OAuth2 + GitHub OAuth2
-- **File Storage:** Cloudinary
-- **API Docs:** Swagger UI
+Nếu gặp vấn đề trong quá trình cài đặt, tạo **Issue** trên GitHub hoặc liên hệ: `viet16092004@gmail.com`
