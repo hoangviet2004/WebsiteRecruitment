@@ -1,7 +1,9 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using TechList.Application.Applications.Interfaces;
 using TechList.Application.Applications.Models;
+using TechList.Application.Email;
 using TechList.Domain.Entities;
 using TechList.Infrastructure.Identity;
 using TechList.Infrastructure.Persistence;
@@ -12,11 +14,19 @@ public sealed class JobApplicationService : IJobApplicationService
 {
     private readonly AppDbContext _db;
     private readonly UserManager<ApplicationUser> _userManager;
+    private readonly IEmailService _emailService;
+    private readonly ILogger<JobApplicationService> _logger;
 
-    public JobApplicationService(AppDbContext db, UserManager<ApplicationUser> userManager)
+    public JobApplicationService(
+        AppDbContext db,
+        UserManager<ApplicationUser> userManager,
+        IEmailService emailService,
+        ILogger<JobApplicationService> logger)
     {
         _db = db;
         _userManager = userManager;
+        _emailService = emailService;
+        _logger = logger;
     }
 
     public async Task<JobApplicationDto> ApplyAsync(string candidateId, CreateApplicationRequest request, CancellationToken ct)
@@ -135,7 +145,27 @@ public sealed class JobApplicationService : IJobApplicationService
         application.UpdatedAt = DateTime.UtcNow;
         await _db.SaveChangesAsync(ct);
 
-        return await BuildDto(application.Id, ct);
+        var dto = await BuildDto(application.Id, ct);
+
+        if (!string.IsNullOrEmpty(dto.CandidateEmail))
+        {
+            try
+            {
+                await _emailService.SendApplicationStatusEmailAsync(
+                    toEmail: dto.CandidateEmail,
+                    candidateName: dto.CandidateName,
+                    jobTitle: dto.JobTitle,
+                    companyName: application.JobPost.Company.Name,
+                    newStatus: newStatus,
+                    ct: ct);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Không thể gửi email thông báo cho ứng viên {Email}", dto.CandidateEmail);
+            }
+        }
+
+        return dto;
     }
 
     public async Task<JobApplicationDto> GetByIdAsync(string userId, Guid applicationId, CancellationToken ct)

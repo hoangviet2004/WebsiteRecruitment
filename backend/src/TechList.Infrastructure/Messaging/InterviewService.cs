@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using TechList.Application.Email;
 using TechList.Application.Messaging.Interfaces;
 using TechList.Application.Messaging.Models;
 using TechList.Domain.Entities;
@@ -12,11 +14,19 @@ public sealed class InterviewService : IInterviewService
 {
     private readonly AppDbContext _db;
     private readonly UserManager<ApplicationUser> _userManager;
+    private readonly IEmailService _emailService;
+    private readonly ILogger<InterviewService> _logger;
 
-    public InterviewService(AppDbContext db, UserManager<ApplicationUser> userManager)
+    public InterviewService(
+        AppDbContext db,
+        UserManager<ApplicationUser> userManager,
+        IEmailService emailService,
+        ILogger<InterviewService> logger)
     {
         _db = db;
         _userManager = userManager;
+        _emailService = emailService;
+        _logger = logger;
     }
 
     public async Task<InterviewScheduleDto> ScheduleAsync(
@@ -56,13 +66,37 @@ public sealed class InterviewService : IInterviewService
         var profile   = await _db.UserProfiles.AsNoTracking()
             .FirstOrDefaultAsync(p => p.UserId == app.CandidateId, ct);
 
-        return new InterviewScheduleDto(
+        var dto = new InterviewScheduleDto(
             schedule.Id, schedule.ApplicationId,
             app.JobPost.Title,
             profile?.DisplayName ?? candidate?.FullName ?? "Ứng viên",
             schedule.ScheduledAt, schedule.DurationMinutes,
             schedule.MeetingLink, schedule.Location, schedule.Notes, schedule.Status
         );
+
+        if (!string.IsNullOrEmpty(candidate?.Email))
+        {
+            try
+            {
+                await _emailService.SendInterviewScheduledEmailAsync(
+                    toEmail: candidate.Email,
+                    candidateName: dto.CandidateName,
+                    jobTitle: app.JobPost.Title,
+                    companyName: app.JobPost.Company.Name,
+                    scheduledAt: schedule.ScheduledAt,
+                    durationMinutes: schedule.DurationMinutes,
+                    meetingLink: schedule.MeetingLink,
+                    location: schedule.Location,
+                    notes: schedule.Notes,
+                    ct: ct);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Không thể gửi email lịch phỏng vấn cho ứng viên {Email}", candidate.Email);
+            }
+        }
+
+        return dto;
     }
 
     public async Task<List<InterviewScheduleDto>> GetUpcomingAsync(
