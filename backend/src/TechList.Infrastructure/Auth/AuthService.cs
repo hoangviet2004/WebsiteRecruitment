@@ -75,10 +75,10 @@ public sealed class AuthService : IAuthService
     {
         var user = await _userManager.FindByEmailAsync(request.Email);
         if (user is null)
-            throw new UnauthorizedAccessException("Invalid credentials");
+            throw new UnauthorizedAccessException("Sai tên đăng nhập hoặc mật khẩu.");
 
         if (!await _userManager.CheckPasswordAsync(user, request.Password))
-            throw new UnauthorizedAccessException("Invalid credentials");
+            throw new UnauthorizedAccessException("Sai tên đăng nhập hoặc mật khẩu.");
 
         var roles = (await _userManager.GetRolesAsync(user)).ToList();
         var profile = await EnsureProfileExistsAsync(user.Id, user.Email!, user.FullName, ct);
