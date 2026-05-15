@@ -119,6 +119,10 @@ function buildCard(a) {
                 <button class="aj-btn-chat" onclick="goToChat('${a.id}')">
                     <i class="fa-regular fa-comments"></i> Tin nhắn
                 </button>
+                ${(a.status === 'Applied' || a.status === 'Screening') ? `
+                <button class="aj-btn-withdraw" onclick="withdrawApplication('${a.id}')">
+                    <i class="fa-solid fa-xmark"></i> Rút đơn
+                </button>` : ''}
             </div>
         </div>`;
 }
@@ -149,6 +153,21 @@ function updateCounts() {
         const countEl = el(`count-${status}`);
         if (countEl) countEl.textContent = `(${cnt})`;
     });
+}
+
+async function withdrawApplication(id) {
+    if (!confirm('Bạn có chắc muốn rút đơn ứng tuyển này?\nThao tác không thể hoàn tác.')) return;
+    try {
+        const res = await apiFetchAuth(`/api/applications/${id}`, { method: 'DELETE' });
+        const data = await res.json();
+        if (res.ok && data.success) {
+            await loadApplications();
+        } else {
+            alert(data.message || 'Có lỗi xảy ra, vui lòng thử lại.');
+        }
+    } catch {
+        alert('Lỗi kết nối, vui lòng thử lại.');
+    }
 }
 
 function showSkeletons() {

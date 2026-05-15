@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using TechList.Application.Applications.Interfaces;
 using TechList.Application.Applications.Models;
 using TechList.Application.Email;
+using TechList.Application.Notifications.Interfaces;
 using TechList.Domain.Entities;
 using TechList.Infrastructure.Identity;
 using TechList.Infrastructure.Persistence;
@@ -15,17 +16,20 @@ public sealed class JobApplicationService : IJobApplicationService
     private readonly AppDbContext _db;
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly IEmailService _emailService;
+    private readonly INotificationService _notificationService;
     private readonly ILogger<JobApplicationService> _logger;
 
     public JobApplicationService(
         AppDbContext db,
         UserManager<ApplicationUser> userManager,
         IEmailService emailService,
+        INotificationService notificationService,
         ILogger<JobApplicationService> logger)
     {
         _db = db;
         _userManager = userManager;
         _emailService = emailService;
+        _notificationService = notificationService;
         _logger = logger;
     }
 
@@ -55,6 +59,22 @@ public sealed class JobApplicationService : IJobApplicationService
 
         _db.JobApplications.Add(application);
         await _db.SaveChangesAsync(ct);
+
+        try
+        {
+            await _notificationService.CreateAsync(
+                userId: job.Company.OwnerId,
+                title: "Đơn ứng tuyển mới",
+                message: $"Có ứng viên mới nộp đơn cho vị trí {job.Title}.",
+                type: "NewApplication",
+                jobPostId: job.Id,
+                jobTitle: job.Title,
+                ct: ct);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Không thể tạo thông báo cho recruiter khi có đơn ứng tuyển mới.");
+        }
 
         return await BuildDto(application.Id, ct);
     }
@@ -147,6 +167,22 @@ public sealed class JobApplicationService : IJobApplicationService
 
         var dto = await BuildDto(application.Id, ct);
 
+        try
+        {
+            await _notificationService.CreateAsync(
+                userId: application.CandidateId,
+                title: GetStatusTitle(newStatus),
+                message: $"Trạng thái đơn ứng tuyển vị trí {application.JobPost.Title} đã được cập nhật.",
+                type: newStatus,
+                jobPostId: application.JobPost.Id,
+                jobTitle: application.JobPost.Title,
+                ct: ct);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Không thể tạo thông báo in-app cho ứng viên {Id}", application.CandidateId);
+        }
+
         if (!string.IsNullOrEmpty(dto.CandidateEmail))
         {
             try
@@ -189,6 +225,34 @@ public sealed class JobApplicationService : IJobApplicationService
         return await _db.JobApplications
             .AnyAsync(a => a.JobPostId == jobPostId && a.CandidateId == candidateId, ct);
     }
+
+    public async Task WithdrawAsync(string candidateId, Guid applicationId, CancellationToken ct)
+    {
+        var application = await _db.JobApplications
+            .AsTracking()
+            .FirstOrDefaultAsync(a => a.Id == applicationId, ct)
+            ?? throw new InvalidOperationException("Không tìm thấy đơn ứng tuyển.");
+
+        if (application.CandidateId != candidateId)
+            throw new UnauthorizedAccessException("Bạn không có quyền rút đơn này.");
+
+        var withdrawable = new[] { "Applied", "Screening" };
+        if (!withdrawable.Contains(application.Status))
+            throw new InvalidOperationException("Chỉ có thể rút đơn khi trạng thái là Đã nộp hoặc Đang xem xét.");
+
+        _db.JobApplications.Remove(application);
+        await _db.SaveChangesAsync(ct);
+    }
+
+    private static string GetStatusTitle(string status) => status switch
+    {
+        "Screening" => "Hồ sơ đang được xem xét",
+        "Interview" => "Bạn được mời phỏng vấn",
+        "Offered"   => "Chúc mừng! Bạn nhận được offer",
+        "Rejected"  => "Đơn ứng tuyển đã bị từ chối",
+        "OnHold"    => "Đơn ứng tuyển đang tạm giữ",
+        _           => "Cập nhật trạng thái ứng tuyển"
+    };
 
     private async Task<JobApplicationDto> BuildDto(Guid applicationId, CancellationToken ct)
     {

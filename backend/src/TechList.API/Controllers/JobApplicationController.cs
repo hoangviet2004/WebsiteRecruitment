@@ -84,4 +84,13 @@ public sealed class JobApplicationController : ControllerBase
         var result = await _service.CheckAppliedAsync(GetUserId(), jobPostId, ct);
         return Ok(ApiResponse<bool>.Ok(result));
     }
+
+    // ── Candidate: Rút đơn ứng tuyển ───────────────────────────
+    [HttpDelete("{id:guid}")]
+    [Authorize(Roles = "Candidate")]
+    public async Task<ActionResult<ApiResponse<object>>> Withdraw(Guid id, CancellationToken ct)
+    {
+        await _service.WithdrawAsync(GetUserId(), id, ct);
+        return Ok(ApiResponse<object>.Ok(null!, "Đã rút đơn ứng tuyển thành công."));
+    }
 }

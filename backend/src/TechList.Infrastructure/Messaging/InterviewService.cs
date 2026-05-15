@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using TechList.Application.Email;
+using TechList.Application.Notifications.Interfaces;
 using TechList.Application.Messaging.Interfaces;
 using TechList.Application.Messaging.Models;
 using TechList.Domain.Entities;
@@ -15,17 +16,20 @@ public sealed class InterviewService : IInterviewService
     private readonly AppDbContext _db;
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly IEmailService _emailService;
+    private readonly INotificationService _notificationService;
     private readonly ILogger<InterviewService> _logger;
 
     public InterviewService(
         AppDbContext db,
         UserManager<ApplicationUser> userManager,
         IEmailService emailService,
+        INotificationService notificationService,
         ILogger<InterviewService> logger)
     {
         _db = db;
         _userManager = userManager;
         _emailService = emailService;
+        _notificationService = notificationService;
         _logger = logger;
     }
 
@@ -73,6 +77,22 @@ public sealed class InterviewService : IInterviewService
             schedule.ScheduledAt, schedule.DurationMinutes,
             schedule.MeetingLink, schedule.Location, schedule.Notes, schedule.Status
         );
+
+        try
+        {
+            await _notificationService.CreateAsync(
+                userId: app.CandidateId,
+                title: "Lịch phỏng vấn mới",
+                message: $"Bạn có lịch phỏng vấn cho vị trí {app.JobPost.Title} tại {app.JobPost.Company.Name}.",
+                type: "Interview",
+                jobPostId: app.JobPost.Id,
+                jobTitle: app.JobPost.Title,
+                ct: ct);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Không thể tạo thông báo in-app lịch phỏng vấn cho ứng viên {Id}", app.CandidateId);
+        }
 
         if (!string.IsNullOrEmpty(candidate?.Email))
         {

@@ -182,7 +182,7 @@ body { font-family: 'Inter', sans-serif; background: #f8fafc; color: #1e293b; di
     gap: 10px;
     margin-top: auto;
 }
-.aj-btn-detail, .aj-btn-chat {
+.aj-btn-detail, .aj-btn-chat, .aj-btn-withdraw {
     flex: 1;
     display: flex;
     align-items: center;
@@ -212,6 +212,12 @@ body { font-family: 'Inter', sans-serif; background: #f8fafc; color: #1e293b; di
     border: none;
 }
 .aj-btn-chat:hover { background: #2563eb; }
+.aj-btn-withdraw {
+    background: #fef2f2;
+    color: #dc2626;
+    border: 1.5px solid #fecaca;
+}
+.aj-btn-withdraw:hover { background: #fee2e2; }
 
 /* ── Empty State ────────────────────────────────────────── */
 .aj-empty {
