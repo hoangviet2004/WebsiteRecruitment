@@ -1758,8 +1758,12 @@
     font-family: inherit;
     color: #0f172a;
     background: #f8fafc;
-    transition: all 0.2s;
+    transition: none;
     line-height: 1.5;
+    min-height: 42px;
+    height: 42px;
+    max-height: 200px;
+    overflow-y: hidden;
 }
 .msg-textarea:focus {
     outline: none;

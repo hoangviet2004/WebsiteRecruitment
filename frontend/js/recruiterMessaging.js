@@ -414,6 +414,7 @@ async function sendMessage(){
         if(!res?.ok) throw new Error(data?.message||'Lỗi gửi tin');
 
         input.value = '';
+        autoResizeTextarea(input);
         // Reload thread để hiện tin mới
         await loadThread(_activeAppId);
         // Cập nhật conversation list (last message)
@@ -427,22 +428,15 @@ async function sendMessage(){
 }
 
 function handleMsgKey(e){
-    // Ctrl+Enter hoặc Cmd+Enter để gửi
     if((e.ctrlKey || e.metaKey) && e.key === 'Enter'){
         e.preventDefault();
         sendMessage();
     }
 }
 
-// ── Chọn loại tin ────────────────────────────────────────────
-function setMsgType(type){
-    _msgType = type;
-    document.getElementById('btn-type-msg').classList.toggle('active', type==='message');
-    document.getElementById('btn-type-email').classList.toggle('active', type==='email');
-    const ta = document.getElementById('msg-input');
-    ta.placeholder = type==='email'
-        ? 'Soạn email gửi ứng viên... (Ctrl+Enter để gửi)'
-        : 'Nhập tin nhắn tại đây... (Ctrl+Enter để gửi)';
+function autoResizeTextarea(el){
+    el.style.height = 'auto';
+    el.style.height = Math.max(42, el.scrollHeight) + 'px';
 }
 
 // ── Áp dụng template ─────────────────────────────────────────
@@ -459,10 +453,12 @@ function applyTemplate(key){
         text = text.replace(/\[Vị trí\]/g, conv.jobTitle);
     }
 
-    document.getElementById('msg-input').value = text;
-    setMsgType(tpl.type);
+    const ta = document.getElementById('msg-input');
+    ta.value = text;
+    _msgType = tpl.type;
     document.getElementById('msg-template-sel').value = '';
-    document.getElementById('msg-input').focus();
+    autoResizeTextarea(ta);
+    ta.focus();
 }
 
 // ── Quick action (Offer / Reject) ─────────────────────────────

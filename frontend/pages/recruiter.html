@@ -477,15 +477,6 @@
                         <!-- Input box -->
                         <div class="msg-input-wrap" id="msg-input-wrap" style="display:none;">
                             <div class="msg-input-toolbar">
-                                <button class="msg-toolbar-btn" title="Gửi Email" onclick="setMsgType('email')"
-                                    id="btn-type-email">
-                                    <i class="fa-regular fa-envelope"></i> Email
-                                </button>
-                                <button class="msg-toolbar-btn active" title="Tin nhắn" onclick="setMsgType('message')"
-                                    id="btn-type-msg">
-                                    <i class="fa-regular fa-comment"></i> Tin nhắn
-                                </button>
-                                <div class="msg-toolbar-sep"></div>
                                 <select class="msg-template-sel" id="msg-template-sel"
                                     onchange="applyTemplate(this.value)">
                                     <option value="">Chọn mẫu nhanh...</option>
@@ -498,7 +489,7 @@
                             </div>
                             <div class="msg-input-row">
                                 <textarea id="msg-input" class="msg-textarea" placeholder="Nhập tin nhắn tại đây..."
-                                    rows="3" onkeydown="handleMsgKey(event)"></textarea>
+                                    rows="1" onkeydown="handleMsgKey(event)" oninput="autoResizeTextarea(this)"></textarea>
                                 <button class="msg-send-btn" onclick="sendMessage()">
                                     <i class="fa-solid fa-paper-plane"></i>
                                 </button>
