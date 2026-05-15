@@ -100,10 +100,13 @@
                 </button>
             </div>
             <div class="cm-input-row">
-                <textarea id="cm-input" class="cm-textarea"
-                    placeholder="Nhập tin nhắn của bạn..." rows="1"
-                    oninput="autoResize(this)"
-                    onkeydown="handleKey(event)"></textarea>
+                <div class="cm-textarea-wrap">
+                    <textarea id="cm-input" class="cm-textarea"
+                        placeholder="Nhập tin nhắn của bạn..." rows="1" maxlength="500"
+                        oninput="autoResize(this); updateCharCount(this, 'cm-char-count')"
+                        onkeydown="handleKey(event)"></textarea>
+                    <span class="cm-char-counter" id="cm-char-counter"><span id="cm-char-count">0</span>/500</span>
+                </div>
                 <button class="cm-send-btn" id="cm-send-btn" onclick="sendMsg()">
                     <i class="fa-solid fa-paper-plane"></i>
                 </button>

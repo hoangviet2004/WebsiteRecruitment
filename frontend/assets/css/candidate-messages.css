@@ -313,7 +313,7 @@ body { font-family: 'Inter', sans-serif; background: #f8fafc; color: #0f172a; he
     flex: 1; resize: none; border: 1px solid #e2e8f0; border-radius: 10px;
     padding: 10px 14px; font-size: 14px; font-family: inherit;
     color: #0f172a; background: #f8fafc; transition: all 0.2s;
-    max-height: 140px; overflow-y: auto;
+    overflow-y: hidden;
 }
 .cm-textarea:focus { outline: none; border-color: #3b82f6; background: #fff; box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
 .cm-send-btn {
@@ -324,6 +324,29 @@ body { font-family: 'Inter', sans-serif; background: #f8fafc; color: #0f172a; he
 }
 .cm-send-btn:hover { background: #1e40af; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(29,78,216,0.3); }
 .cm-send-btn:disabled { background: #94a3b8; transform: none; box-shadow: none; cursor: not-allowed; }
+
+.cm-textarea-wrap {
+    position: relative;
+    flex: 1;
+}
+.cm-textarea-wrap .cm-textarea {
+    flex: none;
+    width: 100%;
+}
+.cm-char-counter {
+    position: absolute;
+    bottom: 6px;
+    right: 10px;
+    font-size: 11px;
+    color: #94a3b8;
+    pointer-events: none;
+    background: rgba(248,250,252,0.85);
+    border-radius: 4px;
+    padding: 1px 5px;
+    line-height: 1.4;
+}
+.cm-char-counter.warn  { color: #f59e0b; }
+.cm-char-counter.limit { color: #ef4444; font-weight: 600; }
 
 /* ── Right panel ──────────────────────────────────────────── */
 .cm-panel-col {

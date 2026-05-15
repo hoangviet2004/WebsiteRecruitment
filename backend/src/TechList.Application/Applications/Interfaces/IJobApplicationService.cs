@@ -24,4 +24,7 @@ public interface IJobApplicationService
 
     // Candidate: kiểm tra xem đã nộp đơn cho job này chưa
     Task<bool> CheckAppliedAsync(string candidateId, Guid jobPostId, CancellationToken ct);
+
+    // Candidate: rút đơn ứng tuyển
+    Task WithdrawAsync(string candidateId, Guid applicationId, CancellationToken ct);
 }

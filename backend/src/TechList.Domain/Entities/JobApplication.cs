@@ -7,7 +7,7 @@ public class JobApplication
     public Guid JobPostId { get; set; }
     public string CandidateId { get; set; } = default!;
 
-    // Applied, Screening, Interview, Offered, Rejected, OnHold
+    // Applied, Screening, Interview, Offered, Hired, Rejected
     public string Status { get; set; } = "Applied";
 
     public string? CoverLetter { get; set; }

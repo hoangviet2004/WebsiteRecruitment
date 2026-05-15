@@ -1,5 +1,8 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using TechList.Application.Email;
+using TechList.Application.Notifications.Interfaces;
 using TechList.Application.Messaging.Interfaces;
 using TechList.Application.Messaging.Models;
 using TechList.Domain.Entities;
@@ -12,11 +15,22 @@ public sealed class InterviewService : IInterviewService
 {
     private readonly AppDbContext _db;
     private readonly UserManager<ApplicationUser> _userManager;
+    private readonly IEmailService _emailService;
+    private readonly INotificationService _notificationService;
+    private readonly ILogger<InterviewService> _logger;
 
-    public InterviewService(AppDbContext db, UserManager<ApplicationUser> userManager)
+    public InterviewService(
+        AppDbContext db,
+        UserManager<ApplicationUser> userManager,
+        IEmailService emailService,
+        INotificationService notificationService,
+        ILogger<InterviewService> logger)
     {
         _db = db;
         _userManager = userManager;
+        _emailService = emailService;
+        _notificationService = notificationService;
+        _logger = logger;
     }
 
     public async Task<InterviewScheduleDto> ScheduleAsync(
@@ -56,13 +70,57 @@ public sealed class InterviewService : IInterviewService
         var profile   = await _db.UserProfiles.AsNoTracking()
             .FirstOrDefaultAsync(p => p.UserId == app.CandidateId, ct);
 
-        return new InterviewScheduleDto(
+        var dto = new InterviewScheduleDto(
             schedule.Id, schedule.ApplicationId,
             app.JobPost.Title,
             profile?.DisplayName ?? candidate?.FullName ?? "Ứng viên",
             schedule.ScheduledAt, schedule.DurationMinutes,
             schedule.MeetingLink, schedule.Location, schedule.Notes, schedule.Status
         );
+
+        try
+        {
+            await _notificationService.CreateAsync(
+                userId: app.CandidateId,
+                title: "Lịch phỏng vấn mới",
+                message: $"Bạn có lịch phỏng vấn cho vị trí {app.JobPost.Title} tại {app.JobPost.Company.Name}.",
+                type: "Interview",
+                jobPostId: app.JobPost.Id,
+                jobTitle: app.JobPost.Title,
+                ct: ct);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Không thể tạo thông báo in-app lịch phỏng vấn cho ứng viên {Id}", app.CandidateId);
+        }
+
+        if (!string.IsNullOrEmpty(candidate?.Email))
+        {
+            var toEmail       = candidate.Email;
+            var candName      = dto.CandidateName;
+            var jobTitle      = app.JobPost.Title;
+            var companyName   = app.JobPost.Company.Name;
+            var scheduledAt   = schedule.ScheduledAt;
+            var duration      = schedule.DurationMinutes;
+            var meetingLink   = schedule.MeetingLink;
+            var location      = schedule.Location;
+            var notes         = schedule.Notes;
+            _ = Task.Run(async () =>
+            {
+                try
+                {
+                    await _emailService.SendInterviewScheduledEmailAsync(
+                        toEmail, candName, jobTitle, companyName,
+                        scheduledAt, duration, meetingLink, location, notes);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Không thể gửi email lịch phỏng vấn cho ứng viên {Email}", toEmail);
+                }
+            });
+        }
+
+        return dto;
     }
 
     public async Task<List<InterviewScheduleDto>> GetUpcomingAsync(

@@ -196,9 +196,6 @@ function renderTable(users, isEmpty) {
             btnHtml += isApproved
                 ? `<button class="btn-action btn-delete" onclick="toggleBlockUser('${u.id}')" title="Chặn tài khoản"><i class="fa-solid fa-ban"></i></button>`
                 : `<button class="btn-action btn-toggle" onclick="toggleBlockUser('${u.id}')" title="Bỏ chặn tài khoản"><i class="fa-solid fa-unlock"></i></button>`;
-            if (u.role !== 'Admin') {
-                btnHtml += `<button class="btn-action btn-delete" onclick="deleteUser('${u.id}')" title="Xóa tài khoản"><i class="fa-solid fa-trash-can"></i></button>`;
-            }
         }
 
         // Status
@@ -307,22 +304,6 @@ function clearSearch() {
 }
 
 // ── Actions (unchanged logic, improved UX) ────────────────────
-async function deleteUser(id) {
-    if (!confirm('Bạn có chắc chắn muốn xóa tài khoản này?\nThao tác sẽ xóa luôn tất cả công ty và tin tuyển dụng liên quan!')) return;
-    try {
-        const response = await apiFetchAuth('/api/admin/users/' + id, { method: 'DELETE' });
-        if (response.ok) {
-            showToast('Đã xóa tài khoản thành công!', 'success');
-            await loadUsers();
-        } else {
-            const error = await response.json();
-            showToast('Lỗi: ' + (error.message || 'Không xác định'), 'error');
-        }
-    } catch (e) {
-        showToast('Lỗi mạng: ' + e.message, 'error');
-    }
-}
-
 async function toggleBlockUser(id) {
     if (!confirm('Bạn có chắc chắn muốn thay đổi trạng thái chặn của tài khoản này?')) return;
     try {

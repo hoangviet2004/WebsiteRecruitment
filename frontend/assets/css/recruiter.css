@@ -166,7 +166,9 @@
     background: #f1f5f9;
     color: #475569;
     border: 1px solid #cbd5e1;
-    padding: 10px 24px;
+    padding: 10px 16px;
+    height: 40px;
+    box-sizing: border-box;
     border-radius: 8px;
     font-weight: 600;
     cursor: pointer;
@@ -277,6 +279,7 @@
     padding: 16px 24px;
     border-top: 1px solid #e2e8f0;
     display: flex;
+    align-items: center;
     justify-content: flex-end;
     gap: 12px;
     background: #f8fafc;
@@ -648,15 +651,23 @@
 .badge-offered   { background: #ecfdf5; color: #059669; }
 .badge-onhold    { background: #fef3c7; color: #d97706; }
 .badge-rejected  { background: #fef2f2; color: #dc2626; }
+.badge-hired     { background: #fefce8; color: #854d0e; }
+
+/* Stage badges */
+.badge-stage         { border-radius: 6px; font-size: 11px; }
+.stage-apply         { background: #f0f9ff; color: #0369a1; border: 1px solid #bae6fd; }
+.stage-interview     { background: #f5f3ff; color: #7c3aed; border: 1px solid #ddd6fe; }
+.stage-offer         { background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
+.stage-done          { background: #f8fafc; color: #475569; border: 1px solid #e2e8f0; }
 
 /* Action buttons */
 .cand-action-btn {
     border: none;
     background: transparent;
     cursor: pointer;
-    padding: 6px 10px;
+    padding: 8px;
     border-radius: 6px;
-    font-size: 14px;
+    font-size: 15px;
     transition: all 0.15s;
     color: #64748b;
 }
@@ -854,27 +865,85 @@
 
 .cand-status-btn {
     border: none;
-    padding: 8px 14px;
+    padding: 10px 16px;
     border-radius: 8px;
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s;
     display: inline-flex;
     align-items: center;
     gap: 6px;
+    height: 40px;
+    box-sizing: border-box;
+    white-space: nowrap;
 }
 
-.cand-status-btn.screening  { background:#fef9c3; color:#ca8a04; }
+.cand-status-btn.screening  { background:#fef9c3; color:#ca8a04; border:1.5px solid #fde047; }
 .cand-status-btn.screening:hover { background:#fef08a; }
-.cand-status-btn.interview  { background:#f0fdf4; color:#16a34a; }
+.cand-status-btn.interview  { background:#f0fdf4; color:#16a34a; border:1.5px solid #86efac; }
 .cand-status-btn.interview:hover { background:#dcfce7; }
-.cand-status-btn.offered    { background:#ecfdf5; color:#059669; }
+.cand-status-btn.offered    { background:#ecfdf5; color:#059669; border:1.5px solid #6ee7b7; }
 .cand-status-btn.offered:hover { background:#d1fae5; }
-.cand-status-btn.onhold     { background:#fef3c7; color:#d97706; }
+.cand-status-btn.onhold     { background:#fef3c7; color:#d97706; border:1.5px solid #fcd34d; }
 .cand-status-btn.onhold:hover { background:#fde68a; }
-.cand-status-btn.rejected   { background:#fef2f2; color:#dc2626; }
+.cand-status-btn.rejected   { background:#fef2f2; color:#dc2626; border:1.5px solid #fca5a5; }
 .cand-status-btn.rejected:hover { background:#fee2e2; }
+.cand-status-btn.hired      { background:#fefce8; color:#854d0e; border:1.5px solid #fde047; }
+.cand-status-btn.hired:hover { background:#fef9c3; }
+
+/* Inline form trong modal */
+.cand-inline-form {
+    margin: 0 24px 12px;
+    padding: 16px;
+    background: #f8fafc;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 10px;
+}
+.cand-inline-form-success {
+    background: #f0fdf4;
+    border-color: #86efac;
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+    color: #15803d;
+}
+.cand-inline-form-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.cand-form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+.cand-form-group { display: flex; flex-direction: column; gap: 4px; }
+.cand-form-full  { grid-column: 1 / -1; }
+.cand-form-group label { font-size: 12px; font-weight: 600; color: #475569; }
+.cand-form-group input,
+.cand-form-group select,
+.cand-form-group textarea {
+    width: 100%;
+    box-sizing: border-box;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 7px;
+    padding: 8px 10px;
+    font-size: 13px;
+    font-family: inherit;
+    background: #fff;
+    color: #0f172a;
+    outline: none;
+    transition: border-color 0.15s;
+}
+.cand-form-group input:focus,
+.cand-form-group select:focus,
+.cand-form-group textarea:focus { border-color: #3b82f6; }
+.cand-form-group textarea { resize: none; }
 
 /* AI Evaluate Button */
 .btn-ai {
@@ -986,8 +1055,20 @@
 /* Quick Reject Modal */
 .qr-status-checkboxes {
     display: flex;
-    flex-wrap: wrap;
+    flex-direction: column;
     gap: 10px;
+}
+
+.qr-stage-group {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.qr-stage-label {
+    font-size: 11px;
+    min-width: 90px;
 }
 
 .qr-checkbox-item {
@@ -1758,8 +1839,12 @@
     font-family: inherit;
     color: #0f172a;
     background: #f8fafc;
-    transition: all 0.2s;
+    transition: none;
     line-height: 1.5;
+    box-sizing: border-box;
+    min-height: 42px;
+    height: 42px;
+    overflow-y: hidden;
 }
 .msg-textarea:focus {
     outline: none;
@@ -1781,6 +1866,29 @@
     flex-shrink: 0;
 }
 .msg-send-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(59,130,246,0.35); }
+
+.msg-textarea-wrap {
+    position: relative;
+    flex: 1;
+}
+.msg-textarea-wrap .msg-textarea {
+    flex: none;
+    width: 100%;
+}
+.msg-char-counter {
+    position: absolute;
+    bottom: 6px;
+    right: 10px;
+    font-size: 11px;
+    color: #94a3b8;
+    pointer-events: none;
+    background: rgba(248,250,252,0.85);
+    border-radius: 4px;
+    padding: 1px 5px;
+    line-height: 1.4;
+}
+.msg-char-counter.warn  { color: #f59e0b; }
+.msg-char-counter.limit { color: #ef4444; font-weight: 600; }
 
 /* ── Cột phải: Candidate info ── */
 .msg-info-col {

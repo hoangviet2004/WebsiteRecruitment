@@ -239,9 +239,6 @@ function renderTable(companies, isEmpty) {
                         <i class="fa-solid fa-eye"></i>
                     </button>
                     ${toggleBtnHtml}
-                    <button class="btn-action btn-delete" onclick="deleteCompany('${c.id}')" title="Xóa công ty">
-                        <i class="fa-solid fa-trash-can"></i>
-                    </button>
                 </td>
             </tr>`;
     });
@@ -293,24 +290,6 @@ function clearSearch() {
     _currentPage = 1;
     applyFilters();
     inp?.focus();
-}
-
-// ── Delete company ────────────────────────────────────────────
-async function deleteCompany(id) {
-    if (!confirm('Hành động này sẽ xóa vĩnh viễn công ty và toàn bộ tin tuyển dụng liên quan.\nBạn có chắc chắn không?')) return;
-
-    try {
-        const response = await apiFetchAuth('/api/admin/companies/' + id, { method: 'DELETE' });
-        if (response.ok) {
-            showToast('Đã xóa công ty thành công!', 'success');
-            await loadCompanies();
-        } else {
-            const error = await response.json();
-            showToast('Lỗi: ' + (error.message || 'Không xác định'), 'error');
-        }
-    } catch (e) {
-        showToast('Lỗi kết nối: ' + e.message, 'error');
-    }
 }
 
 // ── Toggle company status ─────────────────────────────────────

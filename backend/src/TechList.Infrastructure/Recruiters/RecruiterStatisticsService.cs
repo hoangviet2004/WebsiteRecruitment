@@ -108,7 +108,7 @@ public sealed class RecruiterStatisticsService : IRecruiterStatisticsService
             ["Screening"] = "Sàng lọc",
             ["Interview"] = "Phỏng vấn",
             ["Offered"]   = "Đề nghị",
-            ["OnHold"]    = "Tạm giữ",
+            ["Hired"]     = "Đã tuyển",
             ["Rejected"]  = "Từ chối"
         };
 

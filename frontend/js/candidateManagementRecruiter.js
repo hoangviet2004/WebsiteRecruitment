@@ -8,6 +8,7 @@ let _filteredApps    = [];   // sau khi lọc
 let _currentPage     = 1;
 const PAGE_SIZE      = 10;
 let _currentAppId    = null; // đơn đang mở trong modal
+const _offerData     = {};   // { [appId]: { min, max } } — lưu lương đã xác nhận
 
 // Màu avatar theo index
 const AVATAR_COLORS = ['#3b82f6','#8b5cf6','#ec4899','#f59e0b','#10b981','#ef4444','#6366f1','#14b8a6'];
@@ -28,10 +29,10 @@ function getInitials(name) {
 const STATUS_CONFIG = {
     Applied:   { label: 'Mới nộp',   cls: 'applied',   icon: 'fa-file-pen' },
     Screening: { label: 'Sàng lọc',  cls: 'screening', icon: 'fa-magnifying-glass' },
-    Interview: { label: 'Phỏng vấn', cls: 'interview', icon: 'fa-comments' },
+    Interview: { label: 'Đang phỏng vấn', cls: 'interview', icon: 'fa-comments' },
     Offered:   { label: 'Đề nghị',   cls: 'offered',   icon: 'fa-handshake' },
-    OnHold:    { label: 'Tạm giữ',   cls: 'onhold',    icon: 'fa-clock' },
-    Rejected:  { label: 'Từ chối',   cls: 'rejected',  icon: 'fa-xmark' }
+    Rejected:  { label: 'Từ chối',   cls: 'rejected',  icon: 'fa-xmark' },
+    Hired:     { label: 'Đã tuyển',  cls: 'hired',     icon: 'fa-trophy' },
 };
 
 function statusBadge(status) {
@@ -39,16 +40,30 @@ function statusBadge(status) {
     return `<span class="badge badge-${cfg.cls}"><i class="fa-solid ${cfg.icon}"></i> ${cfg.label}</span>`;
 }
 
+const STAGE_CONFIG = {
+    Applied:   { label: 'Nộp hồ sơ',  cls: 'stage-apply',      icon: 'fa-file-arrow-up',  step: 1 },
+    Screening: { label: 'Nộp hồ sơ',  cls: 'stage-apply',      icon: 'fa-file-arrow-up',  step: 1 },
+    Interview: { label: 'Phỏng vấn',  cls: 'stage-interview',  icon: 'fa-comments',        step: 2 },
+    Offered:   { label: 'Offer',       cls: 'stage-offer',      icon: 'fa-handshake',       step: 3 },
+    Rejected:  { label: 'Hoàn thành', cls: 'stage-done',       icon: 'fa-flag-checkered',  step: 4 },
+    Hired:     { label: 'Hoàn thành', cls: 'stage-done',       icon: 'fa-flag-checkered',  step: 4 },
+};
+
+function stageBadge(status) {
+    const cfg = STAGE_CONFIG[status] || STAGE_CONFIG.Applied;
+    return `<span class="badge badge-stage ${cfg.cls}"><i class="fa-solid ${cfg.icon}"></i> ${cfg.label}</span>`;
+}
+
 // ── Tải dữ liệu từ API ──────────────────────────────────────
 async function loadCandidates() {
     if (!currentCompanyId) {
         document.getElementById('cand-table-body').innerHTML =
-            `<tr><td colspan="5" class="cand-loading"><i class="fa-solid fa-circle-info" style="color:#f59e0b;"></i> Vui lòng tạo Hồ sơ Công ty trước.</td></tr>`;
+            `<tr><td colspan="6" class="cand-loading"><i class="fa-solid fa-circle-info" style="color:#f59e0b;"></i> Vui lòng tạo Hồ sơ Công ty trước.</td></tr>`;
         return;
     }
 
     document.getElementById('cand-table-body').innerHTML =
-        `<tr><td colspan="5" class="cand-loading"><i class="fa-solid fa-spinner fa-spin"></i> Đang tải dữ liệu...</td></tr>`;
+        `<tr><td colspan="6" class="cand-loading"><i class="fa-solid fa-spinner fa-spin"></i> Đang tải dữ liệu...</td></tr>`;
     document.getElementById('cand-count-label').textContent = 'Đang tải...';
     document.getElementById('cand-stats-row').innerHTML = '';
 
@@ -65,7 +80,7 @@ async function loadCandidates() {
         renderStats();
     } catch (e) {
         document.getElementById('cand-table-body').innerHTML =
-            `<tr><td colspan="5" class="cand-loading" style="color:#ef4444;"><i class="fa-solid fa-circle-exclamation"></i> ${e.message}</td></tr>`;
+            `<tr><td colspan="6" class="cand-loading" style="color:#ef4444;"><i class="fa-solid fa-circle-exclamation"></i> ${e.message}</td></tr>`;
     }
 }
 
@@ -116,7 +131,7 @@ function renderTable() {
     label.textContent = `${total} ứng viên`;
 
     if (total === 0) {
-        tbody.innerHTML = `<tr><td colspan="5" class="cand-loading"><i class="fa-solid fa-inbox" style="color:#cbd5e1;"></i> Không có ứng viên nào.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="6" class="cand-loading"><i class="fa-solid fa-inbox" style="color:#cbd5e1;"></i> Không có ứng viên nào.</td></tr>`;
         return;
     }
 
@@ -145,9 +160,13 @@ function renderTable() {
             <td><span style="font-weight:500; color:#0f172a;">${escHtml(a.jobTitle || '')}</span></td>
             <td style="color:#64748b; font-size:13px;">${dateStr}</td>
             <td>${statusBadge(a.status)}</td>
+            <td>${stageBadge(a.status)}</td>
             <td>
                 <button class="cand-action-btn view" title="Xem hồ sơ" onclick="openCandModal('${a.id}')">
-                    <i class="fa-solid fa-eye"></i> Xem
+                    <i class="fa-regular fa-pen-to-square"></i>
+                </button>
+                <button class="cand-action-btn" title="Đoạn chat" onclick="goToCandChat('${a.id}')" style="color:#3b82f6;">
+                    <i class="fa-regular fa-comments"></i>
                 </button>
             </td>
         </tr>`;
@@ -189,9 +208,12 @@ function goPage(page) {
 
 // ── Thống kê nhanh ──────────────────────────────────────────
 function renderStats() {
-    const total       = _allApplications.length;
-    const interviews  = _allApplications.filter(a => a.status === 'Interview').length;
-    const pending     = _allApplications.filter(a => a.status === 'Applied' || a.status === 'Screening').length;
+    let total = 0, interviews = 0, pending = 0;
+    for (const a of _allApplications) {
+        total++;
+        if (a.status === 'Interview') interviews++;
+        else if (a.status === 'Applied' || a.status === 'Screening') pending++;
+    }
 
     document.getElementById('cand-stats-row').innerHTML = `
         <div class="cand-stat-card">
@@ -283,20 +305,9 @@ function openCandModal(appId) {
 
         ${coverHtml}`;
 
-    // Render nút cập nhật trạng thái (bỏ qua trạng thái hiện tại)
-    const actions = [
-        { status: 'Screening', cls: 'screening', icon: 'fa-magnifying-glass', label: 'Sàng lọc' },
-        { status: 'Interview', cls: 'interview', icon: 'fa-comments',          label: 'Phỏng vấn' },
-        { status: 'Offered',   cls: 'offered',   icon: 'fa-handshake',          label: 'Đề nghị' },
-        { status: 'OnHold',    cls: 'onhold',    icon: 'fa-clock',              label: 'Tạm giữ' },
-        { status: 'Rejected',  cls: 'rejected',  icon: 'fa-xmark',              label: 'Từ chối' },
-    ];
-
-    document.getElementById('cand-modal-status-actions').innerHTML = actions
-        .filter(a => a.status !== app.status)
-        .map(a => `<button class="cand-status-btn ${a.cls}" onclick="updateCandStatus('${app.id}', '${a.status}')">
-            <i class="fa-solid ${a.icon}"></i> ${a.label}
-        </button>`).join('');
+    // Render stage-aware actions
+    document.getElementById('cand-modal-inline-form').innerHTML = '';
+    renderModalActions(app);
 
     // Reset kết quả đánh giá cũ
     document.getElementById('cand-ai-result').style.display = 'none';
@@ -309,36 +320,330 @@ function closeCandModal() {
     _currentAppId = null;
 }
 
+function goToCandChat(appId) {
+    if (!appId) return;
+    // Switch sang tab messages
+    const menuBtn = document.getElementById('menu-messages');
+    if (typeof switchTab === 'function' && menuBtn) switchTab('messages', menuBtn);
+    // Mở conversation tương ứng sau khi conversations đã load
+    const tryOpen = (attempt = 0) => {
+        if (typeof openConversation === 'function' && typeof _convList !== 'undefined' && _convList.length > 0) {
+            openConversation(appId);
+        } else if (attempt < 10) {
+            setTimeout(() => tryOpen(attempt + 1), 300);
+        }
+    };
+    tryOpen();
+}
+
+// ── Stage-aware action rendering ────────────────────────────
+function renderModalActions(app) {
+    const el = document.getElementById('cand-modal-status-actions');
+    const id = app.id;
+    const rejectBtn = `<button class="cand-status-btn rejected" onclick="openRejectForm()"><i class="fa-solid fa-xmark"></i> Từ chối</button>`;
+
+    const map = {
+        Applied: `
+            <button class="cand-status-btn screening" onclick="updateCandStatusDirect('${id}','Screening')"><i class="fa-solid fa-magnifying-glass"></i> Sàng lọc</button>
+            ${rejectBtn}`,
+        Screening: `
+            <button class="cand-status-btn interview" onclick="openInterviewForm()"><i class="fa-solid fa-calendar-plus"></i> Hẹn phỏng vấn</button>
+            ${rejectBtn}`,
+        Interview: `
+            <button class="cand-status-btn offered" onclick="updateCandStatusDirect('${id}','Offered')"><i class="fa-solid fa-check"></i> Đã phỏng vấn</button>
+            <button class="cand-status-btn interview" onclick="openInterviewForm()"><i class="fa-solid fa-calendar-day"></i> Đổi lịch</button>
+            ${rejectBtn}`,
+        Offered: _offerData[id]
+            ? null  // handled separately below
+            : `<button class="cand-status-btn offered" onclick="openOfferForm()"><i class="fa-solid fa-handshake"></i> Gửi offer</button>
+               <button class="cand-status-btn hired" onclick="updateCandStatusDirect('${id}','Hired')"><i class="fa-solid fa-trophy"></i> Offer thành công</button>
+               ${rejectBtn}`,
+        Hired: `<span class="cand-stage-done-msg" style="color:#854d0e;"><i class="fa-solid fa-trophy"></i> Đã tuyển</span>`,
+        Rejected: `<span class="cand-stage-done-msg" style="color:#ef4444;"><i class="fa-solid fa-circle-xmark"></i> Đã từ chối ứng viên</span>`,
+    };
+    if (app.status === 'Offered' && _offerData[id]) {
+        _renderOfferConfirmed(id);
+        return;
+    }
+    el.innerHTML = map[app.status] || rejectBtn;
+}
+
 // ── Cập nhật trạng thái ─────────────────────────────────────
-async function updateCandStatus(appId, newStatus) {
-    const statusLabel = STATUS_CONFIG[newStatus]?.label || newStatus;
-
-    if (!confirm(`Cập nhật trạng thái ứng viên thành "${statusLabel}"?`)) return;
-
+async function updateCandStatusDirect(appId, newStatus) {
     try {
         const res = await apiFetchAuth(`/api/applications/${appId}/status`, {
             method: 'PUT',
             body: JSON.stringify({ status: newStatus })
         });
         const data = await res.json();
-
         if (!res.ok || !data.success) throw new Error(data.message || 'Lỗi cập nhật');
 
-        // Cập nhật dữ liệu cục bộ
         const idx = _allApplications.findIndex(a => a.id === appId);
-        if (idx !== -1) {
-            _allApplications[idx].status = newStatus;
-            _allApplications[idx].updatedAt = new Date().toISOString();
-        }
+        if (idx !== -1) { _allApplications[idx].status = newStatus; _allApplications[idx].updatedAt = new Date().toISOString(); }
+
+        if (newStatus === 'Hired' || newStatus === 'Rejected') delete _offerData[appId];
 
         applyCandidateFilters();
         renderStats();
-
-        // Nếu modal đang mở thì làm mới nội dung
         if (_currentAppId === appId) openCandModal(appId);
-    } catch (e) {
-        alert('Lỗi: ' + e.message);
+    } catch (e) { alert('Lỗi: ' + e.message); }
+}
+
+// ── Form từ chối (inline trong modal) ───────────────────────
+const REJECT_REASONS = [
+    'Không đủ kinh nghiệm',
+    'Hồ sơ không phù hợp',
+    'Vị trí đã tuyển đủ người',
+    'Đã tuyển ứng viên khác phù hợp hơn',
+    'Không đáp ứng yêu cầu kỹ năng',
+    'Yêu cầu lương không phù hợp',
+    'Lý do khác',
+];
+
+function openRejectForm() {
+    const options = REJECT_REASONS.map((r, i) =>
+        `<option value="${r}"${i === 0 ? ' selected' : ''}>${r}</option>`).join('');
+
+    document.getElementById('cand-modal-inline-form').innerHTML = `
+        <div class="cand-inline-form" style="border-color:#fca5a5;background:#fef2f2;">
+            <div class="cand-inline-form-title" style="color:#dc2626;">
+                <i class="fa-solid fa-circle-xmark"></i> Lý do từ chối
+            </div>
+            <div class="cand-form-grid">
+                <div class="cand-form-group cand-form-full">
+                    <label>Chọn lý do</label>
+                    <select id="modal-reject-reason" onchange="toggleRejectOther(this)">${options}</select>
+                </div>
+                <div class="cand-form-group cand-form-full" id="modal-reject-other-wrap" style="display:none;">
+                    <textarea id="modal-reject-other" rows="1" maxlength="100" placeholder="Mô tả lý do từ chối (tối đa 100 ký tự)..."
+                        style="overflow:hidden;resize:none;"
+                        oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
+                </div>
+            </div>
+        </div>`;
+
+    document.getElementById('cand-modal-status-actions').innerHTML = `
+        <button class="cand-status-btn rejected" onclick="confirmReject()">
+            <i class="fa-solid fa-circle-xmark"></i> Xác nhận từ chối
+        </button>
+        <button class="btn-secondary" onclick="cancelModalForm()">Hủy</button>`;
+}
+
+function toggleRejectOther(sel) {
+    const wrap = document.getElementById('modal-reject-other-wrap');
+    wrap.style.display = sel.value === 'Lý do khác' ? 'block' : 'none';
+    if (sel.value === 'Lý do khác') document.getElementById('modal-reject-other').focus();
+}
+
+async function confirmReject() {
+    const sel = document.getElementById('modal-reject-reason');
+    let reason = sel?.value || 'Hồ sơ không phù hợp';
+    if (reason === 'Lý do khác') {
+        const custom = document.getElementById('modal-reject-other')?.value.trim();
+        if (!custom) { alert('Vui lòng nhập lý do từ chối.'); return; }
+        reason = custom;
     }
+    const app = _allApplications.find(a => a.id === _currentAppId);
+    const jobTitle = app?.jobTitle || 'vị trí ứng tuyển';
+
+    const rejectMsg = `Cảm ơn bạn đã ứng tuyển vào vị trí ${jobTitle}.\n\nSau khi xem xét kỹ hồ sơ, chúng tôi rất tiếc phải thông báo rằng hồ sơ của bạn chưa phù hợp với yêu cầu hiện tại.\n📌 Lý do: ${reason}\n\nChúng tôi trân trọng sự quan tâm của bạn và mong có cơ hội hợp tác trong tương lai.`;
+
+    try {
+        await apiFetchAuth('/api/messaging/send', {
+            method: 'POST',
+            body: JSON.stringify({ applicationId: _currentAppId, content: rejectMsg, type: 'message' })
+        });
+    } catch { /* không block nếu gửi tin thất bại */ }
+
+    await updateCandStatusDirect(_currentAppId, 'Rejected');
+}
+
+async function rejectCandidate(appId) {
+    if (!confirm('Xác nhận từ chối ứng viên này?')) return;
+    await updateCandStatusDirect(appId, 'Rejected');
+}
+
+async function updateCandStatus(appId, newStatus) {
+    const statusLabel = STATUS_CONFIG[newStatus]?.label || newStatus;
+    if (!confirm(`Cập nhật trạng thái ứng viên thành "${statusLabel}"?`)) return;
+    await updateCandStatusDirect(appId, newStatus);
+}
+
+// ── Form hẹn phỏng vấn (inline trong modal) ─────────────────
+function openInterviewForm() {
+    const dt = new Date(); dt.setDate(dt.getDate() + 1); dt.setHours(10, 0, 0, 0);
+    document.getElementById('cand-modal-inline-form').innerHTML = `
+        <div class="cand-inline-form">
+            <div class="cand-inline-form-title"><i class="fa-solid fa-calendar-plus"></i> Lên lịch phỏng vấn</div>
+            <div class="cand-form-grid">
+                <div class="cand-form-group">
+                    <label>Ngày & giờ phỏng vấn <span style="color:#ef4444">*</span></label>
+                    <input type="datetime-local" id="modal-sch-datetime" value="${dt.toISOString().slice(0,16)}">
+                </div>
+                <div class="cand-form-group">
+                    <label>Thời lượng</label>
+                    <select id="modal-sch-duration">
+                        <option value="30">30 phút</option>
+                        <option value="45">45 phút</option>
+                        <option value="60" selected>60 phút</option>
+                        <option value="90">90 phút</option>
+                        <option value="120">120 phút</option>
+                    </select>
+                </div>
+                <div class="cand-form-group cand-form-full">
+                    <label>Link phỏng vấn trực tuyến</label>
+                    <input type="url" id="modal-sch-link" placeholder="https://meet.google.com/...">
+                </div>
+                <div class="cand-form-group cand-form-full">
+                    <label>Địa điểm (nếu trực tiếp)</label>
+                    <input type="text" id="modal-sch-location" placeholder="Địa chỉ văn phòng...">
+                </div>
+                <div class="cand-form-group cand-form-full">
+                    <label>Ghi chú</label>
+                    <textarea id="modal-sch-notes" rows="2" placeholder="Yêu cầu chuẩn bị, trang phục..."></textarea>
+                </div>
+            </div>
+        </div>`;
+    document.getElementById('cand-modal-status-actions').innerHTML = `
+        <button class="cand-status-btn interview" onclick="submitInterviewFromModal()"><i class="fa-solid fa-calendar-check"></i> Xác nhận lịch</button>
+        <button class="btn-secondary" onclick="cancelModalForm()">Hủy</button>`;
+}
+
+async function submitInterviewFromModal() {
+    const dt = document.getElementById('modal-sch-datetime')?.value;
+    if (!dt) { alert('Vui lòng chọn ngày giờ phỏng vấn.'); return; }
+    const payload = {
+        applicationId:   _currentAppId,
+        scheduledAt:     new Date(dt).toISOString(),
+        durationMinutes: parseInt(document.getElementById('modal-sch-duration').value),
+        meetingLink:     document.getElementById('modal-sch-link').value || null,
+        location:        document.getElementById('modal-sch-location').value || null,
+        notes:           document.getElementById('modal-sch-notes').value || null,
+    };
+    try {
+        const res = await apiFetchAuth('/api/messaging/interviews', { method: 'POST', body: JSON.stringify(payload) });
+        const data = await res.json();
+        if (!res.ok || !data.success) throw new Error(data.message || 'Lỗi lên lịch');
+
+        const idx = _allApplications.findIndex(a => a.id === _currentAppId);
+        if (idx !== -1) { _allApplications[idx].status = 'Interview'; _allApplications[idx].updatedAt = new Date().toISOString(); }
+
+        const iv = data.data;
+        const dtStr = new Date(iv.scheduledAt).toLocaleString('vi-VN', { dateStyle: 'full', timeStyle: 'short' });
+        const autoMsg = `📅 Lịch phỏng vấn đã được lên lịch!\n\n🗓 Thời gian: ${dtStr}\n⏱ Thời lượng: ${iv.durationMinutes} phút${iv.meetingLink ? `\n🔗 Link: ${iv.meetingLink}` : ''}${iv.location ? `\n📍 Địa điểm: ${iv.location}` : ''}${iv.notes ? `\n📝 Ghi chú: ${iv.notes}` : ''}`;
+        await apiFetchAuth('/api/messaging/send', {
+            method: 'POST',
+            body: JSON.stringify({ applicationId: _currentAppId, content: autoMsg, type: 'message' })
+        });
+
+        applyCandidateFilters();
+        renderStats();
+        openCandModal(_currentAppId);
+    } catch (e) { alert('Lỗi: ' + e.message); }
+}
+
+// ── Format tiền tệ ───────────────────────────────────────────
+function formatCurrency(el) {
+    const raw = el.value.replace(/\./g, '').replace(/\D/g, '');
+    el.value = raw ? parseInt(raw).toLocaleString('vi-VN') : '';
+}
+
+function parseCurrency(el) {
+    return el.value.replace(/\./g, '').trim() || null;
+}
+
+// ── Form gửi offer (inline trong modal) ─────────────────────
+function openOfferForm() {
+    document.getElementById('cand-modal-inline-form').innerHTML = `
+        <div class="cand-inline-form">
+            <div class="cand-inline-form-title"><i class="fa-solid fa-handshake"></i> Thông tin Offer</div>
+            <div class="cand-form-grid">
+                <div class="cand-form-group">
+                    <label>Lương tối thiểu (VNĐ)</label>
+                    <input type="text" id="modal-offer-min" placeholder="VD: 10.000.000"
+                        inputmode="numeric" oninput="formatCurrency(this)">
+                </div>
+                <div class="cand-form-group">
+                    <label>Lương tối đa (VNĐ)</label>
+                    <input type="text" id="modal-offer-max" placeholder="VD: 15.000.000"
+                        inputmode="numeric" oninput="formatCurrency(this)">
+                </div>
+            </div>
+        </div>`;
+    document.getElementById('cand-modal-status-actions').innerHTML = `
+        <button class="cand-status-btn offered" onclick="confirmOfferSalary()"><i class="fa-solid fa-check"></i> Xác nhận mức lương</button>
+        <button class="btn-secondary" onclick="cancelModalForm()">Hủy</button>`;
+}
+
+function confirmOfferSalary() {
+    const min = parseCurrency(document.getElementById('modal-offer-min'));
+    const max = parseCurrency(document.getElementById('modal-offer-max'));
+    if (!min && !max) { alert('Vui lòng nhập ít nhất một mức lương.'); return; }
+    if (min && max && parseInt(min) >= parseInt(max)) {
+        alert('Lương tối thiểu phải nhỏ hơn lương tối đa.');
+        document.getElementById('modal-offer-min').focus();
+        return;
+    }
+
+    _offerData[_currentAppId] = { min, max };
+    _renderOfferConfirmed(_currentAppId);
+}
+
+function _renderOfferConfirmed(appId) {
+    const d = _offerData[appId];
+    const fmt = v => v ? parseInt(v).toLocaleString('vi-VN') + ' VNĐ' : '—';
+    document.getElementById('cand-modal-inline-form').innerHTML = `
+        <div class="cand-inline-form cand-inline-form-success">
+            <i class="fa-solid fa-circle-check" style="color:#059669;margin-right:8px;"></i>
+            <strong>Mức lương đề nghị:</strong>&nbsp;${fmt(d.min)} – ${fmt(d.max)}
+        </div>`;
+    document.getElementById('cand-modal-status-actions').innerHTML = `
+        <button class="cand-status-btn hired" onclick="confirmHired('${appId}')"><i class="fa-solid fa-trophy"></i> Offer thành công</button>
+        <button class="cand-status-btn rejected" onclick="openRejectForm()"><i class="fa-solid fa-xmark"></i> Từ chối</button>
+        <button class="btn-secondary" onclick="editOfferSalary()"><i class="fa-solid fa-pen"></i> Sửa</button>`;
+}
+
+async function confirmHired(appId) {
+    const d = _offerData[appId];
+    const fmt = v => v ? parseInt(v).toLocaleString('vi-VN') + ' VNĐ' : null;
+    const minStr = fmt(d?.min);
+    const maxStr = fmt(d?.max);
+
+    let offerLine = '';
+    if (minStr && maxStr) offerLine = `\n💰 Mức lương: ${minStr} – ${maxStr}`;
+    else if (minStr)      offerLine = `\n💰 Mức lương: từ ${minStr}`;
+    else if (maxStr)      offerLine = `\n💰 Mức lương: lên đến ${maxStr}`;
+
+    const app = _allApplications.find(a => a.id === appId);
+    const jobTitle = app?.jobTitle || 'vị trí ứng tuyển';
+
+    const offerMsg = `🎉 Chúc mừng! Bạn đã được chấp nhận vào ${jobTitle}.${offerLine}\n\nChúng tôi sẽ liên hệ để hoàn tất các thủ tục tiếp theo. Xin chúc mừng và chào đón bạn!`;
+
+    try {
+        await apiFetchAuth('/api/messaging/send', {
+            method: 'POST',
+            body: JSON.stringify({ applicationId: appId, content: offerMsg, type: 'message' })
+        });
+    } catch { /* không block nếu gửi tin thất bại */ }
+
+    await updateCandStatusDirect(appId, 'Hired');
+}
+
+function editOfferSalary() {
+    const d = _offerData[_currentAppId] || {};
+    delete _offerData[_currentAppId];
+    openOfferForm();
+    const minEl = document.getElementById('modal-offer-min');
+    const maxEl = document.getElementById('modal-offer-max');
+    if (d.min) { minEl.value = d.min; formatCurrency(minEl); }
+    if (d.max) { maxEl.value = d.max; formatCurrency(maxEl); }
+}
+
+function cancelModalForm() {
+    const app = _allApplications.find(a => a.id === _currentAppId);
+    if (!app) return;
+    document.getElementById('cand-modal-inline-form').innerHTML = '';
+    renderModalActions(app);
 }
 
 // ── Quick Reject ─────────────────────────────────────────────
@@ -372,6 +677,12 @@ function closeQuickRejectModal() {
     document.getElementById('quick-reject-modal').classList.remove('show');
 }
 
+function toggleQrOther(sel) {
+    const ta = document.getElementById('qr-reason-other');
+    ta.style.display = sel.value === 'Khác' ? 'block' : 'none';
+    if (sel.value === 'Khác') ta.focus();
+}
+
 function _isEmptyJson(val) {
     if (!val) return true;
     const s = val.trim();
@@ -396,7 +707,7 @@ function updateQuickRejectCount() {
     const jobId = document.getElementById('qr-job-filter').value;
 
     const affected = _allApplications.filter(a => {
-        if (a.status === 'Rejected' || a.status === 'Offered') return false;
+        if (a.status === 'Rejected' || a.status === 'Hired') return false;
         if (!selectedStatuses.includes(a.status)) return false;
         if (jobId && a.jobPostId !== jobId) return false;
         if (!_matchesProfileFilter(a, profileFilters)) return false;
@@ -430,10 +741,15 @@ async function executeQuickReject() {
     const selectedStatuses = [...document.querySelectorAll('input[name="qr-status"]:checked')].map(cb => cb.value);
     const profileFilters   = [...document.querySelectorAll('input[name="qr-profile"]:checked')].map(cb => cb.value);
     const jobId = document.getElementById('qr-job-filter').value;
-    const reason = document.getElementById('qr-reason').value;
+    let reason = document.getElementById('qr-reason').value;
+    if (reason === 'Khác') {
+        const custom = document.getElementById('qr-reason-other')?.value.trim();
+        if (!custom) { alert('Vui lòng nhập lý do từ chối.'); return; }
+        reason = custom;
+    }
 
     const toReject = _allApplications.filter(a => {
-        if (a.status === 'Rejected' || a.status === 'Offered') return false;
+        if (a.status === 'Rejected' || a.status === 'Hired') return false;
         if (!selectedStatuses.includes(a.status)) return false;
         if (jobId && a.jobPostId !== jobId) return false;
         if (!_matchesProfileFilter(a, profileFilters)) return false;
@@ -623,21 +939,29 @@ async function executeBatchAI() {
 }
 
 function _batchStatusButtons(appId, currentStatus) {
-    const all = [
-        { status: 'Screening', cls: 'screening', icon: 'fa-magnifying-glass', label: 'Sàng lọc' },
-        { status: 'Interview', cls: 'interview', icon: 'fa-comments',         label: 'Phỏng vấn' },
-        { status: 'Offered',   cls: 'offered',   icon: 'fa-handshake',        label: 'Đề nghị' },
-        { status: 'OnHold',    cls: 'onhold',    icon: 'fa-clock',            label: 'Tạm giữ' },
-        { status: 'Rejected',  cls: 'rejected',  icon: 'fa-xmark',            label: 'Từ chối' },
-    ];
+    const NEXT = {
+        Applied:   { status: 'Screening', cls: 'screening', icon: 'fa-magnifying-glass', label: 'Sàng lọc' },
+        Screening: { status: 'Interview', cls: 'interview', icon: 'fa-comments',          label: 'Hẹn phỏng vấn' },
+        Interview: { status: 'Offered',   cls: 'offered',   icon: 'fa-handshake',         label: 'Gửi offer' },
+        Offered:   { status: 'Hired',     cls: 'hired',     icon: 'fa-trophy',             label: 'Offer thành công' },
+    };
+    const rejectBtn = `<button class="cand-status-btn rejected" style="font-size:11px;padding:3px 8px;"
+        onclick="changeBatchResultStatus('${appId}','Rejected',this.parentElement)">
+        <i class="fa-solid fa-xmark"></i> Từ chối
+    </button>`;
+
     const currentLabel = STATUS_CONFIG[currentStatus]?.label || currentStatus;
-    const btns = all
-        .filter(s => s.status !== currentStatus)
-        .map(s => `<button class="cand-status-btn ${s.cls}" style="font-size:11px;padding:3px 8px;"
-            onclick="changeBatchResultStatus('${appId}','${s.status}',this.parentElement)">
-            <i class="fa-solid ${s.icon}"></i> ${s.label}
-        </button>`).join('');
-    return `<span style="font-size:11px;color:#64748b;flex-shrink:0;">Trạng thái: <strong>${escHtml(currentLabel)}</strong></span>${btns}`;
+    const next = NEXT[currentStatus];
+    const nextBtn = next ? `<button class="cand-status-btn ${next.cls}" style="font-size:11px;padding:3px 8px;"
+        onclick="changeBatchResultStatus('${appId}','${next.status}',this.parentElement)">
+        <i class="fa-solid ${next.icon}"></i> ${next.label}
+    </button>` : '';
+
+    const done = currentStatus === 'Hired' || currentStatus === 'Rejected'
+        ? `<span style="font-size:11px;color:#64748b;font-style:italic;">Đã hoàn tất</span>`
+        : `${nextBtn}${rejectBtn}`;
+
+    return `<span style="font-size:11px;color:#64748b;flex-shrink:0;">Trạng thái: <strong>${escHtml(currentLabel)}</strong></span>${done}`;
 }
 
 async function changeBatchResultStatus(appId, newStatus, rowEl) {

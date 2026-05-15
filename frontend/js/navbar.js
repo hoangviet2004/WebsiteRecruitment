@@ -19,7 +19,7 @@ const _STATUS_NOTIF = {
     Screening: { icon: 'fa-magnifying-glass', color: '#ca8a04', msg: 'Hồ sơ của bạn đang được xem xét và sàng lọc.' },
     Interview: { icon: 'fa-comments',         color: '#16a34a', msg: 'Bạn được mời tham gia phỏng vấn.' },
     Offered:   { icon: 'fa-handshake',        color: '#059669', msg: 'Chúc mừng! Bạn nhận được đề nghị công việc.' },
-    OnHold:    { icon: 'fa-clock',            color: '#d97706', msg: 'Đơn ứng tuyển của bạn đang được tạm giữ.' },
+    Hired:     { icon: 'fa-trophy',            color: '#854d0e', msg: 'Chúc mừng! Bạn đã được tuyển dụng.' },
     Rejected:  { icon: 'fa-xmark',            color: '#dc2626', msg: 'Rất tiếc, đơn ứng tuyển của bạn đã bị từ chối.' },
 };
 
@@ -43,25 +43,12 @@ function _injectNotifPanel() {
 async function _loadNotifBadge() {
     const token = sessionStorage.getItem('token');
     if (!token || typeof API_URL === 'undefined') return;
-    const role = (sessionStorage.getItem('role') || '').toLowerCase();
     try {
-        if (role === 'recruiter') {
-            const res = await fetch(`${API_URL}/api/notifications/unread-count`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            const data = await res.json();
-            if (data.success) _updateBadge(data.data || 0);
-        } else {
-            const res = await fetch(`${API_URL}/api/applications/my-applications`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            const data = await res.json();
-            if (data.success) {
-                const seen = _getSeenStatuses();
-                const count = (data.data || []).filter(a => seen[a.id] !== a.status).length;
-                _updateBadge(count);
-            }
-        }
+        const res = await fetch(`${API_URL}/api/notifications/unread-count`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await res.json();
+        if (data.success) _updateBadge(data.data || 0);
     } catch {}
 }
 
@@ -85,27 +72,20 @@ async function openNotifPanel() {
     const role = (sessionStorage.getItem('role') || '').toLowerCase();
 
     try {
+        const res = await fetch(`${API_URL}/api/notifications`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await res.json();
+        if (!data.success) throw new Error();
         if (role === 'recruiter') {
-            const res = await fetch(`${API_URL}/api/notifications`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            const data = await res.json();
-            if (!data.success) throw new Error();
             _renderRecruiterNotifItems(data.data || []);
-            await fetch(`${API_URL}/api/notifications/mark-read`, {
-                method: 'PUT', headers: { 'Authorization': `Bearer ${token}` }
-            });
-            _updateBadge(0);
         } else {
-            const res = await fetch(`${API_URL}/api/applications/my-applications`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            const data = await res.json();
-            if (!data.success) throw new Error();
-            const apps = (data.data || []).sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
-            _renderNotifItems(apps);
-            _markAllRead(apps);
+            _renderCandidateNotifItems(data.data || []);
         }
+        await fetch(`${API_URL}/api/notifications/mark-read`, {
+            method: 'PUT', headers: { 'Authorization': `Bearer ${token}` }
+        });
+        _updateBadge(0);
     } catch {
         body.innerHTML = '<div class="notif-empty"><i class="fa-solid fa-circle-exclamation"></i><p>Không thể tải thông báo.</p></div>';
     }
@@ -160,12 +140,45 @@ function _markAllRead(apps) {
 }
 
 const _RECRUITER_NOTIF_CFG = {
-    Approved:  { icon: 'fa-circle-check',  color: '#16a34a' },
-    Rejected:  { icon: 'fa-ban',           color: '#dc2626' },
-    Unblocked: { icon: 'fa-unlock',        color: '#2563eb' },
-    Hidden:    { icon: 'fa-eye-slash',     color: '#d97706' },
-    Shown:     { icon: 'fa-eye',           color: '#0891b2' },
+    Approved:       { icon: 'fa-circle-check',  color: '#16a34a' },
+    Rejected:       { icon: 'fa-ban',           color: '#dc2626' },
+    Unblocked:      { icon: 'fa-unlock',        color: '#2563eb' },
+    Hidden:         { icon: 'fa-eye-slash',     color: '#d97706' },
+    Shown:          { icon: 'fa-eye',           color: '#0891b2' },
+    NewApplication: { icon: 'fa-user-plus',     color: '#8b5cf6' },
 };
+
+function _renderCandidateNotifItems(notifications) {
+    const body = document.getElementById('notif-body');
+    if (!notifications.length) {
+        body.innerHTML = '<div class="notif-empty"><i class="fa-solid fa-bell-slash"></i><p>Chưa có thông báo nào.</p></div>';
+        return;
+    }
+    body.innerHTML = notifications.map(n => {
+        const cfg = _STATUS_NOTIF[n.type] || { icon: 'fa-bell', color: '#64748b', msg: n.message };
+        const date = new Date(n.createdAt).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
+        return `
+            <div class="notif-item${n.isRead ? '' : ' unread'}" onclick="_goToCandidateAppliedJobs()" style="cursor:pointer;">
+                <div class="notif-icon" style="background:${cfg.color}18;color:${cfg.color};">
+                    <i class="fa-solid ${cfg.icon}"></i>
+                </div>
+                <div class="notif-content">
+                    <div class="notif-job">${_escHtmlNav(n.jobTitle || n.title)}</div>
+                    <div class="notif-msg">${_escHtmlNav(n.message)}</div>
+                    <div class="notif-date">${date}</div>
+                </div>
+                <div class="notif-arrow"><i class="fa-solid fa-chevron-right"></i></div>
+            </div>`;
+    }).join('');
+}
+
+function _goToCandidateAppliedJobs() {
+    closeNotifPanel();
+    const base = window.location.pathname.includes('/pages/')
+        ? 'applied-jobs.html'
+        : 'pages/applied-jobs.html';
+    window.location.href = base;
+}
 
 function _goToRecruiterJobs() {
     closeNotifPanel();

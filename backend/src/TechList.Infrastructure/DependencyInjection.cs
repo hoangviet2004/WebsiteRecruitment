@@ -31,6 +31,8 @@ using TechList.Application.CvEvaluation.Interfaces;
 using TechList.Infrastructure.CvEvaluation;
 using TechList.Application.JobRecommendation.Interfaces;
 using TechList.Infrastructure.JobRecommendation;
+using TechList.Application.Email;
+using TechList.Infrastructure.Email;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 
@@ -61,6 +63,7 @@ public static class DependencyInjection
         services.Configure<JwtSettings>(config.GetSection(JwtSettings.SectionName));
         services.Configure<CloudinarySettings>(config.GetSection(CloudinarySettings.SectionName));
         services.Configure<AnthropicSettings>(config.GetSection("Gemini"));
+        services.Configure<EmailSettings>(config.GetSection(EmailSettings.SectionName));
 
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<ITokenService, JwtTokenService>();
@@ -84,6 +87,7 @@ public static class DependencyInjection
         services.AddScoped<INotificationService, NotificationService>();
         services.AddScoped<ICvEvaluationService, CvEvaluationService>();
         services.AddScoped<IJobRecommendationService, JobRecommendationService>();
+        services.AddScoped<IEmailService, EmailService>();
         services.AddMemoryCache();
 
         return services;

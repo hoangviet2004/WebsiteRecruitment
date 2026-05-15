@@ -216,7 +216,8 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
             return;
         }
 
-        const msg = data?.message || `Đăng nhập thất bại (HTTP ${response.status})`;
+        const msg = data?.message || data?.Message
+            || (response.status === 401 ? 'Sai tên đăng nhập hoặc mật khẩu.' : `Đăng nhập thất bại (HTTP ${response.status})`);
         showGlobalErr('login-global-err', msg);
     } catch {
         showGlobalErr('login-global-err', 'Không thể kết nối đến máy chủ. Vui lòng thử lại.');

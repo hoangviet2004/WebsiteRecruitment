@@ -391,6 +391,7 @@ async function sendMsg() {
         if (!res?.ok) throw new Error(data?.message || 'Lỗi');
         ta.value = '';
         ta.style.height = 'auto';
+        updateCharCount(ta, 'cm-char-count');
         await loadThread(_activeAppId);
         loadConversations();
     } catch(e) {
@@ -411,6 +412,16 @@ function handleKey(e) {
 function autoResize(el) {
     el.style.height = 'auto';
     el.style.height = Math.min(el.scrollHeight, 140) + 'px';
+}
+
+function updateCharCount(el, spanId){
+    const len = el.value.length;
+    const span = document.getElementById(spanId);
+    const counter = span?.parentElement;
+    if(!span) return;
+    span.textContent = len;
+    counter.classList.toggle('warn',  len >= 450 && len < 500);
+    counter.classList.toggle('limit', len >= 500);
 }
 
 // ── Interview response ──────────────────────────────────────────
@@ -516,7 +527,7 @@ function pollUnread() {
 
 // ── Helpers ─────────────────────────────────────────────────────
 function statusLabel(s) {
-    return { Applied:'Mới nộp', Screening:'Sàng lọc', Interview:'Phỏng vấn', Offered:'Đề nghị', Rejected:'Từ chối', OnHold:'Tạm giữ' }[s] || s;
+    return { Applied:'Mới nộp', Screening:'Sàng lọc', Interview:'Đang phỏng vấn', Offered:'Đề nghị', Hired:'Đã tuyển', Rejected:'Từ chối' }[s] || s;
 }
 
 function esc(s) {

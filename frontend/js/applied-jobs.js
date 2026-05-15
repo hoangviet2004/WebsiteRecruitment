@@ -9,9 +9,9 @@ let searchQuery = '';
 const STATUS_CONFIG = {
     Applied:   { label: 'Đã nộp',       color: '#3b82f6', bg: '#eff6ff', icon: 'fa-file-pen' },
     Screening: { label: 'Đang xem xét', color: '#ca8a04', bg: '#fefce8', icon: 'fa-magnifying-glass' },
-    Interview: { label: 'Phỏng vấn',    color: '#16a34a', bg: '#f0fdf4', icon: 'fa-comments' },
+    Interview: { label: 'Đang phỏng vấn', color: '#16a34a', bg: '#f0fdf4', icon: 'fa-comments' },
     Offered:   { label: 'Đề nghị',      color: '#059669', bg: '#ecfdf5', icon: 'fa-handshake' },
-    OnHold:    { label: 'Tạm giữ',      color: '#d97706', bg: '#fffbeb', icon: 'fa-clock' },
+    Hired:     { label: 'Đã tuyển',     color: '#854d0e', bg: '#fefce8', icon: 'fa-trophy' },
     Rejected:  { label: 'Từ chối',      color: '#dc2626', bg: '#fef2f2', icon: 'fa-xmark' },
 };
 
@@ -113,12 +113,16 @@ function buildCard(a) {
             </div>
 
             <div class="aj-card-actions">
-                <a href="job-detail.html?id=${a.jobPostId}" class="aj-btn-detail" target="_blank">
+                <a href="job-detail.html?id=${a.jobPostId}" class="aj-btn-detail">
                     <i class="fa-solid fa-arrow-up-right-from-square"></i> Xem tin
                 </a>
                 <button class="aj-btn-chat" onclick="goToChat('${a.id}')">
                     <i class="fa-regular fa-comments"></i> Tin nhắn
                 </button>
+                ${(a.status === 'Applied' || a.status === 'Screening') ? `
+                <button class="aj-btn-withdraw" onclick="withdrawApplication('${a.id}')">
+                    <i class="fa-solid fa-xmark"></i> Rút đơn
+                </button>` : ''}
             </div>
         </div>`;
 }
@@ -149,6 +153,21 @@ function updateCounts() {
         const countEl = el(`count-${status}`);
         if (countEl) countEl.textContent = `(${cnt})`;
     });
+}
+
+async function withdrawApplication(id) {
+    if (!confirm('Bạn có chắc muốn rút đơn ứng tuyển này?\nThao tác không thể hoàn tác.')) return;
+    try {
+        const res = await apiFetchAuth(`/api/applications/${id}`, { method: 'DELETE' });
+        const data = await res.json();
+        if (res.ok && data.success) {
+            await loadApplications();
+        } else {
+            alert(data.message || 'Có lỗi xảy ra, vui lòng thử lại.');
+        }
+    } catch {
+        alert('Lỗi kết nối, vui lòng thử lại.');
+    }
 }
 
 function showSkeletons() {
