@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using TechList.API.Common;
 using TechList.Application.Auth.Interfaces;
 using TechList.Application.Auth.Models;
+using TechList.Domain.Enums;
 using TechList.Infrastructure.Identity;
 
 namespace TechList.API.Controllers;
@@ -163,13 +164,29 @@ public class AuthController : ControllerBase
         return Ok(ApiResponse<object>.Ok(null!, "Logged out"));
     }
 
+    [HttpPost("set-role")]
+    [Authorize]
+    public async Task<ActionResult<ApiResponse<LoginResponse>>> SetRole([FromBody] SetRoleRequest request, CancellationToken ct)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrWhiteSpace(userId))
+            return Unauthorized();
+
+        var ip = HttpContext.Connection.RemoteIpAddress?.ToString();
+        var ua = Request.Headers.UserAgent.ToString();
+
+        var result = await _authService.SetOAuthRoleAsync(userId, request.Role, ip, ua, ct);
+        return Ok(ApiResponse<LoginResponse>.Ok(result, "Role set successfully"));
+    }
+
     private IActionResult OAuthReturn(string? returnUrl, LoginResponse result)
     {
         if (string.IsNullOrWhiteSpace(returnUrl))
             return Ok(ApiResponse<LoginResponse>.Ok(result, "OAuth login successful"));
 
-        // Demo-friendly redirect (production: prefer HttpOnly refresh cookie + code exchange)
         var redirect = $"{returnUrl}#accessToken={Uri.EscapeDataString(result.Tokens.AccessToken)}&refreshToken={Uri.EscapeDataString(result.Tokens.RefreshToken)}";
+        if (result.IsNewUser)
+            redirect += "&newUser=true";
         return Redirect(redirect);
     }
 

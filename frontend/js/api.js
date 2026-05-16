@@ -3,7 +3,7 @@
 // Đặt tại: js/api.js
 // ============================================================
 
-const API_URL = window.location.hostname === 'localhost'
+const API_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
     ? 'http://localhost:5240'
     : 'https://techlist-api-cxekc6gycvbng0h8.southeastasia-01.azurewebsites.net';
 
