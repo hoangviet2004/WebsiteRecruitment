@@ -2,14 +2,15 @@
 
 // ── Panel switching ───────────────────────────────────────────
 function showPanel(name) {
-    ['register','login','forgot'].forEach(p =>
+    ['register','login','forgot','select-role'].forEach(p =>
         document.getElementById('panel-' + p).style.display = 'none'
     );
     document.getElementById('panel-' + name).style.display = 'block';
     const subtitles = {
-        register: 'Tìm kiếm công việc mơ ước của bạn',
-        login:    'Chào mừng trở lại!',
-        forgot:   'Đặt lại mật khẩu'
+        register:      'Tìm kiếm công việc mơ ước của bạn',
+        login:         'Chào mừng trở lại!',
+        forgot:        'Đặt lại mật khẩu',
+        'select-role': 'Chào mừng đến với TechList!'
     };
     document.getElementById('subtitle').textContent = subtitles[name] || '';
 }
@@ -258,6 +259,7 @@ document.querySelectorAll('.github').forEach(btn => {
     const params       = new URLSearchParams(hash);
     const token        = params.get('accessToken');
     const refreshToken = params.get('refreshToken');
+    const isNewUser    = params.get('newUser') === 'true';
     if (!token || !refreshToken) return;
 
     function parseJwt(t) {
@@ -276,6 +278,13 @@ document.querySelectorAll('.github').forEach(btn => {
     sessionStorage.setItem('email',         decoded.email || '');
     sessionStorage.setItem('fullName',      decoded['display_name'] || decoded.name || '');
     sessionStorage.setItem('loginProvider', 'oauth');
+
+    if (isNewUser) {
+        history.replaceState(null, '', window.location.pathname);
+        showPanel('select-role');
+        return;
+    }
+
     const role = decoded['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'] || 'Candidate';
     sessionStorage.setItem('role', role);
 
@@ -283,3 +292,51 @@ document.querySelectorAll('.github').forEach(btn => {
         ? '../pages/admin.html'
         : '../pages/home.html';
 })();
+
+// ── Chọn vai trò sau OAuth ────────────────────────────────────
+document.querySelectorAll('.role-card').forEach(card => {
+    card.addEventListener('click', async function() {
+        const role = this.dataset.role;
+        const token = sessionStorage.getItem('token');
+        if (!token) { showPanel('login'); return; }
+
+        document.querySelectorAll('.role-card').forEach(c => c.classList.add('loading'));
+        showGlobalErr('role-global-err', '');
+
+        try {
+            const response = await apiFetch('/api/auth/set-role', {
+                method: 'POST',
+                headers: { 'Authorization': 'Bearer ' + token },
+                body: JSON.stringify({ Role: role })
+            });
+
+            let data = null;
+            try { data = await response.json(); } catch (_) {}
+
+            if (response.ok) {
+                const payload      = data?.data;
+                const accessToken  = payload?.tokens?.accessToken;
+                const refreshToken = payload?.tokens?.refreshToken;
+                const user         = payload?.user;
+
+                sessionStorage.setItem('token',        accessToken  || '');
+                sessionStorage.setItem('refreshToken', refreshToken || '');
+                sessionStorage.setItem('userId',       user?.id          || '');
+                sessionStorage.setItem('fullName',     user?.displayName || '');
+                sessionStorage.setItem('email',        user?.email       || '');
+                sessionStorage.setItem('avatarUrl',    user?.avatarUrl   || '');
+                sessionStorage.setItem('role',         role);
+
+                window.location.href = '../pages/home.html';
+                return;
+            }
+
+            const msg = data?.message || `Không thể đặt vai trò (HTTP ${response.status})`;
+            showGlobalErr('role-global-err', msg);
+        } catch {
+            showGlobalErr('role-global-err', 'Không thể kết nối đến máy chủ. Vui lòng thử lại.');
+        } finally {
+            document.querySelectorAll('.role-card').forEach(c => c.classList.remove('loading'));
+        }
+    });
+});

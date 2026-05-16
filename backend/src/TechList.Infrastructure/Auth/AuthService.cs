@@ -164,6 +164,7 @@ public sealed class AuthService : IAuthService
 
         await using var tx = await _db.Database.BeginTransactionAsync(ct);
 
+        var isNewUser = false;
         var user = await _userManager.FindByLoginAsync(provider, providerKey);
 
         if (user is null)
@@ -184,9 +185,7 @@ public sealed class AuthService : IAuthService
                 if (!create.Succeeded)
                     throw new InvalidOperationException(string.Join("; ", create.Errors.Select(e => e.Description)));
 
-                var addRole = await _userManager.AddToRoleAsync(user, AppRole.Candidate);
-                if (!addRole.Succeeded)
-                    throw new InvalidOperationException(string.Join("; ", addRole.Errors.Select(e => e.Description)));
+                isNewUser = true;
             }
 
             var addLogin = await _userManager.AddLoginAsync(user, new UserLoginInfo(provider, providerKey, provider));
@@ -199,7 +198,30 @@ public sealed class AuthService : IAuthService
 
         var response = await IssueTokensAsync(user, profile, roles, ip, userAgent, ct);
         await tx.CommitAsync(ct);
-        return response;
+        return response with { IsNewUser = isNewUser };
+    }
+
+    public async Task<LoginResponse> SetOAuthRoleAsync(string userId, string role, string? ip, string? userAgent, CancellationToken ct)
+    {
+        if (role != AppRole.Candidate && role != AppRole.Recruiter)
+            throw new ArgumentException("Invalid role");
+
+        var user = await _userManager.FindByIdAsync(userId)
+            ?? throw new InvalidOperationException("User not found");
+
+        var currentRoles = await _userManager.GetRolesAsync(user);
+        if (currentRoles.Any())
+            await _userManager.RemoveFromRolesAsync(user, currentRoles);
+
+        var addRole = await _userManager.AddToRoleAsync(user, role);
+        if (!addRole.Succeeded)
+            throw new InvalidOperationException(string.Join("; ", addRole.Errors.Select(e => e.Description)));
+
+        var roles = new List<string> { role };
+        var profile = await _db.UserProfiles.FirstOrDefaultAsync(p => p.UserId == userId, ct)
+            ?? throw new InvalidOperationException("Profile not found");
+
+        return await IssueTokensAsync(user, profile, roles, ip, userAgent, ct);
     }
 
     private async Task<LoginResponse> IssueTokensAsync(

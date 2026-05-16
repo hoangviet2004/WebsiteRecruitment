@@ -11,5 +11,6 @@ public interface IAuthService
 
     // Called from OAuth callbacks
     Task<LoginResponse> ExternalLoginAsync(string provider, string providerKey, string email, string? name, string? ip, string? userAgent, CancellationToken ct);
+    Task<LoginResponse> SetOAuthRoleAsync(string userId, string role, string? ip, string? userAgent, CancellationToken ct);
 }
 
