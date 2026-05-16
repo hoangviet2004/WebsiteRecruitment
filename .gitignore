@@ -7,6 +7,10 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/main/Dotnet.gitignore
 
+# Publish artifacts
+backend/publish/
+backend/publish.zip
+
 # Build results
 [Dd]ebug/
 [Dd]ebugPublic/
