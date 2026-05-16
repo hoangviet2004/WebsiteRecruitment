@@ -3,7 +3,9 @@
 // Đặt tại: js/api.js
 // ============================================================
 
-const API_URL = 'http://localhost:5240'; // backend đang chạy port 5500
+const API_URL = window.location.hostname === 'localhost'
+    ? 'http://localhost:5240'
+    : 'https://techlist-api-cxekc6gycvbng0h8.southeastasia-01.azurewebsites.net';
 
 // ── Gọi API không cần token (public) ────────────────────────
 async function apiFetch(endpoint, options = {}) {
