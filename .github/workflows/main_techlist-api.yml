@@ -36,7 +36,6 @@ jobs:
     runs-on: ubuntu-latest
     needs: build
     permissions:
-      id-token: write
       contents: read
 
     steps:
@@ -45,16 +44,10 @@ jobs:
         with:
           name: .net-app
 
-      - name: Login to Azure
-        uses: azure/login@v2
-        with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_2FAD0515AD9048BEB3447C9216BF9C55 }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_A84D3258B0574F1392675C8C74873318 }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_85B85C59E56243A98C75B412658831C2 }}
-
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
         with:
           app-name: 'techlist-api'
           slot-name: 'Production'
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE }}
           package: .
