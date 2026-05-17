@@ -69,10 +69,13 @@ public class AuthController : ControllerBase
     }
 
     [HttpGet("google/callback")]
-    public async Task<IActionResult> GoogleCallback([FromQuery] string? returnUrl = null, CancellationToken ct = default)
+    public async Task<IActionResult> GoogleCallback([FromQuery] string? returnUrl = null, [FromQuery] string? error = null, CancellationToken ct = default)
     {
+        if (!string.IsNullOrEmpty(error))
+            return OAuthCancel(returnUrl);
+
         var info = await _signInManager.GetExternalLoginInfoAsync();
-        if (info is null) throw new InvalidOperationException("External login info not found");
+        if (info is null) return OAuthCancel(returnUrl);
 
         var provider = info.LoginProvider;
         var providerKey = info.ProviderKey;
@@ -108,10 +111,13 @@ public class AuthController : ControllerBase
     }
 
     [HttpGet("github/callback")]
-    public async Task<IActionResult> GitHubCallback([FromQuery] string? returnUrl = null, CancellationToken ct = default)
+    public async Task<IActionResult> GitHubCallback([FromQuery] string? returnUrl = null, [FromQuery] string? error = null, CancellationToken ct = default)
     {
+        if (!string.IsNullOrEmpty(error))
+            return OAuthCancel(returnUrl);
+
         var info = await _signInManager.GetExternalLoginInfoAsync();
-        if (info is null) throw new InvalidOperationException("External login info not found");
+        if (info is null) return OAuthCancel(returnUrl);
 
         var provider = info.LoginProvider; // "GitHub"
         var providerKey = info.ProviderKey;
@@ -177,6 +183,15 @@ public class AuthController : ControllerBase
 
         var result = await _authService.SetOAuthRoleAsync(userId, request.Role, ip, ua, ct);
         return Ok(ApiResponse<LoginResponse>.Ok(result, "Role set successfully"));
+    }
+
+    private IActionResult OAuthCancel(string? returnUrl)
+    {
+        if (string.IsNullOrWhiteSpace(returnUrl))
+            return BadRequest(ApiResponse<object>.Fail("Đăng nhập bị huỷ."));
+
+        var url = returnUrl.Contains('#') ? returnUrl.Split('#')[0] : returnUrl;
+        return Redirect(url + "#login");
     }
 
     private IActionResult OAuthReturn(string? returnUrl, LoginResponse result)
