@@ -14,6 +14,7 @@ function checkAdminRedirect() {
 
 
 // ── Chạy khi trang load xong ─────────────────────────────────
+checkAdminRedirect();
 loadJobs();
 loadFeaturedCompanies();
 
@@ -74,7 +75,8 @@ async function loadFeaturedCompanies() {
 }
 async function loadJobs() {
     const jobList = document.getElementById('job-list');
-    
+    if (!jobList) return;
+
     try {
         // Gọi API public không cần token (trang chủ ai cũng xem được jobs)
         const response = await apiFetch('/api/jobs', { method: 'GET' });
@@ -175,7 +177,7 @@ async function loadJobs() {
         
     } catch (error) {
         console.error('Lỗi khi tải danh sách việc làm:', error);
-        jobList.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: #ef4444;">Đã có lỗi xảy ra khi lấy dữ liệu.</p>';
+        if (jobList) jobList.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: #ef4444;">Đã có lỗi xảy ra khi lấy dữ liệu.</p>';
     }
 }
 
