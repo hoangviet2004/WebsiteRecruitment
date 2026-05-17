@@ -44,13 +44,12 @@ public sealed class CloudinaryCvStorageService : ICvStorageService
 
     public string GetSignedViewUrl(string publicId)
     {
-        // Signed URL với fl_inline để hoạt động kể cả khi Cloudinary bật Strict Transformations
-        var transformation = new Transformation().Flags("inline");
-        return new Url(_cloudinary.Api)
+        // UrlImgUp đã chứa Api (có secret để ký), override ResourceType sang raw
+        return _cloudinary.Api.UrlImgUp
             .ResourceType("raw")
             .Secure(true)
             .Signed(true)
-            .Transform(transformation)
+            .Transform(new Transformation().Flags("inline"))
             .BuildUrl(publicId);
     }
 
