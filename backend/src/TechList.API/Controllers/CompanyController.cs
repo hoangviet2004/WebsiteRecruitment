@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OutputCaching;
 using TechList.API.Common;
 using TechList.Application.Companies.Interfaces;
 using TechList.Application.Companies.Models;
@@ -19,6 +20,7 @@ public sealed class CompanyController : ControllerBase
     }
 
     [HttpGet]
+    [OutputCache(Duration = 30)]
     public async Task<ActionResult<ApiResponse<List<CompanyDto>>>> GetAll(CancellationToken ct)
     {
         var result = await _companyService.GetAllCompaniesAsync(ct);
@@ -26,6 +28,7 @@ public sealed class CompanyController : ControllerBase
     }
 
     [HttpGet("{id:guid}")]
+    [OutputCache(Duration = 60)]
     public async Task<ActionResult<ApiResponse<CompanyDto>>> GetById(Guid id, CancellationToken ct)
     {
         var result = await _companyService.GetCompanyByIdAsync(id, ct);
@@ -60,6 +63,7 @@ public sealed class CompanyController : ControllerBase
     }
 
     [HttpGet("featured")]
+    [OutputCache(Duration = 60)]
     public async Task<ActionResult<ApiResponse<List<CompanyDto>>>> GetFeatured(CancellationToken ct)
     {
         var result = await _companyService.GetFeaturedCompaniesAsync(ct);
