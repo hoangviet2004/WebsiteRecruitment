@@ -115,10 +115,10 @@ public sealed class ProfileService : IProfileService
             .SingleOrDefaultAsync(x => x.UserId == candidateId && x.IsApproved, ct)
             ?? throw new InvalidOperationException("Không tìm thấy hồ sơ ứng viên");
 
-        if (string.IsNullOrWhiteSpace(profile.CvPublicId))
+        if (string.IsNullOrWhiteSpace(profile.CvUrl))
             throw new InvalidOperationException("Ứng viên chưa có CV");
 
-        return _cvStorage.GetSignedViewUrl(profile.CvPublicId);
+        return profile.CvUrl;
     }
 
     public async Task<string> GetCvViewUrlAsync(string userId, CancellationToken ct)
@@ -127,10 +127,10 @@ public sealed class ProfileService : IProfileService
             .SingleOrDefaultAsync(x => x.UserId == userId, ct)
             ?? throw new InvalidOperationException("Profile not found");
 
-        if (string.IsNullOrWhiteSpace(profile.CvPublicId))
+        if (string.IsNullOrWhiteSpace(profile.CvUrl))
             throw new InvalidOperationException("Chưa có CV");
 
-        return _cvStorage.GetSignedViewUrl(profile.CvPublicId);
+        return profile.CvUrl;
     }
 
     public async Task<string> GetCvDownloadUrlAsync(string userId, CancellationToken ct)

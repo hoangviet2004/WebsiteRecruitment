@@ -126,8 +126,10 @@ public sealed class AdminController : ControllerBase
     // ── STATISTICS ──────────────────────────────────────────────────────────
     private static StatisticsQueryDto ParseQuery(string? startDate, string? endDate)
     {
-        var end   = string.IsNullOrWhiteSpace(endDate)   ? DateTime.UtcNow : DateTime.Parse(endDate).ToUniversalTime();
-        var start = string.IsNullOrWhiteSpace(startDate) ? end.AddDays(-30)  : DateTime.Parse(startDate).ToUniversalTime();
+        var end   = string.IsNullOrWhiteSpace(endDate)   ? DateTime.UtcNow
+                  : DateTime.TryParse(endDate, out var parsedEnd) ? parsedEnd.ToUniversalTime() : DateTime.UtcNow;
+        var start = string.IsNullOrWhiteSpace(startDate) ? end.AddDays(-30)
+                  : DateTime.TryParse(startDate, out var parsedStart) ? parsedStart.ToUniversalTime() : end.AddDays(-30);
         var days  = (end - start).TotalDays;
         var period = days <= 14 ? "day" : days <= 90 ? "week" : "month";
         return new StatisticsQueryDto(start, end, period);

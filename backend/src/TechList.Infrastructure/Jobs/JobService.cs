@@ -131,8 +131,6 @@ public sealed class JobService : IJobService
             UpdatedAt = DateTime.UtcNow
         };
 
-        _db.JobPosts.Add(job);
-
         if (subscription.Package.MaxJobPosts != -1)
         {
             // Atomic check-and-increment: tránh race condition khi 2 request cùng lúc
@@ -149,12 +147,14 @@ public sealed class JobService : IJobService
                     throw new InvalidOperationException(
                         $"Bạn đã vượt quá giới hạn {subscription.Package.MaxJobPosts} tin đăng của gói \"{subscription.Package.Name}\". " +
                         $"Vui lòng đăng ký gói dịch vụ cao hơn để đăng thêm tin.");
+                _db.JobPosts.Add(job);
                 await _db.SaveChangesAsync(ct);
                 await tx.CommitAsync(ct);
             });
         }
         else
         {
+            _db.JobPosts.Add(job);
             await _db.SaveChangesAsync(ct);
         }
 

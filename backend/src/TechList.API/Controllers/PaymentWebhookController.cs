@@ -112,6 +112,19 @@ public sealed class PaymentWebhookController : ControllerBase
                 var package = await _db.ServicePackages.FindAsync(transaction.PackageId);
                 if (package != null)
                 {
+                    // Deactivate existing subscriptions
+                    var existing = await _db.Subscriptions
+                        .Where(s => s.UserId == transaction.UserId && s.Status == SubscriptionStatus.Active)
+                        .ToListAsync();
+                    foreach (var s in existing)
+                    {
+                        s.IsSelected = false;
+                        s.Status = SubscriptionStatus.Expired;
+                    }
+
+                    var actualJobCount = await _db.JobPosts
+                        .CountAsync(j => j.Company.OwnerId == transaction.UserId);
+
                     var subscription = new Subscription
                     {
                         UserId = transaction.UserId,
@@ -119,7 +132,8 @@ public sealed class PaymentWebhookController : ControllerBase
                         StartDate = DateTime.UtcNow,
                         EndDate = DateTime.UtcNow.AddDays(package.DurationDays),
                         Status = SubscriptionStatus.Active,
-                        JobPostsUsed = 0
+                        IsSelected = true,
+                        JobPostsUsed = actualJobCount
                     };
                     _db.Subscriptions.Add(subscription);
                 }
