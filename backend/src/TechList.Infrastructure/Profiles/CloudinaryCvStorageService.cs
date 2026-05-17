@@ -44,9 +44,14 @@ public sealed class CloudinaryCvStorageService : ICvStorageService
 
     public string GetSignedViewUrl(string publicId)
     {
-        // fl_inline buộc Content-Disposition: inline → browser hiển thị PDF thay vì download
-        var cloudName = _cloudinary.Api.Account.Cloud;
-        return $"https://res.cloudinary.com/{cloudName}/raw/upload/fl_inline/{publicId}";
+        // Signed URL với fl_inline để hoạt động kể cả khi Cloudinary bật Strict Transformations
+        var transformation = new Transformation().Flags("inline");
+        return new Url(_cloudinary.Api)
+            .ResourceType("raw")
+            .Secure(true)
+            .Signed(true)
+            .Transform(transformation)
+            .BuildUrl(publicId);
     }
 
     public string GetSignedDownloadUrl(string publicId)
