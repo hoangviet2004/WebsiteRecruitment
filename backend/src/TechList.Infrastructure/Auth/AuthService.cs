@@ -162,42 +162,46 @@ public sealed class AuthService : IAuthService
     {
         await EnsureRolesCreatedAsync(ct);
 
-        await using var tx = await _db.Database.BeginTransactionAsync(ct);
-
         var isNewUser = false;
-        var user = await _userManager.FindByLoginAsync(provider, providerKey);
+        LoginResponse response = null!;
 
-        if (user is null)
+        var strategy = _db.Database.CreateExecutionStrategy();
+        await strategy.ExecuteAsync(async () =>
         {
-            user = await _userManager.FindByEmailAsync(email);
+            var user = await _userManager.FindByLoginAsync(provider, providerKey);
+
             if (user is null)
             {
-                user = new ApplicationUser
+                user = await _userManager.FindByEmailAsync(email);
+                if (user is null)
                 {
-                    UserName = email,
-                    Email = email,
-                    EmailConfirmed = true,
-                    FullName = name ?? string.Empty,
-                    CreatedAt = DateTime.UtcNow
-                };
+                    user = new ApplicationUser
+                    {
+                        UserName = email,
+                        Email = email,
+                        EmailConfirmed = true,
+                        FullName = name ?? string.Empty,
+                        CreatedAt = DateTime.UtcNow
+                    };
 
-                var create = await _userManager.CreateAsync(user);
-                if (!create.Succeeded)
-                    throw new InvalidOperationException(string.Join("; ", create.Errors.Select(e => e.Description)));
+                    var create = await _userManager.CreateAsync(user);
+                    if (!create.Succeeded)
+                        throw new InvalidOperationException(string.Join("; ", create.Errors.Select(e => e.Description)));
 
-                isNewUser = true;
+                    isNewUser = true;
+                }
+
+                var addLogin = await _userManager.AddLoginAsync(user, new UserLoginInfo(provider, providerKey, provider));
+                if (!addLogin.Succeeded)
+                    throw new InvalidOperationException(string.Join("; ", addLogin.Errors.Select(e => e.Description)));
             }
 
-            var addLogin = await _userManager.AddLoginAsync(user, new UserLoginInfo(provider, providerKey, provider));
-            if (!addLogin.Succeeded)
-                throw new InvalidOperationException(string.Join("; ", addLogin.Errors.Select(e => e.Description)));
-        }
+            var roles = (await _userManager.GetRolesAsync(user)).ToList();
+            var profile = await EnsureProfileExistsAsync(user.Id, user.Email!, user.FullName, ct, name);
 
-        var roles = (await _userManager.GetRolesAsync(user)).ToList();
-        var profile = await EnsureProfileExistsAsync(user.Id, user.Email!, user.FullName, ct, name);
+            response = await IssueTokensAsync(user, profile, roles, ip, userAgent, ct);
+        });
 
-        var response = await IssueTokensAsync(user, profile, roles, ip, userAgent, ct);
-        await tx.CommitAsync(ct);
         return response with { IsNewUser = isNewUser };
     }
 

@@ -136,18 +136,22 @@ public sealed class JobService : IJobService
         if (subscription.Package.MaxJobPosts != -1)
         {
             // Atomic check-and-increment: tránh race condition khi 2 request cùng lúc
-            await using var tx = await _db.Database.BeginTransactionAsync(ct);
-            var updated = await _db.Subscriptions
-                .Where(s => s.Id == subscription.Id && s.JobPostsUsed < s.Package.MaxJobPosts)
-                .ExecuteUpdateAsync(s => s
-                    .SetProperty(p => p.JobPostsUsed, p => p.JobPostsUsed + 1)
-                    .SetProperty(p => p.UpdatedAt, DateTime.UtcNow), ct);
-            if (updated == 0)
-                throw new InvalidOperationException(
-                    $"Bạn đã vượt quá giới hạn {subscription.Package.MaxJobPosts} tin đăng của gói \"{subscription.Package.Name}\". " +
-                    $"Vui lòng đăng ký gói dịch vụ cao hơn để đăng thêm tin.");
-            await _db.SaveChangesAsync(ct);
-            await tx.CommitAsync(ct);
+            var strategy = _db.Database.CreateExecutionStrategy();
+            await strategy.ExecuteAsync(async () =>
+            {
+                await using var tx = await _db.Database.BeginTransactionAsync(ct);
+                var updated = await _db.Subscriptions
+                    .Where(s => s.Id == subscription.Id && s.JobPostsUsed < s.Package.MaxJobPosts)
+                    .ExecuteUpdateAsync(s => s
+                        .SetProperty(p => p.JobPostsUsed, p => p.JobPostsUsed + 1)
+                        .SetProperty(p => p.UpdatedAt, DateTime.UtcNow), ct);
+                if (updated == 0)
+                    throw new InvalidOperationException(
+                        $"Bạn đã vượt quá giới hạn {subscription.Package.MaxJobPosts} tin đăng của gói \"{subscription.Package.Name}\". " +
+                        $"Vui lòng đăng ký gói dịch vụ cao hơn để đăng thêm tin.");
+                await _db.SaveChangesAsync(ct);
+                await tx.CommitAsync(ct);
+            });
         }
         else
         {
