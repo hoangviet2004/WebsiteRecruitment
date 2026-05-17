@@ -652,6 +652,10 @@ function showCurrentCv(url, filename) {
             link.onclick = async (e) => {
                 e.preventDefault();
                 const win = window.open('', '_blank');
+                if (!win) {
+                    showToast('Trình duyệt đang chặn popup. Vui lòng cho phép popup và thử lại.', 'error');
+                    return;
+                }
                 try {
                     const token = sessionStorage.getItem('token');
                     const res = await fetch(`${API_URL}/api/profile/cv/view`, {
