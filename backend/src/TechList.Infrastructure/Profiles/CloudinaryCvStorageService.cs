@@ -44,13 +44,8 @@ public sealed class CloudinaryCvStorageService : ICvStorageService
 
     public string GetSignedViewUrl(string publicId)
     {
-        // UrlImgUp đã chứa Api (có secret để ký), override ResourceType sang raw
-        return _cloudinary.Api.UrlImgUp
-            .ResourceType("raw")
-            .Secure(true)
-            .Signed(true)
-            .Transform(new Transformation().Flags("inline"))
-            .BuildUrl(publicId);
+        var cloudName = _cloudinary.Api.Account.Cloud;
+        return $"https://res.cloudinary.com/{cloudName}/raw/upload/{publicId}";
     }
 
     public string GetSignedDownloadUrl(string publicId)
