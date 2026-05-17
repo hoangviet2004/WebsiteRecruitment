@@ -62,6 +62,10 @@ async function apiFetchAuth(endpoint, options = {}) {
 // ── Mở CV ứng viên qua signed URL (tránh lỗi 401 Cloudinary) ──
 async function openSignedCvView(candidateId) {
     const win = window.open('', '_blank');
+    if (!win) {
+        alert('Trình duyệt đang chặn popup. Vui lòng cho phép popup và thử lại.');
+        return;
+    }
     try {
         const res = await apiFetchAuth(`/api/profile/${encodeURIComponent(candidateId)}/cv-view`);
         if (!res) { win.close(); return; }
