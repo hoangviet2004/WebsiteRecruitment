@@ -108,7 +108,8 @@ public sealed class StatisticsService : IStatisticsService
             GrowthPct(currentJobs, prevJobs),
             GrowthPct(currentApps, prevApps),
             GrowthPct(currentCompanies, prevCompanies),
-            prevUsers, prevJobs, prevCompanies
+            prevUsers, prevJobs, prevCompanies,
+            currentUsers, currentJobs, currentCompanies
         );
 
         _cache.Set(cacheKey, result, CacheTtl);

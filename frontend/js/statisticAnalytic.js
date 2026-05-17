@@ -8,11 +8,12 @@
 // ═══════════════════════════════════════════════════════════════
 // STATE
 // ═══════════════════════════════════════════════════════════════
-let _currentRange = { startDate: null, endDate: null };
-let _charts       = {};     // { timeseries, skills, jobtypes, companies }
-let _data         = {};     // raw data cache (client-side, 60s)
-let _clientCache  = new Map();  // key → { ts, data }
-const CLIENT_TTL  = 60_000;    // 60 seconds
+let _currentRange   = { startDate: null, endDate: null };
+let _charts         = {};
+let _data           = {};
+let _clientCache    = new Map();
+let _countIntervals = {};   // elId → intervalId, để cancel animation cũ
+const CLIENT_TTL    = 60_000;
 
 // ═══════════════════════════════════════════════════════════════
 // INIT
@@ -144,17 +145,17 @@ async function loadAll() {
 function renderOverview(d) {
     if (!d) return;
 
-    animateCount('val-users',     d.totalUsers,     0);
-    animateCount('val-jobs',      d.totalActiveJobs,0);
-    animateCount('val-apps',      d.totalApplicationsEstimate, 0);
-    animateCount('val-companies', d.totalCompanies, 0);
+    animateCount('val-users',     d.currentPeriodUsers,     0);
+    animateCount('val-jobs',      d.currentPeriodJobs,      0);
+    animateCount('val-apps',      d.currentPeriodJobs * 3,  0);
+    animateCount('val-companies', d.currentPeriodCompanies, 0);
 
     document.getElementById('sub-users').textContent =
-        `Ứng viên: ${d.totalCandidates} | Nhà tuyển dụng: ${d.totalRecruiters}`;
+        `Tổng hệ thống: ${d.totalUsers.toLocaleString('vi-VN')}`;
     document.getElementById('sub-jobs').textContent =
-        `Tổng: ${d.totalJobs} tin`;
+        `Tổng hệ thống: ${d.totalJobs.toLocaleString('vi-VN')} tin`;
     document.getElementById('sub-companies').textContent =
-        `Mới trong kỳ: ${d.prevPeriodCompanies}`;
+        `Tổng hệ thống: ${d.totalCompanies.toLocaleString('vi-VN')}`;
 
     renderGrowthBadge('badge-users',     d.userGrowthPct);
     renderGrowthBadge('badge-jobs',      d.jobGrowthPct);
@@ -181,17 +182,25 @@ function renderGrowthBadge(elId, pct) {
 function animateCount(elId, target, from = 0) {
     const el = document.getElementById(elId);
     if (!el) return;
+
+    // Cancel interval cũ nếu đang chạy
+    if (_countIntervals[elId]) {
+        clearInterval(_countIntervals[elId]);
+        delete _countIntervals[elId];
+    }
+
     const duration = 700;
     const steps    = 30;
     const step     = (target - from) / steps;
     let current    = from;
     let i          = 0;
-    const interval = setInterval(() => {
+    _countIntervals[elId] = setInterval(() => {
         i++;
         current += step;
         el.textContent = Math.round(current).toLocaleString('vi-VN');
         if (i >= steps) {
-            clearInterval(interval);
+            clearInterval(_countIntervals[elId]);
+            delete _countIntervals[elId];
             el.textContent = target.toLocaleString('vi-VN');
         }
     }, duration / steps);
@@ -201,8 +210,13 @@ function animateCount(elId, target, from = 0) {
 // CHART HELPERS
 // ═══════════════════════════════════════════════════════════════
 function showChartLoading(name) {
+    // Dọn error state cũ nếu có
+    const canvas = document.getElementById(`chart-${name}`);
+    canvas?.nextElementSibling?.classList.contains('error-state') &&
+        canvas.nextElementSibling.remove();
+
     const el = document.getElementById(`load-${name}`);
-    if (el) { el.style.display = 'flex'; }
+    if (el) el.style.display = 'flex';
 }
 function hideChartLoading(name, showError = false) {
     const el = document.getElementById(`load-${name}`);
@@ -311,6 +325,7 @@ function renderSkillsChart(data) {
                 borderWidth: 1.5,
                 borderRadius: 8,
                 borderSkipped: false,
+                maxBarThickness: 60,
             }],
         },
         options: {
@@ -329,7 +344,12 @@ function renderSkillsChart(data) {
             scales: {
                 x: {
                     grid: { display: false },
-                    ticks: { font: { family: 'Inter', size: 11 }, color: '#64748b' },
+                    ticks: {
+                        font: { family: 'Inter', size: 11 },
+                        color: '#64748b',
+                        maxRotation: 35,
+                        minRotation: 0,
+                    },
                 },
                 y: {
                     beginAtZero: true,
@@ -560,14 +580,13 @@ function exportExcel() {
         if (_data.overview?.value) {
             const d = _data.overview.value;
             const overviewData = [
-                ['Chỉ số', 'Giá trị', '% Tăng/Giảm'],
-                ['Tổng tài khoản',        d.totalUsers,               pctStr(d.userGrowthPct)],
-                ['Ứng viên',              d.totalCandidates,          '—'],
-                ['Nhà tuyển dụng',        d.totalRecruiters,          '—'],
-                ['Tin tuyển dụng hoạt động', d.totalActiveJobs,       pctStr(d.jobGrowthPct)],
-                ['Tổng tin tuyển dụng',   d.totalJobs,                '—'],
-                ['Doanh nghiệp',          d.totalCompanies,           pctStr(d.companyGrowthPct)],
-                ['Lượt ứng tuyển (ước tính)', d.totalApplicationsEstimate, pctStr(d.applicationGrowthPct)],
+                ['Chỉ số', 'Trong kỳ', '% So kỳ trước', 'Tổng hệ thống'],
+                ['Tài khoản mới',         d.currentPeriodUsers,        pctStr(d.userGrowthPct),         d.totalUsers],
+                ['Ứng viên (tổng)',        d.totalCandidates,           '—',                             '—'],
+                ['Nhà tuyển dụng (tổng)', d.totalRecruiters,           '—',                             '—'],
+                ['Tin đăng mới',          d.currentPeriodJobs,         pctStr(d.jobGrowthPct),          d.totalJobs],
+                ['Doanh nghiệp mới',      d.currentPeriodCompanies,    pctStr(d.companyGrowthPct),      d.totalCompanies],
+                ['Lượt ứng tuyển (ước tính)', d.currentPeriodJobs * 3, pctStr(d.applicationGrowthPct), d.totalApplicationsEstimate],
             ];
             wb.SheetNames.push('Tổng quan');
             wb.Sheets['Tổng quan'] = XLSX.utils.aoa_to_sheet(overviewData);
@@ -652,19 +671,19 @@ function exportPdf() {
             doc.setFont('helvetica', 'bold');
             doc.setFontSize(12);
             doc.setTextColor(59, 130, 246);
-            doc.text('1. TONG QUAN HE THONG', 14, y);
+            doc.text('1. TONG QUAN KY BAO CAO', 14, y);
             y += 4;
 
             doc.autoTable({
                 startY: y,
-                head: [['Chi so', 'Gia tri', '% Tang/Giam']],
+                head: [['Chi so', 'Trong ky', '% So ky truoc', 'Tong he thong']],
                 body: [
-                    ['Tong tai khoan',             d.totalUsers,             pctStr(d.userGrowthPct)],
-                    ['Ung vien',                   d.totalCandidates,        '—'],
-                    ['Nha tuyen dung',             d.totalRecruiters,        '—'],
-                    ['Tin tuyen dung hoat dong',   d.totalActiveJobs,        pctStr(d.jobGrowthPct)],
-                    ['Doanh nghiep',               d.totalCompanies,         pctStr(d.companyGrowthPct)],
-                    ['Luot ung tuyen (uoc tinh)',  d.totalApplicationsEstimate, pctStr(d.applicationGrowthPct)],
+                    ['Tai khoan moi',         d.currentPeriodUsers,        pctStr(d.userGrowthPct),         d.totalUsers],
+                    ['Ung vien (tong)',        d.totalCandidates,           '—',                             '—'],
+                    ['Nha tuyen dung (tong)', d.totalRecruiters,           '—',                             '—'],
+                    ['Tin dang moi',          d.currentPeriodJobs,         pctStr(d.jobGrowthPct),          d.totalJobs],
+                    ['Doanh nghiep moi',      d.currentPeriodCompanies,    pctStr(d.companyGrowthPct),      d.totalCompanies],
+                    ['Luot ung tuyen (uoc tinh)', d.currentPeriodJobs * 3, pctStr(d.applicationGrowthPct), d.totalApplicationsEstimate],
                 ],
                 styles: { font: 'helvetica', fontSize: 9, cellPadding: 3 },
                 headStyles: { fillColor: [59, 130, 246], textColor: 255, fontStyle: 'bold' },

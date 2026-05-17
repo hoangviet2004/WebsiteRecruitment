@@ -8,14 +8,17 @@ public record OverviewStatsDto(
     int TotalActiveJobs,
     int TotalJobs,
     int TotalCompanies,
-    int TotalApplicationsEstimate,   // ước lượng từ jobs
-    double UserGrowthPct,            // so với kỳ trước (%)
+    int TotalApplicationsEstimate,
+    double UserGrowthPct,
     double JobGrowthPct,
     double ApplicationGrowthPct,
     double CompanyGrowthPct,
     int PrevPeriodUsers,
     int PrevPeriodJobs,
-    int PrevPeriodCompanies
+    int PrevPeriodCompanies,
+    int CurrentPeriodUsers,
+    int CurrentPeriodJobs,
+    int CurrentPeriodCompanies
 );
 
 // ── Line Chart: Time Series ────────────────────────────────

@@ -93,133 +93,65 @@
 
 
     <!-- ════════════════════════════════════════════════════════
-       PHẦN 2 — THỐNG KÊ & PHÂN TÍCH (nhúng từ statisticAnalytic)
+       PHẦN 2 — HOẠT ĐỘNG HỆ THỐNG
        ════════════════════════════════════════════════════════ -->
     <div style="margin-top:48px; padding-top:36px; border-top:2px dashed #e2e8f0;">
 
-      <!-- Sub-header -->
-      <div class="admin-header" style="margin-bottom:20px;">
-        <h2 style="font-size:22px;font-weight:700;color:#0f172a;display:flex;align-items:center;gap:10px;">
-          <i class="fa-solid fa-chart-pie" style="color:#3b82f6;"></i> Thống Kê & Phân Tích
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;">
+        <h2 style="font-size:22px;font-weight:700;color:#0f172a;display:flex;align-items:center;gap:10px;margin:0;">
+          <i class="fa-solid fa-bolt" style="color:#f59e0b;"></i> Hoạt động hệ thống
         </h2>
-        <p class="subtitle" style="margin-top:4px;">Phân tích tổng hợp trong <strong id="ov-period-label">30 ngày gần
-            nhất</strong>.</p>
-      </div>
-
-      <!-- Filter bar -->
-      <div class="filter-bar" id="ov-filter-bar">
-        <label><i class="fa-solid fa-calendar-days"></i> Khoảng thời gian:</label>
-        <button class="filter-btn" id="ov-flt-today" onclick="ovSetFilter('today')">Hôm nay</button>
-        <button class="filter-btn" id="ov-flt-7d" onclick="ovSetFilter('7d')">7 ngày</button>
-        <button class="filter-btn active" id="ov-flt-30d" onclick="ovSetFilter('30d')">30 ngày</button>
-        <button class="filter-btn" id="ov-flt-3m" onclick="ovSetFilter('3m')">3 tháng</button>
-        <button class="filter-btn" id="ov-flt-custom" onclick="ovSetFilter('custom')">Tùy chỉnh</button>
-        <div class="filter-separator"></div>
-        <div class="date-range-group hidden" id="ov-custom-range">
-          <input type="date" class="date-input" id="ov-date-from" onchange="ovApplyCustomRange()">
-          <span style="color:#64748b;font-size:13px;">→</span>
-          <input type="date" class="date-input" id="ov-date-to" onchange="ovApplyCustomRange()">
-        </div>
-        <span style="margin-left:auto;font-size:12px;color:#94a3b8;" id="ov-last-updated"></span>
-      </div>
-
-      <!-- Overview analytics cards (% tăng/giảm) -->
-      <div class="overview-grid">
-        <div class="overview-card blue">
-          <div class="card-top">
-            <div class="card-icon blue"><i class="fa-solid fa-users"></i></div>
-            <span class="card-badge flat" id="ov-badge-users">—</span>
-          </div>
-          <div class="card-value" id="ov-val-users">--</div>
-          <div class="card-label">Tổng tài khoản</div>
-          <div class="card-sub"><i class="fa-solid fa-user-graduate"></i> <span id="ov-sub-users">Ứng viên: -- | NTD:
-              --</span></div>
-        </div>
-        <div class="overview-card green">
-          <div class="card-top">
-            <div class="card-icon green"><i class="fa-solid fa-briefcase"></i></div>
-            <span class="card-badge flat" id="ov-badge-jobs">—</span>
-          </div>
-          <div class="card-value" id="ov-val-jobs">--</div>
-          <div class="card-label">Tin tuyển dụng hoạt động</div>
-          <div class="card-sub"><i class="fa-solid fa-layer-group"></i> <span id="ov-sub-jobs">Tổng: -- tin</span></div>
-        </div>
-        <div class="overview-card purple">
-          <div class="card-top">
-            <div class="card-icon purple"><i class="fa-solid fa-file-signature"></i></div>
-            <span class="card-badge flat" id="ov-badge-apps">—</span>
-          </div>
-          <div class="card-value" id="ov-val-apps">--</div>
-          <div class="card-label">Lượt ứng tuyển (ước tính)</div>
-          <div class="card-sub"><i class="fa-solid fa-arrow-trend-up"></i> <span id="ov-sub-apps">So với kỳ trước</span>
-          </div>
-        </div>
-        <div class="overview-card orange">
-          <div class="card-top">
-            <div class="card-icon orange"><i class="fa-solid fa-building"></i></div>
-            <span class="card-badge flat" id="ov-badge-companies">—</span>
-          </div>
-          <div class="card-value" id="ov-val-companies">--</div>
-          <div class="card-label">Doanh nghiệp</div>
-          <div class="card-sub"><i class="fa-solid fa-plus"></i> <span id="ov-sub-companies">Mới trong kỳ: --</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Charts grid -->
-      <div class="section-header" style="margin-top:32px;">
-        <span class="section-title"><i class="fa-solid fa-chart-bar"></i> Biểu đồ phân tích</span>
-        <a href="./statisticAnalytic.html" class="ov-see-all-btn">
-          Xem đầy đủ <i class="fa-solid fa-arrow-right"></i>
+        <a href="./statisticAnalytic.html" style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;background:#3b82f6;color:#fff;border-radius:8px;font-size:13px;font-weight:600;text-decoration:none;">
+          <i class="fa-solid fa-chart-pie"></i> Xem báo cáo đầy đủ
         </a>
       </div>
 
-      <div class="charts-grid">
-        <!-- Line chart -->
-        <div class="chart-card span-2">
-          <div class="chart-title"><i class="fa-solid fa-chart-line"></i> Tài khoản mới & Tin đăng mới</div>
-          <div class="chart-subtitle">Theo thời gian trong khoảng đã chọn</div>
-          <div class="chart-container" style="min-height:280px;position:relative;">
-            <canvas id="ov-chart-timeseries"></canvas>
-            <div class="loading-overlay" id="ov-load-timeseries">
+      <!-- Widget grid: 2 cột -->
+      <div style="display:grid;grid-template-columns:2fr 1fr;gap:20px;margin-bottom:20px;">
+
+        <!-- Tin chờ duyệt -->
+        <div class="data-card" style="padding:0;overflow:hidden;">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid #e2e8f0;">
+            <h3 style="margin:0;font-size:15px;font-weight:700;color:#0f172a;display:flex;align-items:center;gap:8px;">
+              <i class="fa-solid fa-clock" style="color:#f59e0b;"></i> Tin chờ duyệt
+              <span id="badge-pending" style="background:#fef3c7;color:#92400e;font-size:12px;font-weight:700;padding:2px 8px;border-radius:20px;">0</span>
+            </h3>
+            <a href="./jobPostingManagement.html" style="font-size:12px;color:#3b82f6;text-decoration:none;font-weight:600;">Xem tất cả →</a>
+          </div>
+          <div id="widget-pending-body" style="overflow-x:auto;">
+            <div style="text-align:center;padding:32px;color:#94a3b8;">
               <div class="spinner"></div>
             </div>
           </div>
         </div>
 
-        <!-- Bar chart: skills -->
-        <div class="chart-card">
-          <div class="chart-title"><i class="fa-solid fa-code"></i> Top Kỹ năng IT</div>
-          <div class="chart-subtitle">Từ hồ sơ ứng viên & tin tuyển dụng</div>
-          <div class="chart-container sm" style="position:relative;">
-            <canvas id="ov-chart-skills"></canvas>
-            <div class="loading-overlay" id="ov-load-skills">
+        <!-- Người dùng mới -->
+        <div class="data-card" style="padding:0;overflow:hidden;">
+          <div style="padding:16px 20px;border-bottom:1px solid #e2e8f0;">
+            <h3 style="margin:0;font-size:15px;font-weight:700;color:#0f172a;display:flex;align-items:center;gap:8px;">
+              <i class="fa-solid fa-user-plus" style="color:#10b981;"></i> Người dùng mới nhất
+            </h3>
+          </div>
+          <div id="widget-recent-users" style="padding:8px 0;">
+            <div style="text-align:center;padding:32px;color:#94a3b8;">
               <div class="spinner"></div>
             </div>
           </div>
         </div>
 
-        <!-- Pie: job types -->
-        <div class="chart-card">
-          <div class="chart-title"><i class="fa-solid fa-chart-pie"></i> Phân loại tin tuyển dụng</div>
-          <div class="chart-subtitle">Full-time / Part-time / Remote / Freelance</div>
-          <div class="chart-container sm" style="position:relative;">
-            <canvas id="ov-chart-jobtypes"></canvas>
-            <div class="loading-overlay" id="ov-load-jobtypes">
-              <div class="spinner"></div>
-            </div>
-          </div>
-        </div>
       </div>
 
-      <!-- Top jobs mini table -->
-      <div class="section-header" style="margin-top:32px;">
-        <span class="section-title"><i class="fa-solid fa-fire"></i> Tin tuyển dụng nổi bật</span>
-      </div>
-      <div class="table-card" id="ov-table-top-jobs">
-        <div class="empty-state" style="padding:32px;">
-          <div class="spinner"></div>
-          <p style="margin-top:12px;">Đang tải...</p>
+      <!-- Cảnh báo hệ thống -->
+      <div class="data-card" style="padding:0;overflow:hidden;">
+        <div style="padding:16px 20px;border-bottom:1px solid #e2e8f0;">
+          <h3 style="margin:0;font-size:15px;font-weight:700;color:#0f172a;display:flex;align-items:center;gap:8px;">
+            <i class="fa-solid fa-triangle-exclamation" style="color:#ef4444;"></i> Cảnh báo hệ thống
+          </h3>
+        </div>
+        <div id="widget-alerts" style="padding:16px 20px;">
+          <div style="text-align:center;padding:16px;color:#94a3b8;">
+            <div class="spinner"></div>
+          </div>
         </div>
       </div>
 
@@ -232,8 +164,6 @@
   <script src="../js/api.js"></script>
   <script src="../js/guard.js"></script>
   <script src="../js/sidebar.js"></script>
-  <!-- Chart.js -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
   <!-- Page logic -->
   <script src="../js/admin.js"></script>
 
