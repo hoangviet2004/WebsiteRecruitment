@@ -114,21 +114,6 @@ html {
 .pf-nav-link:hover  { background: #f8fafc; color: #0f172a; }
 .pf-nav-link.active { background: #eff6ff; color: #3b82f6; font-weight: 600; }
 
-.pf-share-btn {
-    margin-top: 20px;
-    width: 100%;
-    display: flex; align-items: center; justify-content: center; gap: 8px;
-    padding: 10px 16px;
-    border: 1px solid #e2e8f0;
-    border-radius: 10px;
-    background: #fff;
-    color: #475569;
-    font-size: 13px; font-weight: 600;
-    cursor: pointer;
-    transition: all 0.15s;
-    font-family: inherit;
-}
-.pf-share-btn:hover { background: #f8fafc; border-color: #3b82f6; color: #3b82f6; }
 
 /* ── Main ────────────────────────────────────────────────── */
 .pf-main {
@@ -648,7 +633,6 @@ html {
     .pf-nav { flex-direction: row; flex-wrap: wrap; padding-top: 0; }
     .pf-nav-group-label { display: none; }
     .pf-main { margin-left: 0; }
-    .pf-share-btn { width: auto; }
 }
 
 /* ── Đổi mật khẩu ───────────────────────────────────────────── */

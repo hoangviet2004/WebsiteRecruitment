@@ -188,6 +188,14 @@ function _goToRecruiterJobs() {
     window.location.href = `${base}?tab=jobs`;
 }
 
+function _goToRecruiterCandidates() {
+    closeNotifPanel();
+    const base = window.location.pathname.includes('/pages/')
+        ? 'recruiter.html'
+        : 'pages/recruiter.html';
+    window.location.href = `${base}?tab=candidates`;
+}
+
 function _renderRecruiterNotifItems(notifications) {
     const body = document.getElementById('notif-body');
     if (!notifications.length) {
@@ -197,8 +205,10 @@ function _renderRecruiterNotifItems(notifications) {
     body.innerHTML = notifications.map(n => {
         const cfg = _RECRUITER_NOTIF_CFG[n.type] || { icon: 'fa-bell', color: '#64748b' };
         const date = new Date(n.createdAt).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
+        const candidateTypes = new Set(['NewApplication']);
+        const onclick = candidateTypes.has(n.type) ? '_goToRecruiterCandidates()' : '_goToRecruiterJobs()';
         return `
-            <div class="notif-item${n.isRead ? '' : ' unread'}" onclick="_goToRecruiterJobs()" style="cursor:pointer;">
+            <div class="notif-item${n.isRead ? '' : ' unread'}" onclick="${onclick}" style="cursor:pointer;">
                 <div class="notif-icon" style="background:${cfg.color}18;color:${cfg.color};">
                     <i class="fa-solid ${cfg.icon}"></i>
                 </div>

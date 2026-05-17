@@ -7,7 +7,8 @@
 let _convList        = [];        // toàn bộ conversations
 let _activeAppId     = null;      // applicationId đang mở
 let _msgType         = 'message'; // 'message' | 'email'
-let _pollTimer       = null;      // setInterval handle
+let _pollTimer       = null;      // setInterval handle (thread)
+let _convPollTimer   = null;      // setInterval handle (conv list)
 let _pollLastMsgId   = null;      // ID tin nhắn cuối để detect tin mới
 let _msgLoaded       = false;
 
@@ -85,6 +86,10 @@ function _statusTag(status){
 
 // ── Khởi tạo khi chuyển sang tab ─────────────────────────────
 function loadMessaging(){
+    // Ẩn badge khi vào tab messages — không cần báo khi đang xem trực tiếp
+    const badge = document.getElementById('msg-unread-badge');
+    if(badge) badge.style.display = 'none';
+
     if(!currentCompanyId){
         document.getElementById('msg-conv-list').innerHTML=
             '<div class="msg-empty-state"><i class="fa-solid fa-circle-info" style="color:#f59e0b;"></i> Tạo Hồ sơ Công ty trước.</div>';
@@ -92,6 +97,7 @@ function loadMessaging(){
     }
     fetchConversations();
     startPollingUnread();
+    startPollingConversations();
 }
 
 // ── Danh sách hội thoại ──────────────────────────────────────
@@ -558,10 +564,21 @@ function stopMsgPolling(){
     if(_pollTimer){ clearInterval(_pollTimer); _pollTimer=null; }
 }
 
-// ── Polling unread count cho badge sidebar ────────────────────
+// ── Helpers kiểm tra tab hiện tại ────────────────────────────
+function _isOnMessagesTab(){
+    return document.getElementById('tab-messages')?.classList.contains('active');
+}
+
+// ── Polling unread badge (15s) — chỉ hiện khi KHÔNG ở tab messages
 function startPollingUnread(){
     setInterval(async ()=>{
         if(!currentCompanyId) return;
+        const badge = document.getElementById('msg-unread-badge');
+        if(_isOnMessagesTab()){
+            // Đang xem tab messages → ẩn badge
+            if(badge) badge.style.display = 'none';
+            return;
+        }
         try {
             const [res, supportRes] = await Promise.all([
                 apiFetchAuth(`/api/messaging/unread-count?companyId=${currentCompanyId}`),
@@ -572,10 +589,25 @@ function startPollingUnread(){
                 safeJsonMsg(supportRes)
             ]);
             const count = (data?.data ?? 0) + (supportData?.data ?? 0);
-            const badge = document.getElementById('msg-unread-badge');
-            if(badge) badge.style.display = count>0?'inline-block':'none';
+            if (badge) {
+                badge.textContent = count > 99 ? '99+' : String(count);
+                badge.style.display = count > 0 ? 'inline-flex' : 'none';
+            }
         } catch(_){}
     }, 15000);
+}
+
+// ── Polling conversation list (5s) — chỉ chạy khi ở tab messages
+function startPollingConversations(){
+    if(_convPollTimer) clearInterval(_convPollTimer);
+    _convPollTimer = setInterval(async ()=>{
+        if(!currentCompanyId || !_isOnMessagesTab()) return;
+        try { await fetchConversations(); } catch(_){}
+    }, 5000);
+}
+
+function stopPollingConversations(){
+    if(_convPollTimer){ clearInterval(_convPollTimer); _convPollTimer = null; }
 }
 
 // ── Utilities ─────────────────────────────────────────────────

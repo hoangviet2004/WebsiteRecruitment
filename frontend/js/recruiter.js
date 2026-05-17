@@ -22,6 +22,12 @@ function switchTab(tabName, element) {
     document.querySelectorAll('.tab-pane').forEach(el => el.classList.remove('active'));
     document.getElementById('tab-' + tabName).classList.add('active');
 
+    // Dừng polling conversation khi rời tab messages
+    if (tabName !== 'messages' && typeof stopPollingConversations === 'function') {
+        stopPollingConversations();
+        if (typeof stopMsgPolling === 'function') stopMsgPolling();
+    }
+
     if (tabName === 'jobs' && currentCompanyId) {
         loadMyJobs(currentCompanyId);
     } else if (tabName === 'jobs' && !currentCompanyId) {

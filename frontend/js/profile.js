@@ -446,12 +446,26 @@ function saveExp() {
     if (!position || !company) { showToast('Vui lòng nhập Chức vụ và Công ty!', 'error'); return; }
 
     const current  = !!document.getElementById('exp-current')?.checked;
+    const fromVal  = document.getElementById('exp-from')?.value || '';
+    const toVal    = current ? null : (document.getElementById('exp-to')?.value || '');
+    const today    = new Date().toISOString().slice(0, 7); // YYYY-MM
+
+    if (fromVal && fromVal > today) {
+        showToast('Ngày bắt đầu không được ở tương lai!', 'error'); return;
+    }
+    if (!current && toVal && toVal > today) {
+        showToast('Ngày kết thúc không được ở tương lai!', 'error'); return;
+    }
+    if (fromVal && toVal && toVal < fromVal) {
+        showToast('Ngày kết thúc phải sau ngày bắt đầu!', 'error'); return;
+    }
+
     const entry = {
         id:       Date.now().toString(),
         position,
         company,
-        from:     document.getElementById('exp-from')?.value || '',
-        to:       current ? null : (document.getElementById('exp-to')?.value || ''),
+        from:     fromVal,
+        to:       toVal,
         current,
         desc:     (document.getElementById('exp-desc')?.value || '').trim(),
     };
@@ -519,13 +533,31 @@ function saveEdu() {
     const school = (document.getElementById('edu-school')?.value || '').trim();
     if (!degree || !school) { showToast('Vui lòng nhập Bằng cấp và Trường học!', 'error'); return; }
 
+    const fromVal = document.getElementById('edu-from')?.value || '';
+    const toVal   = document.getElementById('edu-to')?.value   || '';
+    const gpaRaw  = (document.getElementById('edu-gpa')?.value || '').trim();
+    const today   = new Date().toISOString().slice(0, 7);
+
+    if (fromVal && fromVal > today) {
+        showToast('Năm bắt đầu không được ở tương lai!', 'error'); return;
+    }
+    if (toVal && fromVal && toVal < fromVal) {
+        showToast('Năm kết thúc phải sau năm bắt đầu!', 'error'); return;
+    }
+    if (gpaRaw !== '') {
+        const gpaNum = parseFloat(gpaRaw);
+        if (isNaN(gpaNum) || gpaNum < 0 || gpaNum > 4.0) {
+            showToast('GPA phải là số từ 0 đến 4.0!', 'error'); return;
+        }
+    }
+
     const entry = {
         id:     Date.now().toString(),
         degree,
         school,
-        from:   document.getElementById('edu-from')?.value || '',
-        to:     document.getElementById('edu-to')?.value   || '',
-        gpa:    (document.getElementById('edu-gpa')?.value || '').trim(),
+        from:   fromVal,
+        to:     toVal,
+        gpa:    gpaRaw,
     };
 
     const idx = document.getElementById('edu-edit-index').value;
@@ -717,20 +749,6 @@ function scrollToSection(id) {
     return false;
 }
 
-function openPublicProfile() {
-    const userId = sessionStorage.getItem('userId');
-    if (!userId) { showToast('Không tìm thấy thông tin người dùng!', 'error'); return; }
-    window.open(`profile-public.html?id=${encodeURIComponent(userId)}`, '_blank');
-}
-
-function copyPublicLink() {
-    const userId = sessionStorage.getItem('userId');
-    const base   = window.location.origin + '/pages/profile-public.html';
-    const url    = userId ? `${base}?id=${encodeURIComponent(userId)}` : base;
-    navigator.clipboard?.writeText(url)
-        .then(() => showToast('Đã sao chép liên kết hồ sơ công khai!', 'success'))
-        .catch(() => showToast('Không thể sao chép!', 'error'));
-}
 
 // ── Đổi mật khẩu ─────────────────────────────────────────────
 function updateNameCounter(input) {
