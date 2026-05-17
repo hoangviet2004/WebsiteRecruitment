@@ -44,14 +44,9 @@ public sealed class CloudinaryCvStorageService : ICvStorageService
 
     public string GetSignedViewUrl(string publicId)
     {
-        var expires = DateTimeOffset.UtcNow.AddHours(1).ToUnixTimeSeconds();
-        return _cloudinary.DownloadPrivate(
-            publicId,
-            attachment:   false,
-            format:       "pdf",
-            type:         "upload",
-            expiresAt:    expires,
-            resourceType: "raw");
+        // fl_inline buộc Content-Disposition: inline → browser hiển thị PDF thay vì download
+        var cloudName = _cloudinary.Api.Account.Cloud;
+        return $"https://res.cloudinary.com/{cloudName}/raw/upload/fl_inline/{publicId}";
     }
 
     public string GetSignedDownloadUrl(string publicId)
