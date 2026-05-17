@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using TechList.Application.Recruiters.Interfaces;
@@ -224,9 +225,19 @@ public sealed class RecruiterStatisticsService : IRecruiterStatisticsService
             .ToListAsync(ct);
 
         var allSkills = skillStrings
-            .SelectMany(s => s.Split(new[] { ',', ';', '|' }, StringSplitOptions.RemoveEmptyEntries))
-            .Select(s => s.Trim())
-            .Where(s => !string.IsNullOrWhiteSpace(s))
+            .SelectMany(s =>
+            {
+                try
+                {
+                    var arr = JsonSerializer.Deserialize<JsonElement[]>(s);
+                    if (arr is null) return [];
+                    return arr
+                        .Select(el => el.TryGetProperty("name", out var n) ? n.GetString() : null)
+                        .Where(n => !string.IsNullOrWhiteSpace(n))
+                        .Select(n => n!);
+                }
+                catch { return []; }
+            })
             .ToList();
 
         int total = allSkills.Count;

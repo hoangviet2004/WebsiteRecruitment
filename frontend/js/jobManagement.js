@@ -47,6 +47,9 @@ function filterJobs() {
         filtered = filtered.filter(j => j.isApproved && !j.isActive && !j.isBlocked);
     } else if (statusFilter === 'blocked') {
         filtered = filtered.filter(j => j.isBlocked);
+    } else if (statusFilter === 'expired') {
+        const now = new Date();
+        filtered = filtered.filter(j => !j.isBlocked && j.expiresAt && new Date(j.expiresAt) < now);
     }
 
     renderJobs(filtered);
@@ -65,17 +68,21 @@ function renderJobs(jobs) {
         const dateStr = new Date(j.createdAt).toLocaleDateString('vi-VN');
         const expStr = new Date(j.expiresAt).toLocaleDateString('vi-VN');
         
+        const isExpired = j.expiresAt && new Date(j.expiresAt) < new Date();
         let stLabel = '';
         if (j.isBlocked) {
             stLabel = '<span class="badge badge-blocked">Bị từ chối</span>';
         } else if (!j.isApproved) {
             stLabel = '<span class="badge badge-inactive">Chờ duyệt</span>';
+        } else if (isExpired) {
+            stLabel = '<span class="badge" style="background:#e2e8f0;color:#64748b;">Hết hạn</span>';
         } else {
             stLabel = j.isActive ? '<span class="badge badge-active">Đã duyệt & Hiện</span>' : '<span class="badge" style="background:#e2e8f0;color:#475569;">Đang ẩn</span>';
         }
 
         let trClass = '';
         if (j.isBlocked) trClass = 'style="background-color: #fef2f2;"';
+        else if (isExpired) trClass = 'style="background-color: #f8fafc;"';
         else if (!j.isApproved) trClass = 'style="background-color: #fffbeb;"';
 
         let actionHtml = '';
@@ -123,11 +130,14 @@ function viewJob(id) {
     const dateStr = new Date(j.createdAt).toLocaleDateString('vi-VN');
     const expStr = new Date(j.expiresAt).toLocaleDateString('vi-VN');
 
+    const isExpiredDetail = j.expiresAt && new Date(j.expiresAt) < new Date();
     let stLabel = '';
     if (j.isBlocked) {
         stLabel = '<span class="badge badge-blocked">Bị từ chối</span>';
     } else if (!j.isApproved) {
         stLabel = '<span class="badge badge-inactive">Chờ duyệt</span>';
+    } else if (isExpiredDetail) {
+        stLabel = '<span class="badge" style="background:#e2e8f0;color:#64748b;">Hết hạn</span>';
     } else {
         stLabel = j.isActive ? '<span class="badge badge-active">Đã duyệt & Hiện</span>' : '<span class="badge" style="background:#e2e8f0;color:#475569;">Đang ẩn</span>';
     }

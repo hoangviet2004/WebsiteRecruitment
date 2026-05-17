@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
 // ── Load data ─────────────────────────────────────────────────
 async function loadCompanies() {
     const tbody = document.getElementById('company-table-body');
-    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:32px;">
+    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:32px;">
         <i class="fa-solid fa-spinner fa-spin" style="font-size:20px;color:#3b82f6;"></i>
         <span style="display:block;margin-top:8px;color:#64748b;">Đang tải dữ liệu...</span>
     </td></tr>`;
@@ -37,7 +37,7 @@ async function loadCompanies() {
         _currentPage  = 1;
         applyFilters();
     } catch (e) {
-        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:#ef4444;padding:32px;">
+        tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;color:#ef4444;padding:32px;">
             <i class="fa-solid fa-circle-exclamation" style="font-size:24px;"></i>
             <span style="display:block;margin-top:8px;">Lỗi: ${e.message}</span>
         </td></tr>`;
@@ -165,7 +165,7 @@ function renderTable(companies, isEmpty) {
     const keyword = (document.getElementById('cm-search')?.value || '').trim();
 
     if (isEmpty) {
-        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:40px;color:#64748b;">
+        tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:40px;color:#64748b;">
             <i class="fa-solid fa-inbox" style="font-size:28px;display:block;margin-bottom:8px;color:#cbd5e1;"></i>
             Không tìm thấy công ty phù hợp.
         </td></tr>`;
@@ -234,11 +234,13 @@ function renderTable(companies, isEmpty) {
                 <td>${sizeBadge}</td>
                 <td>${statusBadge}</td>
                 <td style="white-space:nowrap;color:#64748b;font-size:13px;">${dateStr}</td>
-                <td style="display:flex;gap:6px;align-items:center;">
-                    <button class="btn-action btn-view" onclick="viewCompanyProfile('${c.id}')" title="Xem hồ sơ">
-                        <i class="fa-solid fa-eye"></i>
-                    </button>
-                    ${toggleBtnHtml}
+                <td>
+                    <div style="display:flex;gap:6px;align-items:center;">
+                        <button class="btn-action btn-view" onclick="viewCompanyProfile('${c.id}')" title="Xem hồ sơ">
+                            <i class="fa-solid fa-eye"></i>
+                        </button>
+                        ${toggleBtnHtml}
+                    </div>
                 </td>
             </tr>`;
     });
@@ -333,9 +335,6 @@ function viewCompanyProfile(companyId) {
         ? `<span class="badge badge-active">Hoạt động</span>`
         : `<span class="badge badge-blocked">Bị chặn</span>`;
 
-    const createdAt = p.createdAt
-        ? new Date(p.createdAt).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' })
-        : '—';
 
     const descValue = (p.description && p.description.trim())
         ? p.description.replace(/\n/g, '<br>')
@@ -355,10 +354,6 @@ function viewCompanyProfile(companyId) {
         </div>
 
         <div class="profile-info-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
-            <div class="profile-info-item full-width" style="grid-column:1/-1;">
-                <div class="profile-info-label" style="font-size:12px;font-weight:600;color:#64748b;margin-bottom:4px;"><i class="fa-solid fa-location-dot fa-xs"></i> Địa chỉ</div>
-                <div class="profile-info-value" style="font-size:14px;color:#1e293b;">${escHtml(p.address || '—')}</div>
-            </div>
             <div class="profile-info-item">
                 <div class="profile-info-label" style="font-size:12px;font-weight:600;color:#64748b;margin-bottom:4px;"><i class="fa-solid fa-file-invoice-dollar fa-xs"></i> Mã số thuế</div>
                 <div class="profile-info-value" style="font-size:14px;color:#1e293b;font-family:monospace;font-weight:500;">${escHtml(p.taxCode || '—')}</div>
@@ -368,12 +363,20 @@ function viewCompanyProfile(companyId) {
                 <div class="profile-info-value" style="font-size:14px;color:#1e293b;">${escHtml(p.companySize || '—')}</div>
             </div>
             <div class="profile-info-item">
-                <div class="profile-info-label" style="font-size:12px;font-weight:600;color:#64748b;margin-bottom:4px;"><i class="fa-solid fa-calendar fa-xs"></i> Ngày tạo</div>
-                <div class="profile-info-value" style="font-size:14px;color:#1e293b;">${createdAt}</div>
+                <div class="profile-info-label" style="font-size:12px;font-weight:600;color:#64748b;margin-bottom:4px;"><i class="fa-solid fa-envelope fa-xs"></i> Email liên hệ</div>
+                <div class="profile-info-value" style="font-size:14px;color:#1e293b;">${escHtml(p.contactEmail || '—')}</div>
+            </div>
+            <div class="profile-info-item">
+                <div class="profile-info-label" style="font-size:12px;font-weight:600;color:#64748b;margin-bottom:4px;"><i class="fa-solid fa-phone fa-xs"></i> Số điện thoại</div>
+                <div class="profile-info-value" style="font-size:14px;color:#1e293b;">${escHtml(p.contactPhone || '—')}</div>
             </div>
             <div class="profile-info-item full-width" style="grid-column:1/-1;">
                 <div class="profile-info-label" style="font-size:12px;font-weight:600;color:#64748b;margin-bottom:4px;"><i class="fa-solid fa-globe fa-xs"></i> Website</div>
                 <div class="profile-info-value" style="font-size:14px;color:#1e293b;">${webLink}</div>
+            </div>
+            <div class="profile-info-item full-width" style="grid-column:1/-1;">
+                <div class="profile-info-label" style="font-size:12px;font-weight:600;color:#64748b;margin-bottom:4px;"><i class="fa-solid fa-location-dot fa-xs"></i> Địa chỉ</div>
+                <div class="profile-info-value" style="font-size:14px;color:#1e293b;">${escHtml(p.address || '—')}</div>
             </div>
             <div class="profile-info-item full-width" style="grid-column:1/-1;">
                 <div class="profile-info-label" style="font-size:12px;font-weight:600;color:#64748b;margin-bottom:4px;"><i class="fa-solid fa-align-left fa-xs"></i> Giới thiệu công ty</div>

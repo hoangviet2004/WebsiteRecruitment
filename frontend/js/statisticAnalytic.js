@@ -489,7 +489,6 @@ function renderTopJobsTable(data) {
 function renderRecruitersTable(data) {
     const el = document.getElementById('table-recruiters');
     if (!data?.length) { el.innerHTML = emptyState('Không có dữ liệu nhà tuyển dụng'); return; }
-    const maxJobs = Math.max(...data.map(d => d.totalJobs));
     el.innerHTML = `
     <table class="analytics-table">
       <thead>
@@ -498,8 +497,8 @@ function renderRecruitersTable(data) {
           <th>Họ tên</th>
           <th>Email</th>
           <th>Công ty</th>
-          <th>Tổng tin</th>
-          <th>Đang hoạt động</th>
+          <th style="text-align:center;">Tổng tin</th>
+          <th style="text-align:center;">Đang hoạt động</th>
           <th>Lần đăng gần nhất</th>
         </tr>
       </thead>
@@ -510,13 +509,8 @@ function renderRecruitersTable(data) {
             <td style="font-weight:600;color:var(--text-primary)">${escHtml(r.fullName || '—')}</td>
             <td style="font-size:12px;color:var(--text-secondary)">${escHtml(r.email)}</td>
             <td>${escHtml(r.companyName)}</td>
-            <td>
-              <div class="mini-bar-wrap">
-                <div class="mini-bar"><div class="mini-bar-fill" style="width:${Math.round(r.totalJobs*100/maxJobs)}%"></div></div>
-                <span class="mini-bar-val">${r.totalJobs}</span>
-              </div>
-            </td>
-            <td><span class="trend-up">${r.activeJobs}</span></td>
+            <td style="font-weight:600;color:var(--text-primary);text-align:center;">${r.totalJobs}</td>
+            <td style="text-align:center;"><span class="trend-up">${r.activeJobs}</span></td>
             <td style="white-space:nowrap">${formatDate(r.lastPostedAt)}</td>
           </tr>`).join('')}
       </tbody>
@@ -529,14 +523,13 @@ function renderRecruitersTable(data) {
 function renderCandidatesTable(data) {
     const el = document.getElementById('table-candidates');
     if (!data?.length) { el.innerHTML = emptyState('Không có dữ liệu ứng viên'); return; }
-    const maxCount = Math.max(...data.map(d => d.count));
     el.innerHTML = `
     <table class="analytics-table">
       <thead>
         <tr>
           <th>Phân loại</th>
           <th>Giá trị</th>
-          <th>Số lượng</th>
+          <th style="text-align:center;">Số lượng</th>
           <th>Tỉ lệ</th>
         </tr>
       </thead>
@@ -545,12 +538,7 @@ function renderCandidatesTable(data) {
           <tr>
             <td><span class="category-tag ${d.category === 'Kỹ năng' ? 'skill' : 'exp'}">${escHtml(d.category)}</span></td>
             <td style="font-weight:600;color:var(--text-primary)">${escHtml(d.value)}</td>
-            <td>
-              <div class="mini-bar-wrap">
-                <div class="mini-bar"><div class="mini-bar-fill" style="width:${Math.round(d.count*100/maxCount)}%"></div></div>
-                <span class="mini-bar-val">${d.count}</span>
-              </div>
-            </td>
+            <td style="font-weight:600;color:var(--text-primary);text-align:center;">${d.count}</td>
             <td style="font-weight:600;color:var(--primary)">${d.percentage > 0 ? d.percentage + '%' : '—'}</td>
           </tr>`).join('')}
       </tbody>

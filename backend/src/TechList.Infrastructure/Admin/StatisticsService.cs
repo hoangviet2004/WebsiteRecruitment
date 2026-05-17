@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
@@ -208,11 +209,21 @@ public sealed class StatisticsService : IStatisticsService
             .Select(p => p.Skills!)
             .ToListAsync(ct);
 
-        // Parse comma/semicolon separated skills
+        // Parse JSON array: [{"name":"React","level":"advanced"}, ...]
         var skillCounts = profiles
-            .SelectMany(s => s.Split(new[] { ',', ';', '|' }, StringSplitOptions.RemoveEmptyEntries))
-            .Select(s => s.Trim())
-            .Where(s => !string.IsNullOrWhiteSpace(s))
+            .SelectMany(s =>
+            {
+                try
+                {
+                    var arr = JsonSerializer.Deserialize<JsonElement[]>(s);
+                    if (arr is null) return [];
+                    return arr
+                        .Select(el => el.TryGetProperty("name", out var n) ? n.GetString() : null)
+                        .Where(n => !string.IsNullOrWhiteSpace(n))
+                        .Select(n => n!);
+                }
+                catch { return []; }
+            })
             .GroupBy(s => s, StringComparer.OrdinalIgnoreCase)
             .Select(g => new SkillStatDto(g.Key, g.Count()))
             .OrderByDescending(x => x.Count)
@@ -451,9 +462,19 @@ public sealed class StatisticsService : IStatisticsService
         // Skills breakdown
         var allSkills = profiles
             .Where(p => !string.IsNullOrWhiteSpace(p.Skills))
-            .SelectMany(p => p.Skills!.Split(new[] { ',', ';', '|' }, StringSplitOptions.RemoveEmptyEntries))
-            .Select(s => s.Trim())
-            .Where(s => !string.IsNullOrWhiteSpace(s))
+            .SelectMany(p =>
+            {
+                try
+                {
+                    var arr = JsonSerializer.Deserialize<JsonElement[]>(p.Skills!);
+                    if (arr is null) return [];
+                    return arr
+                        .Select(el => el.TryGetProperty("name", out var n) ? n.GetString() : null)
+                        .Where(n => !string.IsNullOrWhiteSpace(n))
+                        .Select(n => n!);
+                }
+                catch { return []; }
+            })
             .ToList();
 
         int totalSkillEntries = allSkills.Count;

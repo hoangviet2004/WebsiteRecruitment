@@ -109,6 +109,13 @@ body {
     border-radius: 16px;
 }
 
+.data-card table td,
+.data-card table th {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
 .table-responsive {
     overflow-x: auto;
 }
@@ -293,6 +300,21 @@ tbody tr:hover {
 .stat-card-warning .stat-icon {
     background: rgba(245, 158, 11, 0.1);
     color: #f59e0b;
+}
+
+.stat-card-teal .stat-icon {
+    background: rgba(20, 184, 166, 0.1);
+    color: #14b8a6;
+}
+
+.stat-card-red .stat-icon {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+}
+
+.stat-card-indigo .stat-icon {
+    background: rgba(99, 102, 241, 0.1);
+    color: #6366f1;
 }
 
 /* ── Candidate Profile Modal ── */

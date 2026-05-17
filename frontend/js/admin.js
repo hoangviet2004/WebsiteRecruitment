@@ -22,14 +22,16 @@ document.addEventListener('DOMContentLoaded', () => {
 // PHẦN 1 — STAT CARDS CƠ BẢN
 // ════════════════════════════════════════════════════════════
 async function loadDashboardStats() {
+    const now = new Date();
+
     try {
-        const usersRes  = await apiFetchAuth('/api/admin/users',     { method: 'GET' });
+        const usersRes  = await apiFetchAuth('/api/admin/users', { method: 'GET' });
         const usersData = await usersRes.json();
         if (usersRes.ok && usersData.success) {
             const users = usersData.data || [];
-            document.getElementById('stat-users').textContent     = users.length;
+            document.getElementById('stat-users').textContent      = users.length;
             document.getElementById('stat-candidates').textContent = users.filter(u => u.role === 'Candidate').length;
-            document.getElementById('stat-pending-users').textContent = users.filter(u => u.isApproved === false).length;
+            document.getElementById('stat-recruiters').textContent = users.filter(u => u.role === 'Recruiter').length;
         }
     } catch (e) { console.error('Lỗi load users stats:', e); }
 
@@ -38,18 +40,23 @@ async function loadDashboardStats() {
         const jobsData = await jobsRes.json();
         if (jobsRes.ok && jobsData.success) {
             const jobs = jobsData.data || [];
+            const pending = jobs.filter(j => !j.isApproved);
+            const active  = jobs.filter(j => j.isApproved && new Date(j.deadline || j.expiresAt) >= now);
+            const expired = jobs.filter(j => new Date(j.deadline || j.expiresAt) < now);
             document.getElementById('stat-jobs').textContent         = jobs.length;
-            document.getElementById('stat-pending-jobs').textContent = jobs.filter(j => !j.isApproved).length;
+            document.getElementById('stat-pending-jobs').textContent = pending.length;
+            document.getElementById('stat-active-jobs').textContent  = active.length;
+            document.getElementById('stat-expired-jobs').textContent = expired.length;
         }
     } catch (e) { console.error('Lỗi load jobs stats:', e); }
 
     try {
-        const companiesRes  = await apiFetchAuth('/api/admin/companies', { method: 'GET' });
-        const companiesData = await companiesRes.json();
-        if (companiesRes.ok && companiesData.success) {
-            document.getElementById('stat-companies').textContent = (companiesData.data || []).length;
+        const ovRes  = await apiFetchAuth('/api/admin/statistics/overview', { method: 'GET' });
+        const ovData = await ovRes.json();
+        if (ovRes.ok && ovData.success) {
+            document.getElementById('stat-applications').textContent = ovData.data?.totalApplicationsEstimate ?? '--';
         }
-    } catch (e) { console.error('Lỗi load companies stats:', e); }
+    } catch (e) { console.error('Lỗi load applications stats:', e); }
 }
 
 // ════════════════════════════════════════════════════════════

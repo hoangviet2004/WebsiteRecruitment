@@ -309,7 +309,7 @@ function handleImageSelect(input, type) {
         }
         
         cropper = new Cropper(cropImage, {
-            aspectRatio: type === 'logo' ? 1 : NaN, // Logo 1:1, Cover tự do
+            aspectRatio: type === 'logo' ? 1 : 1200 / 320, // Logo 1:1, Cover 1200×320
             viewMode: 2,
             autoCropArea: 1,
             responsive: true,
@@ -349,7 +349,7 @@ async function confirmCrop() {
     // Tùy chỉnh độ phân giải khi xuất ảnh
     const cropOptions = currentCropType === 'logo' 
         ? { width: 400, height: 400 } 
-        : { maxWidth: 1200 }; // Cover không cố định kích thước nhưng giới hạn chiều rộng
+        : { width: 1200, height: 320 }; // Cover cố định 1200×320
         
     cropper.getCroppedCanvas(cropOptions).toBlob(async (blob) => {
         const formData = new FormData();
