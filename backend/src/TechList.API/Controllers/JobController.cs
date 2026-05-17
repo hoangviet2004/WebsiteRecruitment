@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OutputCaching;
 using TechList.API.Common;
 using TechList.Application.Jobs.Interfaces;
 using TechList.Application.Jobs.Models;
@@ -19,6 +20,7 @@ public sealed class JobController : ControllerBase
     }
 
     [HttpGet]
+    [OutputCache(Duration = 30)]
     public async Task<ActionResult<ApiResponse<List<JobDto>>>> GetActiveJobs(CancellationToken ct)
     {
         var result = await _jobService.GetActiveJobsAsync(ct);
@@ -26,6 +28,7 @@ public sealed class JobController : ControllerBase
     }
 
     [HttpGet("company/{companyId:guid}")]
+    [OutputCache(Duration = 30)]
     public async Task<ActionResult<ApiResponse<List<JobDto>>>> GetByCompany(Guid companyId, CancellationToken ct)
     {
         var result = await _jobService.GetJobsByCompanyAsync(companyId, ct);
@@ -33,6 +36,7 @@ public sealed class JobController : ControllerBase
     }
 
     [HttpGet("{id:guid}")]
+    [OutputCache(Duration = 60)]
     public async Task<ActionResult<ApiResponse<JobDto>>> GetById(Guid id, CancellationToken ct)
     {
         var result = await _jobService.GetJobByIdAsync(id, ct);

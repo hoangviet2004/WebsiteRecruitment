@@ -16,6 +16,10 @@ using TechList.Domain.Entities;
 var builder = WebApplication.CreateBuilder(args);
 
 // 1. Controllers & Swagger
+builder.Services.AddOutputCache(opts =>
+{
+    opts.AddBasePolicy(b => b.Expire(TimeSpan.FromSeconds(30)));
+});
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
@@ -450,6 +454,7 @@ app.Use(async (context, next) =>
 
 // app.UseHttpsRedirection();
 app.UseCors("AllowFrontend");
+app.UseOutputCache();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
