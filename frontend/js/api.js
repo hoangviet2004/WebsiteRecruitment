@@ -59,21 +59,25 @@ async function apiFetchAuth(endpoint, options = {}) {
     }
 }
 
-// ── Mở CV ứng viên qua signed URL (tránh lỗi 401 Cloudinary) ──
+// ── Mở CV ứng viên qua signed URL ──────────────────────────────
+// Dùng anchor click thay vì window.open để tránh bị popup blocker chặn
 async function openSignedCvView(candidateId) {
-    const win = window.open('', '_blank');
     try {
         const res = await apiFetchAuth(`/api/profile/${encodeURIComponent(candidateId)}/cv-view`);
-        if (!res) { win.close(); return; }
+        if (!res) { alert('Không thể tải CV của ứng viên này'); return; }
         const data = await res.json();
         if (data.data?.url) {
-            win.location.href = data.data.url;
+            const a = document.createElement('a');
+            a.href   = data.data.url;
+            a.target = '_blank';
+            a.rel    = 'noopener noreferrer';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
         } else {
-            win.close();
             alert('Không thể tải CV của ứng viên này');
         }
     } catch {
-        win.close();
         alert('Không thể mở CV');
     }
 }

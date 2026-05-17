@@ -207,7 +207,7 @@ async function loadProfile() {
         renderEdu();
 
         // CV
-        if (p.cvUrl) showCurrentCv(p.cvUrl);
+        if (p.cvUrl) await showCurrentCv(p.cvUrl);
 
         // Trạng thái mật khẩu (OAuth vs email)
         _hasPassword = p.hasPassword !== false;
@@ -638,81 +638,76 @@ function showCvLoading(on) {
     if (zone) zone.style.pointerEvents = on ? 'none' : 'auto';
 }
 
-function showCurrentCv(url, filename) {
+async function showCurrentCv(url, filename) {
     document.getElementById('pf-cv-empty').style.display   = 'none';
     document.getElementById('pf-cv-loading').style.display = 'none';
     const cur = document.getElementById('pf-cv-current');
-    if (cur) {
-        cur.style.display = 'block';
-        
-        // Link xem (View) — lấy signed URL từ backend để tránh lỗi 401 Cloudinary
-        const link = document.getElementById('pf-cv-link');
-        if (link) {
-            link.removeAttribute('href');
-            link.onclick = async (e) => {
-                e.preventDefault();
-                const win = window.open('', '_blank');
-                try {
-                    const token = sessionStorage.getItem('token');
-                    const res = await fetch(`${API_URL}/api/profile/cv/view`, {
-                        headers: { 'Authorization': `Bearer ${token}` }
-                    });
-                    const data = await res.json();
-                    if (data.data?.url) {
-                        win.location.href = data.data.url;
-                    } else {
-                        win.close();
-                        showToast('Không thể lấy link xem CV', 'error');
-                    }
-                } catch {
-                    win.close();
-                    showToast('Không thể mở CV', 'error');
-                }
-            };
-        }
+    if (!cur) return;
+    cur.style.display = 'block';
 
-        // Link tải (Download) — lấy signed download URL từ backend
-        const download = document.getElementById('pf-cv-download');
-        if (download) {
-            download.removeAttribute('href');
-            download.onclick = async (e) => {
-                e.preventDefault();
-                try {
-                    const token = sessionStorage.getItem('token');
-                    const res = await fetch(`${API_URL}/api/profile/cv/download`, {
-                        headers: { 'Authorization': `Bearer ${token}` }
-                    });
-                    const data = await res.json();
-                    if (data.data?.url) {
-                        const a = document.createElement('a');
-                        a.href = data.data.url;
-                        a.download = document.getElementById('pf-cv-filename')?.textContent || 'CV.pdf';
-                        document.body.appendChild(a);
-                        a.click();
-                        document.body.removeChild(a);
-                    } else {
-                        showToast('Không thể lấy link tải CV', 'error');
-                    }
-                } catch {
-                    showToast('Lỗi kết nối khi tải CV', 'error');
-                }
-            };
+    // Hiển thị tên file
+    const fn = document.getElementById('pf-cv-filename');
+    if (fn) {
+        let name = filename;
+        if (!name && url) {
+            try {
+                const parts = new URL(url).pathname.split('/');
+                name = decodeURIComponent(parts[parts.length - 1]) || 'CV.pdf';
+            } catch { name = 'CV.pdf'; }
         }
+        fn.textContent = name || 'CV.pdf';
+    }
 
-        const fn = document.getElementById('pf-cv-filename');
-        if (fn) {
-            let name = filename;
-            if (!name && url) {
-                try {
-                    const parts = new URL(url).pathname.split('/');
-                    name = decodeURIComponent(parts[parts.length - 1]) || 'CV.pdf';
-                } catch { name = 'CV.pdf'; }
+    const meta = document.getElementById('pf-cv-updated');
+    if (meta) meta.textContent = 'Cập nhật ' + new Date().toLocaleDateString('vi-VN');
+
+    // Pre-fetch view URL rồi gán thẳng vào href — tránh hoàn toàn window.open và popup blocker
+    const link = document.getElementById('pf-cv-link');
+    if (link) {
+        link.removeAttribute('href');
+        link.onclick = null;
+        try {
+            const token = sessionStorage.getItem('token');
+            const res   = await fetch(`${API_URL}/api/profile/cv/view`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const data = await res.json();
+            if (data.data?.url) {
+                link.href   = data.data.url;
+                link.target = '_blank';
+                link.rel    = 'noopener noreferrer';
             }
-            fn.textContent = name || 'CV.pdf';
+        } catch {
+            link.onclick = (e) => { e.preventDefault(); showToast('Lỗi kết nối khi tải link CV', 'error'); };
         }
-        
-        const meta = document.getElementById('pf-cv-updated');
-        if (meta) meta.textContent = 'Cập nhật ' + new Date().toLocaleDateString('vi-VN');
+    }
+
+    // Download — fetch khi click rồi trigger anchor (không phải window.open, không bị chặn)
+    const download = document.getElementById('pf-cv-download');
+    if (download) {
+        download.removeAttribute('href');
+        download.onclick = async (e) => {
+            e.preventDefault();
+            try {
+                const token = sessionStorage.getItem('token');
+                const res   = await fetch(`${API_URL}/api/profile/cv/download`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await res.json();
+                if (data.data?.url) {
+                    const a = document.createElement('a');
+                    a.href     = data.data.url;
+                    a.download = fn?.textContent || 'CV.pdf';
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                } else {
+                    showToast('Không thể lấy link tải CV', 'error');
+                }
+            } catch {
+                showToast('Lỗi kết nối khi tải CV', 'error');
+            }
+        };
     }
 }
 
