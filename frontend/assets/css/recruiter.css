@@ -1200,16 +1200,21 @@
 /* Period filter buttons */
 .an-period-group {
     display: flex;
+    align-items: center;
     background: #f1f5f9;
+    border: 1px solid #e2e8f0;
     border-radius: 10px;
-    padding: 4px;
+    padding: 3px;
     gap: 2px;
+    height: 38px;
+    box-sizing: border-box;
 }
 
 .an-period-btn {
     border: none;
     background: transparent;
-    padding: 7px 16px;
+    padding: 0 14px;
+    height: 100%;
     border-radius: 7px;
     font-size: 13px;
     font-weight: 600;
@@ -1217,6 +1222,7 @@
     cursor: pointer;
     transition: all 0.2s;
     font-family: inherit;
+    white-space: nowrap;
 }
 
 .an-period-btn.active,
@@ -1231,7 +1237,9 @@
     align-items: center;
     gap: 7px;
     font-size: 13px;
-    padding: 9px 16px;
+    padding: 0 16px;
+    height: 38px;
+    box-sizing: border-box;
 }
 
 /* Overview Cards grid */

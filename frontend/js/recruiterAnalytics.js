@@ -59,49 +59,50 @@ async function fetchAllAnalytics() {
     const cId = currentCompanyId;
     const p   = _anPeriod;
 
-    try {
-        const responses = await Promise.all([
-            apiFetchAuth(`/api/recruiter-stats/overview?companyId=${cId}&period=${p}`),
-            apiFetchAuth(`/api/recruiter-stats/status-distribution?companyId=${cId}`),
-            apiFetchAuth(`/api/recruiter-stats/trend?companyId=${cId}&period=${p}`),
-            apiFetchAuth(`/api/recruiter-stats/hot-skills?companyId=${cId}`),
-            apiFetchAuth(`/api/recruiter-stats/job-performance?companyId=${cId}&period=${p}`),
-        ]);
+    const [overviewRes, statusRes, trendRes, skillsRes, perfRes] = await Promise.allSettled([
+        apiFetchAuth(`/api/recruiter-stats/overview?companyId=${cId}&period=${p}`),
+        apiFetchAuth(`/api/recruiter-stats/status-distribution?companyId=${cId}`),
+        apiFetchAuth(`/api/recruiter-stats/trend?companyId=${cId}&period=${p}`),
+        apiFetchAuth(`/api/recruiter-stats/hot-skills?companyId=${cId}`),
+        apiFetchAuth(`/api/recruiter-stats/job-performance?companyId=${cId}&period=${p}`),
+    ]);
 
-        const [overviewRes, statusRes, trendRes, skillsRes, perfRes] = responses;
-
-        // Kiểm tra nếu apiFetchAuth trả về undefined (vd: token hết hạn → đã redirect)
-        if (!overviewRes) return;
-
-        const [overviewJson, statusJson, trendJson, skillsJson, perfJson] = await Promise.all([
-            safeJson(overviewRes), safeJson(statusRes), safeJson(trendRes),
-            safeJson(skillsRes),   safeJson(perfRes)
-        ]);
-
-        if (!overviewRes.ok) {
-            const msg = overviewJson?.message || `Lỗi server ${overviewRes.status}: endpoint chưa sẵn sàng, vui lòng khởi động lại backend.`;
-            throw new Error(msg);
-        }
-
-        _anRawData = {
-            overview: overviewJson?.data,
-            status:   statusJson?.data  ?? [],
-            trend:    trendJson?.data   ?? [],
-            skills:   skillsJson?.data  ?? [],
-            perf:     perfJson?.data    ?? [],
-        };
-
-        renderOverviewCards(_anRawData.overview);
-        renderDonutChart(_anRawData.status);
-        renderSkillsBar(_anRawData.skills);
-        renderTrendLine(_anRawData.trend);
-        renderJobPerfTable(_anRawData.perf);
-        updateLastUpdated();
-        _anLoaded = true;
-
-    } catch (e) {
-        showAnError('Lỗi tải dữ liệu thống kê: ' + e.message);
+    // Overview là bắt buộc
+    if (overviewRes.status === 'rejected' || !overviewRes.value) {
+        showAnError('Lỗi tải dữ liệu thống kê: không thể kết nối server.');
+        return;
     }
+    const overviewJson = await safeJson(overviewRes.value);
+    if (!overviewRes.value.ok) {
+        showAnError(overviewJson?.message || `Lỗi server ${overviewRes.value.status}`);
+        return;
+    }
+
+    const safeData = async (settled) => {
+        if (settled.status === 'rejected' || !settled.value) return null;
+        const json = await safeJson(settled.value);
+        return json?.data ?? null;
+    };
+
+    const [statusData, trendData, skillsData, perfData] = await Promise.all([
+        safeData(statusRes), safeData(trendRes), safeData(skillsRes), safeData(perfRes),
+    ]);
+
+    _anRawData = {
+        overview: overviewJson?.data,
+        status:   statusData ?? [],
+        trend:    trendData  ?? [],
+        skills:   skillsData ?? [],
+        perf:     perfData   ?? [],
+    };
+
+    renderOverviewCards(_anRawData.overview);
+    renderDonutChart(_anRawData.status);
+    renderSkillsBar(_anRawData.skills);
+    renderTrendLine(_anRawData.trend);
+    renderJobPerfTable(_anRawData.perf);
+    updateLastUpdated();
+    _anLoaded = true;
 }
 
 // ── Skeleton loading ─────────────────────────────────────────
@@ -125,44 +126,44 @@ function showAnError(msg) {
 function renderOverviewCards(d) {
     const cards = [
         {
-            color:  'blue',
-            icon:   'fa-paper-plane',
-            label:  'Lượt Ứng tuyển nhận được',
-            value:  d.totalApplications,
-            period: d.currentPeriodApplications,
-            pct:    d.applicationGrowthPct,
-            sub:    'kỳ này',
+            color:      'blue',
+            icon:       'fa-paper-plane',
+            label:      'Lượt ứng tuyển trong kỳ',
+            value:      d.currentPeriodApplications,
+            totalLabel: 'Tổng',
+            total:      d.totalApplications,
+            pct:        d.applicationGrowthPct,
         },
         {
-            color:  'green',
-            icon:   'fa-briefcase',
-            label:  'Tin đang hoạt động',
-            value:  d.activeJobs,
-            period: d.currentPeriodJobs,
-            pct:    d.jobGrowthPct,
-            sub:    'tin mới kỳ này',
+            color:      'green',
+            icon:       'fa-briefcase',
+            label:      'Tin đăng mới trong kỳ',
+            value:      d.currentPeriodJobs,
+            totalLabel: 'Đang hoạt động',
+            total:      d.activeJobs,
+            pct:        d.jobGrowthPct,
         },
         {
-            color:  'amber',
-            icon:   'fa-comments',
-            label:  'Ứng viên Phỏng vấn',
-            value:  d.interviewCount,
-            period: null,
-            pct:    d.interviewGrowthPct,
-            sub:    null,
+            color:      'amber',
+            icon:       'fa-comments',
+            label:      'Ứng viên phỏng vấn',
+            value:      d.interviewCount,
+            totalLabel: 'Đã đề nghị',
+            total:      d.offeredCount,
+            pct:        d.interviewGrowthPct,
         },
     ];
 
     document.getElementById('an-overview-grid').innerHTML = cards.map(c => {
         const pctClass = c.pct > 0 ? 'up' : c.pct < 0 ? 'down' : 'flat';
         const pctIcon  = c.pct > 0 ? 'fa-arrow-trend-up' : c.pct < 0 ? 'fa-arrow-trend-down' : 'fa-minus';
-        const pctText  = Math.abs(c.pct).toFixed(1) + '%';
-        const vsText   = c.pct > 0 ? `+${pctText}` : (c.pct < 0 ? `-${pctText}` : '0%');
+        const vsText   = c.pct > 0 ? `+${Math.abs(c.pct).toFixed(1)}%` : (c.pct < 0 ? `-${Math.abs(c.pct).toFixed(1)}%` : '0%');
 
         return `<div class="an-overview-card ${c.color}">
             <div class="an-card-icon"><i class="fa-solid ${c.icon}"></i></div>
             <div class="an-card-label">${c.label}</div>
             <div class="an-card-value">${c.value.toLocaleString('vi-VN')}</div>
+            <div style="font-size:12px;color:#64748b;margin-bottom:4px;">${c.totalLabel}: <strong>${c.total.toLocaleString('vi-VN')}</strong></div>
             <span class="an-card-change ${pctClass}">
                 <i class="fa-solid ${pctIcon}"></i> ${vsText} so kỳ trước
             </span>
@@ -248,7 +249,7 @@ function renderSkillsBar(data) {
         options: {
             indexAxis: 'y',
             responsive: true,
-            maintainAspectRatio: true,
+            maintainAspectRatio: false,
             plugins: {
                 legend: { display: false },
                 tooltip: { callbacks: { label: ctx => ` ${ctx.raw} ứng viên` } }
@@ -300,7 +301,7 @@ function renderTrendLine(data) {
         },
         options: {
             responsive: true,
-            maintainAspectRatio: true,
+            maintainAspectRatio: false,
             plugins: {
                 legend: { display: false },
                 tooltip: {
@@ -417,10 +418,87 @@ function exportAnalyticsCSV() {
     URL.revokeObjectURL(url);
 }
 
-// ── Xuất PDF (Print) ─────────────────────────────────────────
+// ── Xuất PDF (jsPDF) ─────────────────────────────────────────
 function exportAnalyticsPDF() {
-    // Đảm bảo đang ở tab analytics trước khi in
-    window.print();
+    if (!_anRawData.overview) {
+        alert('Không có dữ liệu để xuất. Vui lòng tải thống kê trước.');
+        return;
+    }
+
+    const btn = document.getElementById('an-btn-pdf');
+    if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang xuất...'; }
+
+    try {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+        const periodMap = { '7d': '7 ngay qua', '30d': '30 ngay qua', '3m': '3 thang qua' };
+
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(16);
+        doc.setTextColor(15, 23, 42);
+        doc.text('BAO CAO THONG KE TUYEN DUNG', 148, 16, { align: 'center' });
+
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(9);
+        doc.setTextColor(100, 116, 139);
+        doc.text(`Ky: ${periodMap[_anPeriod] || _anPeriod}   |   Xuat: ${new Date().toLocaleString('vi-VN')}`, 148, 23, { align: 'center' });
+
+        let y = 30;
+
+        // 1. Overview
+        const d = _anRawData.overview;
+        if (d) {
+            doc.setFont('helvetica', 'bold'); doc.setFontSize(11); doc.setTextColor(59, 130, 246);
+            doc.text('1. TONG QUAN KY BAO CAO', 14, y); y += 3;
+            doc.autoTable({
+                startY: y,
+                head: [['Chi so', 'Trong ky', '% So ky truoc', 'Tong']],
+                body: [
+                    ['Luot ung tuyen',   d.currentPeriodApplications, pctStrAn(d.applicationGrowthPct), d.totalApplications],
+                    ['Tin dang moi',     d.currentPeriodJobs,         pctStrAn(d.jobGrowthPct),         d.activeJobs + ' (dang HĐ)'],
+                    ['Ung vien PV',      d.interviewCount,            pctStrAn(d.interviewGrowthPct),   d.offeredCount + ' (de nghi)'],
+                ],
+                styles: { font: 'helvetica', fontSize: 9, cellPadding: 3 },
+                headStyles: { fillColor: [59, 130, 246], textColor: 255, fontStyle: 'bold' },
+                alternateRowStyles: { fillColor: [248, 250, 252] },
+                margin: { left: 14, right: 14 },
+            });
+            y = doc.lastAutoTable.finalY + 8;
+        }
+
+        // 2. Job Performance
+        if (_anRawData.perf?.length) {
+            doc.setFont('helvetica', 'bold'); doc.setFontSize(11); doc.setTextColor(59, 130, 246);
+            doc.text('2. HIEU SUAT TUNG TIN DANG', 14, y); y += 3;
+            doc.autoTable({
+                startY: y,
+                head: [['Vi tri', 'Loai hinh', 'Tong don', 'Sang loc', 'Phong van', 'De nghi', 'Ti le (%)']],
+                body: _anRawData.perf.map(j => [
+                    j.title.length > 35 ? j.title.slice(0, 35) + '...' : j.title,
+                    j.jobType || '—',
+                    j.totalApplications, j.screeningCount, j.interviewCount, j.offeredCount,
+                    j.totalApplications > 0 ? Math.round(j.offeredCount / j.totalApplications * 100) + '%' : '0%',
+                ]),
+                styles: { font: 'helvetica', fontSize: 9, cellPadding: 3 },
+                headStyles: { fillColor: [16, 185, 129], textColor: 255, fontStyle: 'bold' },
+                alternateRowStyles: { fillColor: [248, 250, 252] },
+                margin: { left: 14, right: 14 },
+            });
+        }
+
+        const fileName = `bao-cao-tuyen-dung-${_anPeriod}-${new Date().toISOString().slice(0, 10)}.pdf`;
+        doc.save(fileName);
+    } catch (e) {
+        alert('Khong the xuat PDF: ' + e.message);
+        console.error(e);
+    } finally {
+        if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-file-pdf"></i> Xuất PDF'; }
+    }
+}
+
+function pctStrAn(val) {
+    if (val == null) return '—';
+    return (val >= 0 ? '+' : '') + val.toFixed(1) + '%';
 }
 
 // ── Helper ───────────────────────────────────────────────────

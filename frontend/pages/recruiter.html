@@ -339,7 +339,7 @@
                         <button class="btn-primary an-export-btn" onclick="exportAnalyticsCSV()">
                             <i class="fa-solid fa-file-excel"></i> Xuất Excel
                         </button>
-                        <button class="btn-secondary an-export-btn" onclick="exportAnalyticsPDF()">
+                        <button id="an-btn-pdf" class="btn-secondary an-export-btn" onclick="exportAnalyticsPDF()">
                             <i class="fa-solid fa-file-pdf"></i> Xuất PDF
                         </button>
                     </div>
@@ -374,8 +374,8 @@
                             <span class="an-chart-title">Kỹ năng Ứng viên Phổ biến</span>
                             <span class="an-chart-sub">Từ hồ sơ ứng viên đã nộp đơn</span>
                         </div>
-                        <div style="padding: 8px 24px 20px; flex: 1;">
-                            <canvas id="chart-skills-bar" style="max-height:280px;"></canvas>
+                        <div style="padding: 8px 24px 20px; flex: 1; position:relative; height:280px;">
+                            <canvas id="chart-skills-bar"></canvas>
                         </div>
                     </div>
                 </div>
@@ -386,8 +386,8 @@
                         <span class="an-chart-title">Xu hướng Ứng tuyển theo thời gian</span>
                         <span class="an-chart-sub" id="an-trend-sub"></span>
                     </div>
-                    <div style="padding: 8px 24px 20px;">
-                        <canvas id="chart-trend-line" style="max-height:220px;"></canvas>
+                    <div style="padding: 8px 24px 20px; position:relative; height:220px;">
+                        <canvas id="chart-trend-line"></canvas>
                     </div>
                 </div>
 
@@ -1016,6 +1016,8 @@
         </div>
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
     <script src="../js/api.js"></script>
     <script src="../js/navbar.js"></script>
     <script src="../js/home.js"></script>
