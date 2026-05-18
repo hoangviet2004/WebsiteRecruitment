@@ -145,6 +145,12 @@ public sealed class EmailService : IEmailService
                 $"Chúng tôi vô cùng vui mừng thông báo rằng bạn đã vượt qua tất cả các vòng tuyển dụng và được nhận vào vị trí <strong>{jobTitle}</strong> tại <strong>{companyName}</strong>. Nhà tuyển dụng sẽ liên hệ để thảo luận về các điều khoản hợp đồng.",
                 "#10b981"
             ),
+            "Hired" => (
+                $"Chúc mừng! Bạn đã được tuyển dụng chính thức — {jobTitle}",
+                "Chào mừng bạn đến với đội ngũ!",
+                $"Chúng tôi trân trọng thông báo rằng bạn đã chính thức được tuyển dụng vào vị trí <strong>{jobTitle}</strong> tại <strong>{companyName}</strong>. Chúng tôi sẽ sớm liên hệ để hoàn tất các thủ tục nhận việc. Chào mừng bạn!",
+                "#10b981"
+            ),
             "Rejected" => (
                 $"Thông báo kết quả ứng tuyển — {jobTitle}",
                 "Cảm ơn bạn đã ứng tuyển",

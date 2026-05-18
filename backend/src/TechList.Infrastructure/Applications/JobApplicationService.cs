@@ -183,7 +183,7 @@ public sealed class JobApplicationService : IJobApplicationService
             _logger.LogWarning(ex, "Không thể tạo thông báo in-app cho ứng viên {Id}", application.CandidateId);
         }
 
-        if (!string.IsNullOrEmpty(dto.CandidateEmail) && GetStage(newStatus) != GetStage(oldStatus))
+        if (!string.IsNullOrEmpty(dto.CandidateEmail) && newStatus != oldStatus)
         {
             var toEmail       = dto.CandidateEmail;
             var candidateName = dto.CandidateName;

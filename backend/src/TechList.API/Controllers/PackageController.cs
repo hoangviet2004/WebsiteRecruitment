@@ -19,11 +19,13 @@ public sealed class PackageController : ControllerBase
 {
     private readonly AppDbContext _db;
     private readonly IConfiguration _config;
+    private readonly ILogger<PackageController> _logger;
 
-    public PackageController(AppDbContext db, IConfiguration config)
+    public PackageController(AppDbContext db, IConfiguration config, ILogger<PackageController> logger)
     {
         _db = db;
         _config = config;
+        _logger = logger;
     }
 
     /// <summary>Lấy danh sách gói dịch vụ đang hoạt động (public).</summary>
@@ -260,10 +262,14 @@ public sealed class PackageController : ControllerBase
             vnpay.AddRequestData("vnp_Version", "2.1.0");
             vnpay.AddRequestData("vnp_Command", "pay");
             vnpay.AddRequestData("vnp_TmnCode", _config["VNPay:TmnCode"] ?? "");
-            vnpay.AddRequestData("vnp_Amount", (transaction.FinalAmount * 100).ToString());
+            vnpay.AddRequestData("vnp_Amount", ((long)(transaction.FinalAmount * 100)).ToString());
             vnpay.AddRequestData("vnp_CreateDate", DateTime.UtcNow.AddHours(7).ToString("yyyyMMddHHmmss"));
             vnpay.AddRequestData("vnp_CurrCode", "VND");
-            vnpay.AddRequestData("vnp_IpAddr", HttpContext.Connection.RemoteIpAddress?.ToString() ?? "127.0.0.1");
+            var ipAddr = HttpContext.Connection.RemoteIpAddress;
+            var ipString = ipAddr?.IsIPv4MappedToIPv6 == true
+                ? ipAddr.MapToIPv4().ToString()
+                : (ipAddr?.ToString() == "::1" ? "127.0.0.1" : ipAddr?.ToString() ?? "127.0.0.1");
+            vnpay.AddRequestData("vnp_IpAddr", ipString);
             vnpay.AddRequestData("vnp_Locale", "vn");
             vnpay.AddRequestData("vnp_OrderInfo", $"Thanh toan goi dich vu: {package.Name}");
             vnpay.AddRequestData("vnp_OrderType", "other");
@@ -273,6 +279,7 @@ public sealed class PackageController : ControllerBase
             await _db.SaveChangesAsync(ct);
 
             var paymentUrl = vnpay.CreateRequestUrl(_config["VNPay:BaseUrl"] ?? "", _config["VNPay:HashSecret"] ?? "");
+            _logger.LogInformation("VNPAY PaymentUrl: {PaymentUrl}", paymentUrl);
 
             return Ok(ApiResponse<object>.Ok(new { paymentUrl, transactionCode },
                 "Vui lòng thực hiện thanh toán qua VNPay."));
