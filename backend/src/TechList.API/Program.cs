@@ -457,7 +457,7 @@ app.UseCors("AllowFrontend");
 app.UseOutputCache();
 app.UseAuthentication();
 app.UseAuthorization();
-app.MapGet("/health", async (AppDbContext db) =>
+app.MapMethods("/health", ["GET", "HEAD"], async (AppDbContext db) =>
 {
     try
     {
