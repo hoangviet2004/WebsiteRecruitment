@@ -457,5 +457,20 @@ app.UseCors("AllowFrontend");
 app.UseOutputCache();
 app.UseAuthentication();
 app.UseAuthorization();
+app.MapGet("/health", async (AppDbContext db) =>
+{
+    try
+    {
+        var canConnect = await db.Database.CanConnectAsync();
+        return canConnect
+            ? Results.Ok(new { status = "healthy", db = "connected", timestamp = DateTime.UtcNow })
+            : Results.Json(new { status = "unhealthy", db = "unreachable" }, statusCode: 503);
+    }
+    catch (Exception ex)
+    {
+        return Results.Json(new { status = "unhealthy", error = ex.Message }, statusCode: 503);
+    }
+});
+
 app.MapControllers();
 app.Run();
