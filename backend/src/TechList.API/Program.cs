@@ -457,20 +457,10 @@ app.UseCors("AllowFrontend");
 app.UseOutputCache();
 app.UseAuthentication();
 app.UseAuthorization();
-app.MapMethods("/health", ["GET", "HEAD"], async (AppDbContext db) =>
-{
-    try
-    {
-        var canConnect = await db.Database.CanConnectAsync();
-        return canConnect
-            ? Results.Ok(new { status = "healthy", db = "connected", timestamp = DateTime.UtcNow })
-            : Results.Json(new { status = "unhealthy", db = "unreachable" }, statusCode: 503);
-    }
-    catch (Exception ex)
-    {
-        return Results.Json(new { status = "unhealthy", error = ex.Message }, statusCode: 503);
-    }
-});
+// Lightweight ping — chỉ check app còn sống, KHÔNG đụng DB
+// Dùng cho UptimeRobot để giữ App Service khỏi sleep mà không tiêu quota Azure SQL Free Tier
+app.MapMethods("/health", ["GET", "HEAD"], () =>
+    Results.Ok(new { status = "healthy", timestamp = DateTime.UtcNow }));
 
 app.MapControllers();
 app.Run();
