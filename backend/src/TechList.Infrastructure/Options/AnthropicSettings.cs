@@ -4,5 +4,5 @@ public sealed class AnthropicSettings
 {
     public const string SectionName = "Gemini";
     public string ApiKey { get; init; } = string.Empty;
-    public string Model { get; init; } = "gemini-2.0-flash";
+    public string Model { get; init; } = "gemini-2.5-flash";
 }
