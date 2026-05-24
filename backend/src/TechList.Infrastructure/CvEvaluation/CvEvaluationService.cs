@@ -146,7 +146,7 @@ public sealed class CvEvaluationService : ICvEvaluationService
             - "strengths": liệt kê các yêu cầu mà CV ứng viên RÕ RÀNG đáp ứng được (trích dẫn bằng chứng từ CV)
             - "weaknesses": liệt kê các yêu cầu mà CV ứng viên CHƯA đáp ứng hoặc không đề cập
             - "score": tỷ lệ % yêu cầu được đáp ứng (0-100), không làm tròn quá cao nếu CV thiếu nhiều yêu cầu quan trọng
-            - "recommendation": dựa vào score — ≥70: "Nên phỏng vấn", 40-69: "Cân nhắc thêm", <40: "Không phù hợp"
+            - "recommendation": dựa vào score — ≥70: "Đạt yêu cầu", 40-69: "Cân nhắc thêm", <40: "Không đạt yêu cầu"
             - "summary": 1-2 câu nhận xét tổng quan về mức độ phù hợp
             - "details": 3-5 câu phân tích cụ thể: kỹ năng khớp/thiếu, kinh nghiệm có đủ không, học vấn phù hợp không
 
@@ -156,7 +156,7 @@ public sealed class CvEvaluationService : ICvEvaluationService
               "summary": "<string>",
               "strengths": ["<yêu cầu ứng viên đáp ứng>", ...],
               "weaknesses": ["<yêu cầu ứng viên chưa đáp ứng>", ...],
-              "recommendation": "<Nên phỏng vấn | Cân nhắc thêm | Không phù hợp>",
+              "recommendation": "<Đạt yêu cầu | Cân nhắc thêm | Không đạt yêu cầu>",
               "details": "<string>"
             }
             """;

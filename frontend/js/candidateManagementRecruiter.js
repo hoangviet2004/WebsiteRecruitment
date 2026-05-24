@@ -800,10 +800,6 @@ async function executeQuickReject() {
 
 // ── Batch AI Đánh giá CV hàng loạt ─────────────────────────
 function openBatchAIModal() {
-    document.querySelectorAll('input[name="bai-status"]').forEach(cb => {
-        cb.checked = cb.value === 'Applied';
-    });
-
     const sel = document.getElementById('bai-job-filter');
     sel.innerHTML = '<option value="">Tất cả tin tuyển dụng</option>';
     const seen = new Set();
@@ -834,50 +830,66 @@ function closeBatchAIModal() {
 
 function updateBatchAICount() {
     const jobFilter = document.getElementById('bai-job-filter').value;
-    const statuses  = [...document.querySelectorAll('input[name="bai-status"]:checked')].map(cb => cb.value);
+    const limitVal  = document.getElementById('bai-limit-filter').value;
+    const statuses  = ['Applied'];
     const btn    = document.getElementById('bai-confirm-btn');
     const textEl = document.getElementById('bai-count-text');
     const box    = document.getElementById('bai-preview-box');
 
-    if (statuses.length === 0) {
-        textEl.textContent = 'Vui lòng chọn ít nhất một trạng thái.';
+    // Sắp xếp đơn ứng tuyển theo ngày nộp giảm dần (mới nhất lên trước)
+    const sortedApps = [..._allApplications].sort((a, b) => new Date(b.appliedAt) - new Date(a.appliedAt));
+
+    const matched = sortedApps.filter(a =>
+        (!jobFilter || a.jobPostId === jobFilter) && statuses.includes(a.status)
+    );
+    const matchedWithCV = matched.filter(a => a.cvUrl);
+
+    if (matched.length === 0) {
+        textEl.textContent = 'Không có ứng viên nào ở trạng thái Mới nộp.';
         btn.disabled = true;
-        box.className = 'qr-preview-box';
+        box.className = 'qr-preview-box warning';
         return;
     }
 
-    const matched  = _allApplications.filter(a =>
-        (!jobFilter || a.jobPostId === jobFilter) && statuses.includes(a.status)
-    );
-    const withCV    = matched.filter(a => a.cvUrl).length;
-    const withoutCV = matched.length - withCV;
-
-    if (matched.length === 0) {
-        textEl.textContent = 'Không có ứng viên nào phù hợp với tiêu chí đã chọn.';
+    if (matchedWithCV.length === 0) {
+        textEl.textContent = `${matched.length} ứng viên Mới nộp nhưng không ai có CV để đánh giá.`;
         btn.disabled = true;
         box.className = 'qr-preview-box warning';
-    } else if (withCV === 0) {
-        textEl.textContent = `${matched.length} ứng viên phù hợp nhưng không ai có CV để đánh giá.`;
-        btn.disabled = true;
-        box.className = 'qr-preview-box warning';
-    } else {
-        let msg = `Sẽ đánh giá CV của ${withCV} ứng viên.`;
-        if (withoutCV > 0) msg += ` (${withoutCV} người không có CV sẽ bỏ qua)`;
-        textEl.textContent = msg;
-        btn.disabled = false;
-        box.className = 'qr-preview-box';
-        box.style.borderColor = '#8b5cf6';
-        box.style.background  = '#f5f3ff';
+        return;
     }
+
+    const limit = limitVal ? parseInt(limitVal, 10) : matchedWithCV.length;
+    const targets = matchedWithCV.slice(0, limit);
+
+    let msg = `Sẽ đánh giá CV của ${targets.length} ứng viên mới nhất.`;
+    if (matchedWithCV.length > targets.length) {
+        msg += ` (Đã giới hạn top ${targets.length} trong tổng số ${matchedWithCV.length} CV)`;
+    }
+    const withoutCV = matched.length - matchedWithCV.length;
+    if (withoutCV > 0) {
+        msg += ` (${withoutCV} người không có CV sẽ bỏ qua)`;
+    }
+
+    textEl.textContent = msg;
+    btn.disabled = false;
+    box.className = 'qr-preview-box';
+    box.style.borderColor = '#8b5cf6';
+    box.style.background  = '#f5f3ff';
 }
 
 async function executeBatchAI() {
     const jobFilter = document.getElementById('bai-job-filter').value;
-    const statuses  = [...document.querySelectorAll('input[name="bai-status"]:checked')].map(cb => cb.value);
+    const limitVal  = document.getElementById('bai-limit-filter').value;
+    const statuses  = ['Applied'];
 
-    const targets = _allApplications.filter(a =>
-        (!jobFilter || a.jobPostId === jobFilter) && statuses.includes(a.status) && a.cvUrl
+    const sortedApps = [..._allApplications].sort((a, b) => new Date(b.appliedAt) - new Date(a.appliedAt));
+    const matched = sortedApps.filter(a =>
+        (!jobFilter || a.jobPostId === jobFilter) && statuses.includes(a.status)
     );
+    const matchedWithCV = matched.filter(a => a.cvUrl);
+    const limit = limitVal ? parseInt(limitVal, 10) : matchedWithCV.length;
+    const targets = matchedWithCV.slice(0, limit);
+
     if (targets.length === 0) return;
 
     const btn       = document.getElementById('bai-confirm-btn');
@@ -906,7 +918,7 @@ async function executeBatchAI() {
 
             const r          = data.data;
             const scoreColor = r.score >= 75 ? '#10b981' : r.score >= 50 ? '#f59e0b' : '#ef4444';
-            const recColor   = r.recommendation === 'Nên phỏng vấn' ? '#10b981'
+            const recColor   = (r.recommendation === 'Đạt yêu cầu' || r.recommendation === 'Nên phỏng vấn') ? '#10b981'
                              : r.recommendation === 'Cân nhắc thêm'  ? '#f59e0b' : '#ef4444';
 
             item.innerHTML = `
@@ -946,7 +958,7 @@ function _batchStatusButtons(appId, currentStatus) {
         Offered:   { status: 'Hired',     cls: 'hired',     icon: 'fa-trophy',             label: 'Offer thành công' },
     };
     const rejectBtn = `<button class="cand-status-btn rejected" style="font-size:11px;padding:3px 8px;"
-        onclick="changeBatchResultStatus('${appId}','Rejected',this.parentElement)">
+        onclick="showBatchRejectForm('${appId}',this.parentElement)">
         <i class="fa-solid fa-xmark"></i> Từ chối
     </button>`;
 
@@ -964,9 +976,90 @@ function _batchStatusButtons(appId, currentStatus) {
     return `<span style="font-size:11px;color:#64748b;flex-shrink:0;">Trạng thái: <strong>${escHtml(currentLabel)}</strong></span>${done}`;
 }
 
+function showBatchRejectForm(appId, statusRowEl) {
+    const originalHtml = statusRowEl.innerHTML;
+    const reasons = [
+        'Không đủ kinh nghiệm',
+        'Hồ sơ không phù hợp',
+        'Vị trí đã tuyển đủ người',
+        'Đã tuyển ứng viên khác phù hợp hơn',
+        'Không đáp ứng yêu cầu kỹ năng',
+        'Yêu cầu lương không phù hợp',
+        'Lý do khác'
+    ];
+    const optionsHtml = reasons.map(r => `<option value="${r}">${r}</option>`).join('');
+
+    statusRowEl.style.flexDirection = 'column';
+    statusRowEl.style.alignItems = 'stretch';
+    statusRowEl.style.gap = '8px';
+
+    statusRowEl.innerHTML = `
+        <div style="font-size:12px;font-weight:600;color:#dc2626;display:flex;align-items:center;gap:4px;margin-bottom:2px;margin-top:4px;">
+            <i class="fa-solid fa-circle-xmark"></i> Lý do từ chối gửi ứng viên:
+        </div>
+        <select class="batch-reject-reason-select" style="width:100%;padding:6px;border:1.5px solid #fca5a5;border-radius:6px;font-size:12px;background:#fff5f5;color:#dc2626;outline:none;font-family:inherit;">
+            ${optionsHtml}
+        </select>
+        <textarea class="batch-reject-other-input" maxlength="100" placeholder="Mô tả lý do từ chối (tối đa 100 ký tự)..." style="display:none;width:100%;padding:6px;border:1.5px solid #e2e8f0;border-radius:6px;font-size:12px;resize:none;box-sizing:border-box;font-family:inherit;margin-top:4px;outline:none;"></textarea>
+        <div style="display:flex;gap:6px;justify-content:flex-end;margin-top:2px;">
+            <button class="cand-status-btn rejected" style="font-size:11px;padding:3px 10px;height:28px;" id="btn-batch-confirm-reject">Xác nhận</button>
+            <button class="cand-status-btn" style="font-size:11px;padding:3px 10px;height:28px;background:#e2e8f0;color:#475569;border:1px solid #cbd5e1;" id="btn-batch-cancel-reject">Hủy</button>
+        </div>
+    `;
+
+    const selectEl = statusRowEl.querySelector('.batch-reject-reason-select');
+    const textareaEl = statusRowEl.querySelector('.batch-reject-other-input');
+    const confirmBtn = statusRowEl.querySelector('#btn-batch-confirm-reject');
+    const cancelBtn = statusRowEl.querySelector('#btn-batch-cancel-reject');
+
+    selectEl.onchange = () => {
+        textareaEl.style.display = selectEl.value === 'Lý do khác' ? 'block' : 'none';
+        if (selectEl.value === 'Lý do khác') textareaEl.focus();
+    };
+
+    cancelBtn.onclick = () => {
+        statusRowEl.style.flexDirection = 'row';
+        statusRowEl.style.alignItems = 'center';
+        statusRowEl.style.gap = '6px';
+        statusRowEl.innerHTML = originalHtml;
+    };
+
+    confirmBtn.onclick = async () => {
+        let reason = selectEl.value;
+        if (reason === 'Lý do khác') {
+            const custom = textareaEl.value.trim();
+            if (!custom) { alert('Vui lòng nhập lý do từ chối.'); return; }
+            reason = custom;
+        }
+
+        const app = _allApplications.find(a => a.id === appId);
+        const jobTitle = app?.jobTitle || 'vị trí ứng tuyển';
+        const rejectMsg = `Cảm ơn bạn đã ứng tuyển vào vị trí ${jobTitle}.\n\nSau khi xem xét kỹ hồ sơ, chúng tôi rất tiếc phải thông báo rằng hồ sơ của bạn chưa phù hợp với yêu cầu hiện tại.\n📌 Lý do: ${reason}\n\nChúng tôi trân trọng sự quan tâm của bạn và mong có cơ hội hợp tác trong tương lai.`;
+
+        statusRowEl.innerHTML = '<span style="font-size:11px;color:#3b82f6;"><i class="fa-solid fa-spinner fa-spin"></i> Đang gửi thông báo & cập nhật...</span>';
+
+        try {
+            await apiFetchAuth('/api/messaging/send', {
+                method: 'POST',
+                body: JSON.stringify({ applicationId: appId, content: rejectMsg, type: 'message' })
+            });
+        } catch (e) {
+            console.error("Lỗi gửi tin nhắn từ chối:", e);
+        }
+
+        await executeChangeStatusBatch(appId, 'Rejected', statusRowEl);
+    };
+}
+
 async function changeBatchResultStatus(appId, newStatus, rowEl) {
-    const prev = rowEl.innerHTML;
     rowEl.innerHTML = '<span style="font-size:11px;color:#3b82f6;"><i class="fa-solid fa-spinner fa-spin"></i> Đang cập nhật...</span>';
+    await executeChangeStatusBatch(appId, newStatus, rowEl);
+}
+
+async function executeChangeStatusBatch(appId, newStatus, statusRowEl) {
+    statusRowEl.style.flexDirection = 'row';
+    statusRowEl.style.alignItems = 'center';
+    statusRowEl.style.gap = '6px';
 
     try {
         const res  = await apiFetchAuth(`/api/applications/${appId}/status`, {
@@ -984,10 +1077,11 @@ async function changeBatchResultStatus(appId, newStatus, rowEl) {
         applyCandidateFilters();
         renderStats();
 
-        rowEl.innerHTML = _batchStatusButtons(appId, newStatus);
+        statusRowEl.innerHTML = _batchStatusButtons(appId, newStatus);
     } catch (e) {
-        rowEl.innerHTML = prev;
         alert('Lỗi đổi trạng thái: ' + e.message);
+        const currentApp = _allApplications.find(a => a.id === appId);
+        statusRowEl.innerHTML = _batchStatusButtons(appId, currentApp ? currentApp.status : newStatus);
     }
 }
 
@@ -1008,7 +1102,7 @@ async function evaluateCvWithAI(appId) {
 
         const r = data.data;
         const scoreColor = r.score >= 75 ? '#10b981' : r.score >= 50 ? '#f59e0b' : '#ef4444';
-        const recColor   = r.recommendation === 'Nên phỏng vấn' ? '#10b981'
+        const recColor   = (r.recommendation === 'Đạt yêu cầu' || r.recommendation === 'Nên phỏng vấn') ? '#10b981'
                          : r.recommendation === 'Cân nhắc thêm' ? '#f59e0b' : '#ef4444';
 
         resultBox.innerHTML = `

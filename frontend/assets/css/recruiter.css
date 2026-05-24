@@ -948,7 +948,9 @@
 /* AI Evaluate Button */
 .btn-ai {
     border: none;
-    padding: 8px 16px;
+    padding: 10px 16px;
+    height: 40px;
+    box-sizing: border-box;
     border-radius: 8px;
     font-size: 13px;
     font-weight: 600;
@@ -956,6 +958,7 @@
     transition: all 0.2s;
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: 6px;
     background: linear-gradient(135deg, #7c3aed, #4f46e5);
     color: #fff;
