@@ -28,6 +28,19 @@ public sealed class ExceptionHandlingMiddleware : IMiddleware
             _logger.LogWarning(ex, "Business rule violation");
             await WriteAsync(context, HttpStatusCode.BadRequest, ex.Message);
         }
+        catch (OperationCanceledException ex)
+        {
+            if (context.RequestAborted.IsCancellationRequested)
+            {
+                _logger.LogInformation("Yêu cầu đã bị hủy bởi người dùng.");
+                context.Response.StatusCode = 499; // Client Closed Request
+            }
+            else
+            {
+                _logger.LogWarning(ex, "Yêu cầu đã bị quá thời gian xử lý.");
+                await WriteAsync(context, HttpStatusCode.RequestTimeout, "Yêu cầu đã bị quá thời gian xử lý, vui lòng thử lại sau.");
+            }
+        }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Unhandled exception");

@@ -140,22 +140,55 @@ public sealed class JobRecommendationService : IJobRecommendationService
         };
 
         var url = $"https://generativelanguage.googleapis.com/v1beta/models/{_settings.Model}:generateContent?key={_settings.ApiKey}";
-        using var request = new HttpRequestMessage(HttpMethod.Post, url);
-        request.Content = new StringContent(JsonSerializer.Serialize(requestBody), Encoding.UTF8, "application/json");
 
-        var response = await _http.SendAsync(request, ct);
-        var body     = await response.Content.ReadAsStringAsync(ct);
+        const int maxAttempts = 3;
+        var delay = TimeSpan.FromSeconds(1.5);
 
-        if (!response.IsSuccessStatusCode)
-            throw new InvalidOperationException($"Gemini API lỗi: {response.StatusCode} - {body}");
+        for (int attempt = 1; attempt <= maxAttempts; attempt++)
+        {
+            using var attemptCts = CancellationTokenSource.CreateLinkedTokenSource(ct);
+            attemptCts.CancelAfter(TimeSpan.FromSeconds(25)); // 25s timeout limit for this attempt
 
-        using var doc = JsonDocument.Parse(body);
-        return doc.RootElement
-            .GetProperty("candidates")[0]
-            .GetProperty("content")
-            .GetProperty("parts")[0]
-            .GetProperty("text")
-            .GetString() ?? throw new InvalidOperationException("Phản hồi Gemini rỗng.");
+            try
+            {
+                using var request = new HttpRequestMessage(HttpMethod.Post, url);
+                request.Content = new StringContent(JsonSerializer.Serialize(requestBody), Encoding.UTF8, "application/json");
+
+                var response = await _http.SendAsync(request, attemptCts.Token);
+                var body     = await response.Content.ReadAsStringAsync(attemptCts.Token);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    using var doc = JsonDocument.Parse(body);
+                    return doc.RootElement
+                        .GetProperty("candidates")[0]
+                        .GetProperty("content")
+                        .GetProperty("parts")[0]
+                        .GetProperty("text")
+                        .GetString() ?? throw new InvalidOperationException("Phản hồi Gemini rỗng.");
+                }
+
+                var statusCode = (int)response.StatusCode;
+                var isRetryable = statusCode == 429 || statusCode >= 500 || statusCode == 408;
+
+                if (isRetryable && attempt < maxAttempts)
+                {
+                    await Task.Delay(delay, ct);
+                    delay = TimeSpan.FromSeconds(delay.TotalSeconds * 2);
+                    continue;
+                }
+
+                throw new InvalidOperationException($"Gemini API lỗi: {response.StatusCode} - {body}");
+            }
+            catch (Exception ex) when (attempt < maxAttempts && !(ex is OperationCanceledException && ct.IsCancellationRequested))
+            {
+                // Network errors, timeouts, or transient exceptions - retry if user didn't cancel the main request
+                await Task.Delay(delay, ct);
+                delay = TimeSpan.FromSeconds(delay.TotalSeconds * 2);
+            }
+        }
+
+        throw new InvalidOperationException("Không thể gọi Gemini API sau nhiều lần thử.");
     }
 
     private static JobRecommendationResult ParseResult(string json)
