@@ -402,7 +402,12 @@ async function loadAiRecommendations() {
                         <div class="ai-rec-company">${job.companyName} • ${job.location || ''}</div>
                         <div class="ai-rec-reason"><i class="fa-solid fa-check-circle" style="color:#10b981;"></i> ${r.reason}</div>
                     </div>
-                    <div class="ai-rec-score" style="background:${scoreColor};">${r.score}%</div>
+                    <div class="ai-rec-actions">
+                        <div class="ai-rec-score" style="background:${scoreColor};">${r.score}%</div>
+                        <button class="ai-rec-apply-btn" onclick="event.stopPropagation(); applyFromAiCard('${job.id}', this)">
+                            <i class="fa-solid fa-paper-plane"></i> Ứng tuyển ngay
+                        </button>
+                    </div>
                 </div>`;
             }).join('');
         }
@@ -414,6 +419,31 @@ async function loadAiRecommendations() {
     } finally {
         btn.disabled = false;
         btn.innerHTML = '<i class="fa-solid fa-wand-magic-sparkles"></i> Gợi ý việc phù hợp với tôi';
+    }
+}
+
+async function applyFromAiCard(jobId, btn) {
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang gửi...';
+
+    try {
+        const res  = await apiFetchAuth('/api/applications', {
+            method: 'POST',
+            body: JSON.stringify({ jobPostId: jobId, coverLetter: null })
+        });
+        const data = await res.json();
+
+        if (res.ok && data.success) {
+            btn.classList.add('applied');
+            btn.innerHTML = '<i class="fa-solid fa-check"></i> Đã ứng tuyển';
+            jobsShowToast('Ứng tuyển thành công!', 'success');
+        } else {
+            throw new Error(data.message || 'Ứng tuyển thất bại');
+        }
+    } catch (e) {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Ứng tuyển ngay';
+        jobsShowToast('Lỗi: ' + e.message, 'error');
     }
 }
 

@@ -50,10 +50,16 @@ public sealed class JobRecommendationService : IJobRecommendationService
         if (cvText.Length < 50 && !hasProfile)
             return new JobRecommendationResult([]);
 
+        var appliedJobIds = await _db.JobApplications
+            .Where(a => a.CandidateId == candidateId)
+            .Select(a => a.JobPostId)
+            .ToListAsync(ct);
+
         var jobs = await _db.JobPosts
             .Include(j => j.Company)
             .Where(j => j.IsActive && j.IsApproved && !j.IsBlocked && j.ExpiresAt > DateTime.UtcNow
-                     && j.Requirements != null && j.Requirements.Length >= 30)   // ← chỉ lấy job có yêu cầu đủ nội dung
+                     && j.Requirements != null && j.Requirements.Length >= 30
+                     && !appliedJobIds.Contains(j.Id))
             .OrderByDescending(j => j.CreatedAt)
             .Take(20)
             .ToListAsync(ct);
@@ -169,7 +175,27 @@ public sealed class JobRecommendationService : IJobRecommendationService
                 }
 
                 var statusCode = (int)response.StatusCode;
-                var isRetryable = statusCode == 429 || statusCode >= 500 || statusCode == 408;
+
+                if (statusCode == 429)
+                {
+                    // Phân biệt quota ngày (không retry được) vs rate limit thoáng qua
+                    if (IsDailyQuotaExhausted(body))
+                        throw new InvalidOperationException(
+                            "Hệ thống đã đạt giới hạn gợi ý trong hôm nay. Vui lòng thử lại vào ngày mai.");
+
+                    // Rate limit thoáng qua — đợi theo retryDelay gợi ý của API
+                    var suggested = ParseRetryDelay(body);
+                    if (attempt < maxAttempts)
+                    {
+                        await Task.Delay(suggested ?? delay, ct);
+                        delay = TimeSpan.FromSeconds((suggested ?? delay).TotalSeconds * 2);
+                        continue;
+                    }
+
+                    throw new InvalidOperationException("Dịch vụ gợi ý đang bận, vui lòng thử lại sau ít phút.");
+                }
+
+                var isRetryable = statusCode >= 500 || statusCode == 408;
 
                 if (isRetryable && attempt < maxAttempts)
                 {
@@ -180,7 +206,9 @@ public sealed class JobRecommendationService : IJobRecommendationService
 
                 throw new InvalidOperationException($"Gemini API lỗi: {response.StatusCode} - {body}");
             }
-            catch (Exception ex) when (attempt < maxAttempts && !(ex is OperationCanceledException && ct.IsCancellationRequested))
+            catch (Exception ex) when (attempt < maxAttempts
+                && ex is not InvalidOperationException
+                && !(ex is OperationCanceledException && ct.IsCancellationRequested))
             {
                 // Network errors, timeouts, or transient exceptions - retry if user didn't cancel the main request
                 await Task.Delay(delay, ct);
@@ -189,6 +217,51 @@ public sealed class JobRecommendationService : IJobRecommendationService
         }
 
         throw new InvalidOperationException("Không thể gọi Gemini API sau nhiều lần thử.");
+    }
+
+    private static bool IsDailyQuotaExhausted(string body)
+    {
+        try
+        {
+            using var doc = JsonDocument.Parse(body);
+            if (!doc.RootElement.TryGetProperty("error", out var err)) return false;
+            if (!err.TryGetProperty("details", out var details)) return false;
+            foreach (var detail in details.EnumerateArray())
+            {
+                if (!detail.TryGetProperty("violations", out var violations)) continue;
+                foreach (var v in violations.EnumerateArray())
+                {
+                    if (v.TryGetProperty("quotaId", out var qid) &&
+                        qid.GetString()?.Contains("PerDay", StringComparison.OrdinalIgnoreCase) == true)
+                        return true;
+                }
+            }
+        }
+        catch { /* ignore parse errors */ }
+        return false;
+    }
+
+    private static TimeSpan? ParseRetryDelay(string body)
+    {
+        try
+        {
+            using var doc = JsonDocument.Parse(body);
+            if (!doc.RootElement.TryGetProperty("error", out var err)) return null;
+            if (!err.TryGetProperty("details", out var details)) return null;
+            foreach (var detail in details.EnumerateArray())
+            {
+                if (detail.TryGetProperty("retryDelay", out var rd))
+                {
+                    var raw = rd.GetString() ?? "";
+                    // format: "5.020573273s"
+                    if (raw.EndsWith('s') && double.TryParse(raw[..^1], System.Globalization.NumberStyles.Any,
+                            System.Globalization.CultureInfo.InvariantCulture, out var secs))
+                        return TimeSpan.FromSeconds(Math.Min(secs + 1, 30)); // cap at 30s
+                }
+            }
+        }
+        catch { /* ignore parse errors */ }
+        return null;
     }
 
     private static JobRecommendationResult ParseResult(string json)
