@@ -95,6 +95,12 @@ public class AuthController : ControllerBase
             await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
             return OAuthReturn(returnUrl, result);
         }
+        catch (UnauthorizedAccessException ex)
+        {
+            _logger.LogWarning("OAuth {Provider} blocked for {Email}: {Message}", provider, email, ex.Message);
+            await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
+            return OAuthBlocked(returnUrl);
+        }
         catch
         {
             _logger.LogWarning("OAuth {Provider} failed", provider);
@@ -146,6 +152,12 @@ public class AuthController : ControllerBase
             await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
             return OAuthReturn(returnUrl, result);
         }
+        catch (UnauthorizedAccessException ex)
+        {
+            _logger.LogWarning("OAuth {Provider} blocked for {Email}: {Message}", provider, email, ex.Message);
+            await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
+            return OAuthBlocked(returnUrl);
+        }
         catch
         {
             _logger.LogWarning("OAuth {Provider} failed", provider);
@@ -192,6 +204,14 @@ public class AuthController : ControllerBase
 
         var url = returnUrl.Contains('#') ? returnUrl.Split('#')[0] : returnUrl;
         return Redirect(url + "#login");
+    }
+
+    private IActionResult OAuthBlocked(string? returnUrl)
+    {
+        var url = string.IsNullOrWhiteSpace(returnUrl)
+            ? "/pages/auth.html"
+            : (returnUrl.Contains('#') ? returnUrl.Split('#')[0] : returnUrl);
+        return Redirect(url + "#blocked");
     }
 
     private IActionResult OAuthReturn(string? returnUrl, LoginResponse result)

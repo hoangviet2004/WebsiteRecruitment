@@ -252,6 +252,12 @@ document.querySelectorAll('.github').forEach(btn => {
 (function handleOAuthCallback() {
     const hash = window.location.hash.replace('#', '');
     if (!hash.includes('accessToken')) {
+        if (hash === 'blocked') {
+            history.replaceState(null, '', window.location.pathname);
+            showPanel('login');
+            showGlobalErr('login-global-err', 'Tài khoản của bạn đã bị chặn. Vui lòng liên hệ quản trị viên qua email "techlist@gmail.com".');
+            return;
+        }
         if (hash === 'login' || hash === 'register' || hash === 'forgot') showPanel(hash);
         return;
     }

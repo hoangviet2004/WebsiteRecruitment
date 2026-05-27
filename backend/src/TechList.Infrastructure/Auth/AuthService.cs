@@ -84,7 +84,7 @@ public sealed class AuthService : IAuthService
         var profile = await EnsureProfileExistsAsync(user.Id, user.Email!, user.FullName, ct);
 
         if (!roles.Contains(AppRole.Admin) && !profile.IsApproved)
-            throw new UnauthorizedAccessException("Tài khoản của bạn đã bị chặn. Vui lòng liên hệ quản trị viên.");
+            throw new UnauthorizedAccessException("Tài khoản của bạn đã bị chặn. Vui lòng liên hệ quản trị viên qua email \"techlist@gmail.com\".");
 
         return await IssueTokensAsync(user, profile, roles, ip, userAgent, ct);
     }
@@ -108,7 +108,7 @@ public sealed class AuthService : IAuthService
         var profile = await EnsureProfileExistsAsync(user.Id, user.Email!, user.FullName, ct);
 
         if (!roles.Contains(AppRole.Admin) && !profile.IsApproved)
-            throw new UnauthorizedAccessException("Tài khoản của bạn đã bị chặn. Vui lòng liên hệ quản trị viên.");
+            throw new UnauthorizedAccessException("Tài khoản của bạn đã bị chặn. Vui lòng liên hệ quản trị viên qua email \"techlist@gmail.com\".");
 
         // Rotation: revoke old token, issue a new one
         existing.RevokedAt = DateTime.UtcNow;
@@ -198,6 +198,9 @@ public sealed class AuthService : IAuthService
 
             var roles = (await _userManager.GetRolesAsync(user)).ToList();
             var profile = await EnsureProfileExistsAsync(user.Id, user.Email!, user.FullName, ct, name);
+
+            if (!isNewUser && !roles.Contains(AppRole.Admin) && !profile.IsApproved)
+                throw new UnauthorizedAccessException("Tài khoản của bạn đã bị chặn. Vui lòng liên hệ quản trị viên qua email \"techlist@gmail.com\".");
 
             response = await IssueTokensAsync(user, profile, roles, ip, userAgent, ct);
         });
