@@ -33,7 +33,8 @@ public sealed class CandidateMessagingService : ICandidateMessagingService
                 CompanyName = a.JobPost.Company.Name,
                 CompanyLogo = a.JobPost.Company.LogoUrl,
                 OwnerId     = a.JobPost.Company.OwnerId,
-                JobPostId   = a.JobPost.Id
+                JobPostId   = a.JobPost.Id,
+                CompanyIsBlocked = a.JobPost.Company.IsBlocked
             })
             .ToListAsync(ct);
 
@@ -48,10 +49,10 @@ public sealed class CandidateMessagingService : ICandidateMessagingService
             .ToListAsync(ct);
         var recruiterMap  = recruiters.ToDictionary(u => u.Id);
 
-        var profiles = await _db.UserProfiles.AsNoTracking()
+        var profileList = await _db.UserProfiles.AsNoTracking()
             .Where(p => ownerIds.Contains(p.UserId))
             .ToListAsync(ct);
-        var profileMap = profiles.ToDictionary(p => p.UserId);
+        var profileMap = profileList.ToDictionary(p => p.UserId);
 
         // Batch 3: last message + unread per application (1 aggregation query)
         var msgStats = await _db.Messages.AsNoTracking()
@@ -80,7 +81,8 @@ public sealed class CandidateMessagingService : ICandidateMessagingService
                 a.Status,
                 stat?.LastContent, stat?.LastType ?? "message",
                 stat?.LastAt,
-                (stat?.Unread ?? 0) > 0, stat?.Unread ?? 0
+                (stat?.Unread ?? 0) > 0, stat?.Unread ?? 0,
+                a.CompanyIsBlocked
             );
         })
         .OrderByDescending(c => c.LastMessageAt ?? DateTime.MinValue)
@@ -168,7 +170,13 @@ public sealed class CandidateMessagingService : ICandidateMessagingService
     public async Task<CandidateMessageDto> SendMessageAsync(
         string candidateId, SendCandidateMessageRequest req, CancellationToken ct)
     {
-        await VerifyAccessAsync(candidateId, req.ApplicationId, ct);
+        var app = await _db.JobApplications.AsNoTracking()
+            .Include(a => a.JobPost).ThenInclude(j => j.Company)
+            .FirstOrDefaultAsync(a => a.Id == req.ApplicationId && a.CandidateId == candidateId, ct)
+            ?? throw new UnauthorizedAccessException("Bạn không có quyền gửi tin trong cuộc hội thoại này.");
+
+        if (app.JobPost.Company.IsBlocked)
+            throw new InvalidOperationException("Công ty đã bị chặn. Không thể gửi tin nhắn trong cuộc hội thoại này.");
 
         var msg = new Message {
             ApplicationId = req.ApplicationId,

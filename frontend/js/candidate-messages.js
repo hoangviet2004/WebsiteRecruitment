@@ -71,13 +71,16 @@ function renderConvList(list) {
             : `<div class="cm-conv-initials" style="background:${_color(c.recruiterName)}">${_init(c.recruiterName)}</div>`;
         const time    = c.lastMessageAt ? relTime(new Date(c.lastMessageAt)) : '';
         const preview = previewText(c.lastMessage, c.lastMessageType);
-        return `<div class="cm-conv-item ${isActive?'active':''} ${c.hasUnread?'unread':''}"
+        const blockedBadge = c.isCompanyBlocked
+            ? '<span style="display:inline-block;font-size:10px;background:#fef2f2;color:#dc2626;padding:1px 6px;border-radius:4px;font-weight:600;margin-left:4px;"><i class="fa-solid fa-ban" style="font-size:8px;margin-right:2px;"></i>Bị chặn</span>'
+            : '';
+        return `<div class="cm-conv-item ${isActive?'active':''} ${c.hasUnread?'unread':''}${c.isCompanyBlocked?' blocked-conv':''}"
                      onclick="openConv('${c.applicationId}')"
                      id="citem-${c.applicationId}">
             ${avHtml}
             <div class="cm-conv-body">
                 <div class="cm-conv-top">
-                    <span class="cm-conv-name">${esc(c.recruiterName)}</span>
+                    <span class="cm-conv-name">${esc(c.recruiterName)}${blockedBadge}</span>
                     <span class="cm-conv-time">${time}</span>
                 </div>
                 <div class="cm-conv-job">${esc(c.jobTitle.slice(0,32))}${c.jobTitle.length>32?'…':''}</div>
@@ -119,9 +122,27 @@ async function openConv(appId) {
     // Show thread UI
     document.getElementById('cm-thread-empty').style.display  = 'none';
     document.getElementById('cm-thread-header').style.display = 'flex';
-    document.getElementById('cm-input-wrap').style.display    = 'block';
     document.getElementById('cm-panel-col').style.display     = 'flex';
     document.getElementById('cm-panel-col').style.flexDirection = 'column';
+
+    // Check if company is blocked
+    const conv = _convs.find(c => c.applicationId === appId);
+    const isBlocked = conv?.isCompanyBlocked;
+    const inputWrap = document.getElementById('cm-input-wrap');
+
+    // Remove old blocked banner if exists
+    document.getElementById('cm-blocked-banner')?.remove();
+
+    if (isBlocked) {
+        inputWrap.style.display = 'none';
+        const banner = document.createElement('div');
+        banner.id = 'cm-blocked-banner';
+        banner.style.cssText = 'display:flex;align-items:center;gap:8px;padding:14px 18px;background:#fef2f2;border-top:1px solid #fecaca;color:#dc2626;font-size:13px;font-weight:600;';
+        banner.innerHTML = '<i class="fa-solid fa-ban"></i> Công ty này đã bị chặn. Bạn không thể gửi tin nhắn.';
+        inputWrap.parentElement.appendChild(banner);
+    } else {
+        inputWrap.style.display = '';
+    }
 
     await Promise.all([loadThread(appId), loadPanel(appId)]);
     apiFetchAuth(`/api/candidate/messages/thread/${appId}/read`, { method: 'POST' }).catch(()=>{});

@@ -14,7 +14,8 @@ public record CandidateConversationDto(
     string LastMessageType,
     DateTime? LastMessageAt,
     bool HasUnread,
-    int UnreadCount
+    int UnreadCount,
+    bool IsCompanyBlocked = false
 );
 
 // ── Tin nhắn trong thread ───────────────────────────────────

@@ -157,6 +157,10 @@ public sealed class MessagingService : IMessagingService
         if (!isRecruiter && !isCandidate)
             throw new UnauthorizedAccessException("Bạn không có quyền gửi tin trong cuộc hội thoại này.");
 
+        // Chặn gửi tin nếu công ty bị chặn
+        if (app.JobPost.Company.IsBlocked)
+            throw new InvalidOperationException("Công ty đã bị chặn. Không thể gửi tin nhắn trong cuộc hội thoại này.");
+
         var msg = new Message
         {
             Id            = Guid.NewGuid(),

@@ -30,6 +30,7 @@ public sealed class CompanyService : ICompanyService
 
         var companies = await _db.Companies
             .AsNoTracking()
+            .Where(c => !c.IsBlocked)
             .ToListAsync(ct);
 
         return companies.Select(c => {
