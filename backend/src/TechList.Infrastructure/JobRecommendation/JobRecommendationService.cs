@@ -57,7 +57,7 @@ public sealed class JobRecommendationService : IJobRecommendationService
 
         var jobs = await _db.JobPosts
             .Include(j => j.Company)
-            .Where(j => j.IsActive && j.IsApproved && !j.IsBlocked && j.ExpiresAt > DateTime.UtcNow
+            .Where(j => j.IsActive && j.IsApproved && !j.IsBlocked && !j.Company.IsBlocked && j.ExpiresAt > DateTime.UtcNow
                      && j.Requirements != null && j.Requirements.Length >= 30
                      && !appliedJobIds.Contains(j.Id))
             .OrderByDescending(j => j.CreatedAt)

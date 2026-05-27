@@ -20,7 +20,7 @@ public sealed class JobService : IJobService
         var jobs = await _db.JobPosts
             .Include(x => x.Company)
             .AsNoTracking()
-            .Where(x => x.IsActive && x.IsApproved && !x.IsBlocked && x.ExpiresAt >= DateTime.UtcNow)
+            .Where(x => x.IsActive && x.IsApproved && !x.IsBlocked && !x.Company.IsBlocked && x.ExpiresAt >= DateTime.UtcNow)
             .OrderByDescending(x => x.CreatedAt)
             .ToListAsync(ct);
 
@@ -60,6 +60,9 @@ public sealed class JobService : IJobService
 
         if (company.OwnerId != userId)
             throw new UnauthorizedAccessException("You do not have permission to post a job for this company.");
+
+        if (company.IsBlocked)
+            throw new InvalidOperationException("Công ty của bạn đã bị chặn. Bạn không thể đăng tin tuyển dụng mới. Vui lòng liên hệ quản trị viên.");
 
         // ── Subscription check ───────────────────────────────
         var subscription = await _db.Subscriptions
@@ -170,6 +173,9 @@ public sealed class JobService : IJobService
 
         if (job.Company.OwnerId != userId)
             throw new UnauthorizedAccessException("You do not have permission to update this job.");
+
+        if (job.Company.IsBlocked)
+            throw new InvalidOperationException("Công ty của bạn đã bị chặn. Bạn không thể chỉnh sửa tin tuyển dụng. Vui lòng liên hệ quản trị viên.");
 
         // Check subscription limit when reactivating a hidden job
         if (request.IsActive && !job.IsActive)

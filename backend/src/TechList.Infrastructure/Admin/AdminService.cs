@@ -247,6 +247,17 @@ public sealed class AdminService : IAdminService
         company.IsBlocked = !company.IsBlocked;
         company.UpdatedAt = DateTime.UtcNow;
         await _db.SaveChangesAsync(ct);
+
+        if (company.IsBlocked)
+            await _notificationService.CreateAsync(company.OwnerId,
+                "Công ty đã bị chặn",
+                $"Công ty \"{company.Name}\" đã bị quản trị viên chặn. Các tin tuyển dụng sẽ bị ẩn và bạn không thể đăng hoặc sửa tin mới.",
+                "CompanyBlocked", null, company.Name, ct);
+        else
+            await _notificationService.CreateAsync(company.OwnerId,
+                "Công ty đã được bỏ chặn",
+                $"Công ty \"{company.Name}\" đã được quản trị viên bỏ chặn. Bạn có thể hoạt động bình thường trở lại.",
+                "CompanyUnblocked", null, company.Name, ct);
     }
 
     public async Task DeleteCompanyAsync(Guid companyId, CancellationToken ct)
